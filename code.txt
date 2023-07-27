@@ -1,0 +1,13 @@
+! = {n ->
+  res = 0
+
+  (if (is n 0) {
+    res = 1
+  } {
+    res = (* n (! (- n 1)))
+  })
+
+  return res
+}
+
+(print (! (input)))
