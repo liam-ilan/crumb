@@ -1,13 +1,2 @@
-! = {n ->
-  res = 0
-
-  (if (is n 0) {
-    res = 1
-  } {
-    res = (* n (! (- n 1)))
-  })
-
-  return res
-}
-
-(print (! (input)))
+mean = {a b c -> (/ (+ a b c) 3)}
+(print (mean 7 8 3))

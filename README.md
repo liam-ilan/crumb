@@ -1,7 +1,7 @@
 # Crumb Programming Language
 ## Compile and Run
 ```bash
-gcc main.c -o main && ./main code.txt
+gcc src/* -o main && ./main code.txt
 ```
 
 ## Syntax
@@ -13,7 +13,7 @@ return = "return", value;
 assignment = identifier, "=", value;
 value = application | function | int | float | string | identifier;
 application = "(", {value}, ")";
-function = "{", [{identifier, ","}, identifier, "->"], statement, "}";
+function = "{", [{identifier}, "->"], statement, "}";
 ```
 
 ### Tokens
@@ -74,4 +74,10 @@ end
 }
 
 (print (! (input)))
+```
+
+### Mean of Three Items
+```
+mean = {a b c -> (/ (+ a b c) 3)}
+(print (mean 7 8 3))
 ```
