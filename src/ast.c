@@ -37,15 +37,15 @@ char* getOpcodeString(enum Opcodes code) {
 void AstNode_print(AstNode *p_head, int depth) {
 
   // print current node
-  if (p_head->val == NULL) printf("- %s\n", getOpcodeString(p_head->opcode));
-  else printf("- %s: %s\n", getOpcodeString(p_head->opcode), p_head->val);
+  if (p_head->val == NULL) printf("%i| %s\n", p_head->lineNumber, getOpcodeString(p_head->opcode));
+  else printf("%i| %s: %s\n", p_head->lineNumber, getOpcodeString(p_head->opcode), p_head->val);
 
   // for each child
   AstNode *p_curr = p_head->p_headChild;
   while (p_curr != NULL) {
     
     // create appropriate whitespace and dash
-    for (int x = 0; x < depth + 1; x++) printf("  ");
+    for (int x = 0; x < depth + 1; x++) printf("   ");
 
     // print child
     AstNode_print(p_curr, depth + 1);
@@ -67,10 +67,11 @@ void AstNode_appendChild(AstNode *p_head, AstNode **p_p_lastChild, AstNode *p_ch
 }
 
 // allocates memory for a new ast node and populates it
-AstNode* AstNode_new(char* val, enum Opcodes opcode) {
+AstNode* AstNode_new(char* val, enum Opcodes opcode, int lineNumber) {
   AstNode *res = (AstNode *) malloc(sizeof(AstNode));
   res->opcode = opcode;
   res->p_headChild = NULL;
   res->p_next = NULL;
   res->val = val;
+  res->lineNumber = lineNumber;
 }

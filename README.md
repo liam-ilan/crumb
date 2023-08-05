@@ -23,7 +23,6 @@ function = "{", [{identifier}, "->"], statement, "}";
 ")"
 "{"
 "}"
-","
 "->"
 "return"
 identifier

@@ -35,7 +35,7 @@ AstNode *parseApplication(Token *p_head, int length) {
     exit(0);
   }
 
-  AstNode *res = AstNode_new(NULL, OP_APPLICATION);
+  AstNode *res = AstNode_new(NULL, OP_APPLICATION, p_head->lineNumber);
   AstNode *p_lastChild = NULL;
 
   // go to first token of first item item in application
@@ -82,13 +82,13 @@ AstNode *parseValue(Token *p_head, int length) {
   if (length == 1) {
     // int, float, or string
     if (p_head->type == STRING) {
-      return AstNode_new(p_head->val, OP_STRING);
+      return AstNode_new(p_head->val, OP_STRING, p_head->lineNumber);
     } else if (p_head->type == FLOAT) {
-      return AstNode_new(p_head->val, OP_FLOAT);
+      return AstNode_new(p_head->val, OP_FLOAT, p_head->lineNumber);
     } else if (p_head->type == INT) {
-      return AstNode_new(p_head->val, OP_INT);
+      return AstNode_new(p_head->val, OP_INT, p_head->lineNumber);
     } else if (p_head->type == IDENTIFIER) {
-      return AstNode_new(p_head->val, OP_IDENTIFIER);
+      return AstNode_new(p_head->val, OP_IDENTIFIER, p_head->lineNumber);
     } else {
       printf(
         "Syntax Error @ Line %i: Unexpected %s token.\n", 
@@ -140,8 +140,8 @@ AstNode *parseAssignment(Token *p_head, int length) {
 
   } else {
     // create node and return
-    AstNode *res = AstNode_new(NULL, OP_ASSIGNMENT);
-    res->p_headChild = AstNode_new(p_head->val, OP_IDENTIFIER);
+    AstNode *res = AstNode_new(NULL, OP_ASSIGNMENT, p_head->lineNumber);
+    res->p_headChild = AstNode_new(p_head->val, OP_IDENTIFIER, p_head->lineNumber);
     res->p_headChild->p_next = parseValue(p_head->p_next->p_next, length - 2);
 
     return res;
@@ -166,7 +166,7 @@ AstNode *parseReturn(Token *p_head, int length) {
     exit(0);
 
   } else {
-    AstNode *res = AstNode_new(NULL, OP_RETURN);
+    AstNode *res = AstNode_new(NULL, OP_RETURN, p_head->lineNumber);
     res->p_headChild = parseValue(p_head->p_next, length - 1);
     return res;
   }
@@ -178,7 +178,7 @@ AstNode *parseReturn(Token *p_head, int length) {
 AstNode *parseStatement(Token *p_head, int length) {
 
   // create ast node for statement
-  AstNode *res = AstNode_new(NULL, OP_STATEMENT);
+  AstNode *res = AstNode_new(NULL, OP_STATEMENT, p_head->lineNumber);
   AstNode *p_lastChild = res->p_headChild;
 
   // for each token
@@ -283,7 +283,7 @@ AstNode *parseFunction(Token *p_head, int length) {
   }
 
   // create res
-  AstNode *res = AstNode_new(NULL, OP_FUNCTION);
+  AstNode *res = AstNode_new(NULL, OP_FUNCTION, p_head->lineNumber);
   AstNode *p_lastChild = NULL;
 
   // skip to end of function or arrow
@@ -315,7 +315,7 @@ AstNode *parseFunction(Token *p_head, int length) {
       }
 
       // add identifier
-      AstNode_appendChild(res, &p_lastChild, AstNode_new(p_curr->val, OP_IDENTIFIER));
+      AstNode_appendChild(res, &p_lastChild, AstNode_new(p_curr->val, OP_IDENTIFIER, p_curr->lineNumber));
       p_curr = p_curr->p_next;
     }
 

@@ -23,6 +23,7 @@ typedef struct AstNode {
   struct AstNode *p_next;
   enum Opcodes opcode;
   char *val;
+  int lineNumber;
 } AstNode;
 
 // prototypes
@@ -30,6 +31,6 @@ void AstNode_free(AstNode *);
 char* getOpcodeString(enum Opcodes);
 void AstNode_print(AstNode *, int);
 void AstNode_appendChild(AstNode *, AstNode **, AstNode *);
-AstNode* AstNode_new(char*, enum Opcodes);
+AstNode* AstNode_new(char*, enum Opcodes, int);
 
 #endif

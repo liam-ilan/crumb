@@ -27,8 +27,8 @@ void Token_print(Token *p_head, int length) {
   Token *p_curr = p_head;
   int i = 0;
   while (p_curr != NULL && i < length) {
-    if (p_curr->val == NULL) printf("%i | %s\n", p_curr->lineNumber, getTokenTypeString(p_curr->type));
-    else printf("%i | %s: %s\n", p_curr->lineNumber, getTokenTypeString(p_curr->type), p_curr->val);
+    if (p_curr->val == NULL) printf("%i| %s\n", p_curr->lineNumber, getTokenTypeString(p_curr->type));
+    else printf("%i| %s: %s\n", p_curr->lineNumber, getTokenTypeString(p_curr->type), p_curr->val);
     
     i++;
     p_curr = p_curr->p_next;

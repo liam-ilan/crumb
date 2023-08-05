@@ -1,2 +1,1 @@
-mean = {a b c -> (/ (+ a b c) 3)}
-(print (mean 7 8 3))
+return {return "hi"}
