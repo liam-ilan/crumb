@@ -60,19 +60,15 @@ end
 
 ### Factorial
 ```
-! = {n ->
-  res = 0
-
-  (if (is n 0) {
-    res = 1
+fact = {n ->
+  return (if (is n 0) {
+    return 1
   } {
-    res = (* n (! (- n 1)))
+    return (* n (fact (- n 1)))
   })
-
-  return res
 }
 
-(print (! (input)))
+(print (fact 7))
 ```
 
 ### Mean of Three Items

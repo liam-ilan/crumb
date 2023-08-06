@@ -14,5 +14,8 @@ Generic StdLib_loop(Scope *, Generic[], int, int);
 Generic StdLib_if(Scope *, Generic[], int, int);
 Generic StdLib_mod(Scope *, Generic[], int, int);
 Generic StdLib_not(Scope *, Generic[], int, int);
+Generic StdLib_add(Scope *, Generic[], int, int);
+Generic StdLib_sub(Scope *, Generic[], int, int);
+Generic StdLib_mult(Scope *, Generic[], int, int);
 
 #endif

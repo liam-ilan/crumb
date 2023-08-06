@@ -134,6 +134,8 @@ Generic StdLib_apply(Scope *p_scope, Generic args[], int length, int lineNumber)
 
 // (loop n f)
 // applys f, n times, passing the current index to f
+// returns whatever f returns if not void
+// will go to completion and return void if void is all f returns
 Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) {
   // error handling for incorrect number of args
   if (length > 2) {
@@ -173,7 +175,9 @@ Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) 
     int *p_arg = (int *) malloc(sizeof(int));
     *p_arg = i;
     Generic newArgs[1] = {Generic_new(TYPE_INT, p_arg)};
-    applyFunc(args[1], p_scope, newArgs, 1, lineNumber);
+    
+    Generic res = applyFunc(args[1], p_scope, newArgs, 1, lineNumber);
+    if (res.type != TYPE_VOID) return res;
   }
 
   return Generic_new(TYPE_VOID, NULL);
@@ -224,8 +228,8 @@ Generic StdLib_if(Scope *p_scope, Generic args[], int length, int lineNumber) {
     exit(0);
   }
 
-  if (*((int *) args[0].p_val) == 1) applyFunc(args[1], p_scope, NULL, 0, lineNumber);
-  else if (length == 3 && *((int *) args[0].p_val) == 0) applyFunc(args[2], p_scope, NULL, 0, lineNumber);
+  if (*((int *) args[0].p_val) == 1) return applyFunc(args[1], p_scope, NULL, 0, lineNumber);
+  else if (length == 3 && *((int *) args[0].p_val) == 0) return applyFunc(args[2], p_scope, NULL, 0, lineNumber);
   else if (*((int *) args[0].p_val) != 0) {
     // c is not 1 or 0, throw err
     printf(
@@ -330,6 +334,174 @@ Generic StdLib_not(Scope *p_scope, Generic args[], int length, int lineNumber) {
   return Generic_new(TYPE_INT, p_res);
 }
 
+// (+ a b)
+// returns a + b
+Generic StdLib_add(Scope *p_scope, Generic args[], int length, int lineNumber) {
+  // error handling for incorrect number of args
+  if (length > 2) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  } else if (length < 2) {
+    // supplied too little args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  }
+
+  // error handling for types
+  if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: + function requires int or float type for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0].type)
+    );
+    exit(0);
+  } else if (args[1].type != TYPE_INT && args[1].type != TYPE_FLOAT) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: + function requires int or float type for it's 2nd argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[1].type)
+    );
+    exit(0);
+  }
+  
+  if (args[0].type == TYPE_INT && args[1].type == TYPE_INT) {
+    // case where we can return int
+    int *p_res = (int *) malloc(sizeof(int));
+    *p_res = *((int *) args[0].p_val) + *((int *) args[1].p_val);
+    return Generic_new(TYPE_INT, p_res);
+
+  } else {
+    // case where we must return float
+    double *p_res = (double *) malloc(sizeof(double));
+
+    // convert args to approriate types
+
+    *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
+      + (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
+
+    return Generic_new(TYPE_FLOAT, p_res); 
+  }
+}
+
+// (- a b)
+// returns a - b
+Generic StdLib_sub(Scope *p_scope, Generic args[], int length, int lineNumber) {
+  // error handling for incorrect number of args
+  if (length > 2) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  } else if (length < 2) {
+    // supplied too little args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  }
+
+  // error handling for types
+  if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: - function requires int or float type for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0].type)
+    );
+    exit(0);
+  } else if (args[1].type != TYPE_INT && args[1].type != TYPE_FLOAT) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: - function requires int or float type for it's 2nd argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[1].type)
+    );
+    exit(0);
+  }
+  
+  if (args[0].type == TYPE_INT && args[1].type == TYPE_INT) {
+    // case where we can return int
+    int *p_res = (int *) malloc(sizeof(int));
+    *p_res = *((int *) args[0].p_val) - *((int *) args[1].p_val);
+    return Generic_new(TYPE_INT, p_res);
+
+  } else {
+    // case where we must return float
+    double *p_res = (double *) malloc(sizeof(double));
+
+    // convert args to approriate types
+
+    *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
+      - (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
+
+    return Generic_new(TYPE_FLOAT, p_res); 
+  }
+}
+
+// (* a b)
+// returns a * b
+Generic StdLib_mult(Scope *p_scope, Generic args[], int length, int lineNumber) {
+  // error handling for incorrect number of args
+  if (length > 2) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  } else if (length < 2) {
+    // supplied too little args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  }
+
+  // error handling for types
+  if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: * function requires int or float type for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0].type)
+    );
+    exit(0);
+  } else if (args[1].type != TYPE_INT && args[1].type != TYPE_FLOAT) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: * function requires int or float type for it's 2nd argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[1].type)
+    );
+    exit(0);
+  }
+  
+  if (args[0].type == TYPE_INT && args[1].type == TYPE_INT) {
+    // case where we can return int
+    int *p_res = (int *) malloc(sizeof(int));
+    *p_res = *((int *) args[0].p_val) * *((int *) args[1].p_val);
+    return Generic_new(TYPE_INT, p_res);
+
+  } else {
+    // case where we must return float
+    double *p_res = (double *) malloc(sizeof(double));
+
+    // convert args to approriate types
+
+    *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
+      * (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
+
+    return Generic_new(TYPE_FLOAT, p_res); 
+  }
+}
+
 // creates a new global scope
 Scope *newGlobal() {
   // create global scope
@@ -343,6 +515,9 @@ Scope *newGlobal() {
   Scope_set(p_global, "if", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_if));
   Scope_set(p_global, "%", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mod));
   Scope_set(p_global, "!", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_not));
+  Scope_set(p_global, "+", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_add));
+  Scope_set(p_global, "-", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_sub));
+  Scope_set(p_global, "*", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mult));
 
   return p_global;
 }

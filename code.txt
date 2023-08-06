@@ -1,4 +1,4 @@
-(loop 10 {i -> 
+(loop 100 {i -> 
   (if (is (% i 15) 0) {
     (print "fizzbuzz")
   } {
