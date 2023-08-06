@@ -1,11 +1,75 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <string.h>
+
 #include "tokens.h"
 #include "lex.h"
 #include "ast.h"
 #include "parse.h"
 #include "generic.h"
 #include "scope.h"
+#include "eval.h"
+
+// (print args...)
+// prints given arguments
+Generic StdLib_print(Scope *p_scope, Generic args[], int length, int lineNumber) {
+  for (int i = 0; i < length; i++) {
+    Generic_print(args[i]);
+  }
+
+  return Generic_new(TYPE_VOID, NULL);
+}
+
+// (is a b)
+// checks for equality between a and b
+// returns 1 for true, 0 for false
+Generic StdLib_is(Scope *p_scope, Generic args[], int length, int lineNumber) {
+  // error handling for incorrect number of args
+  if (length < 2) {
+    // supplied too little args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  } else if (length > 2) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  }
+
+  int res = 0;
+
+  if (args[0].type == args[1].type) {
+    switch (args[0].type) {
+      case TYPE_FLOAT:
+        if (*((double *) args[0].p_val) == *((double *) args[1].p_val)) res = 1;
+        break;
+      case TYPE_INT:
+        if (*((int *) args[0].p_val) == *((int *) args[1].p_val)) res = 1;
+        break;
+      case TYPE_STRING:
+        if (strcmp(*((char **) args[0].p_val), *((char **) args[1].p_val)) == 0) res = 1;
+        break;
+      case TYPE_VOID:
+        res = 1;
+        break;
+      case TYPE_NATIVEFUNCTION:
+        if (args[0].p_val == args[1].p_val) res = 1;
+        break;
+      case TYPE_FUNCTION:
+        if (args[0].p_val == args[1].p_val) res = 1;
+        break;
+    }
+  }
+
+  return Generic_new(TYPE_INT, &res);
+}
+
 
 int main(int argc, char *argv[]) {
   
@@ -62,34 +126,14 @@ int main(int argc, char *argv[]) {
   /* evaluate */
   printf("\nEVAL\n");
 
-
-
+  // create global scope
   Scope *p_global = Scope_new(NULL);
-  Scope_print(p_global);
 
-  char *a = "a";
-  Generic valA = {TYPE_STRING, &a};
-  Scope_set(p_global, "a", valA);
+  // populate global scope with stdlib
+  Scope_set(p_global, "print", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_print));
+  Scope_set(p_global, "is", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_is));
 
-  Scope_print(p_global);
-
-
-  char *b = "b";
-  Generic valB = {TYPE_STRING, &b};
-  Scope_set(p_global, "b", valB);
-
-  Scope_print(p_global);
-
-
-  double c = 3.8;
-  Generic valC = {TYPE_FLOAT, &c};
-  Scope_set(p_global, "a", valC);
-
-  Scope_print(p_global);
-
-  Generic_print(Scope_get(p_global, "a", 2));
-
-  Scope_free(p_global);
+  eval(p_headAstNode, p_global);
 
   return 0;
 }

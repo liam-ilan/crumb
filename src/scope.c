@@ -67,7 +67,7 @@ Generic Scope_get(Scope *p_target, char *key, int lineNumber) {
     if (p_target->p_parent == NULL) {
       // Error handling
       printf(
-        "Runtime Error @ Line %i: %s not defined.\n", 
+        "Runtime Error @ Line %i: %s is not defined.\n", 
         lineNumber, key
       );
       exit(0);

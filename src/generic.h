@@ -7,7 +7,8 @@ enum Type {
   TYPE_FLOAT,
   TYPE_STRING,
   TYPE_VOID,
-  TYPE_FUNCTION
+  TYPE_FUNCTION,
+  TYPE_NATIVEFUNCTION
 };
 
 // generic struct
@@ -19,6 +20,9 @@ typedef struct Generic {
   void *p_val;
 } Generic;
 
-// prototype
+// prototypes
+char* getTypeString(enum Type);
 void Generic_print(Generic);
+Generic Generic_new(enum Type, void *);
+void Generic_free(Generic);
 #endif

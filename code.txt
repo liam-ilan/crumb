@@ -1,1 +1,1 @@
-return {return "hi"}
+(print (is is print))
