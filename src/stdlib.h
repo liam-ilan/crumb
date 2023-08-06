@@ -17,5 +17,6 @@ Generic StdLib_not(Scope *, Generic[], int, int);
 Generic StdLib_add(Scope *, Generic[], int, int);
 Generic StdLib_sub(Scope *, Generic[], int, int);
 Generic StdLib_mult(Scope *, Generic[], int, int);
+Generic StdLib_div(Scope *, Generic[], int, int);
 
 #endif

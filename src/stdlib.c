@@ -503,6 +503,66 @@ Generic StdLib_mult(Scope *p_scope, Generic args[], int length, int lineNumber) 
   }
 }
 
+// (/ a b)
+// returns a / b
+Generic StdLib_div(Scope *p_scope, Generic args[], int length, int lineNumber) {
+  // error handling for incorrect number of args
+  if (length > 2) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  } else if (length < 2) {
+    // supplied too little args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  }
+
+  // error handling for types
+  if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: / function requires int or float type for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0].type)
+    );
+    exit(0);
+  } else if (args[1].type != TYPE_INT && args[1].type != TYPE_FLOAT) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: / function requires int or float type for it's 2nd argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[1].type)
+    );
+    exit(0);
+  }
+  
+  if (
+    args[0].type == TYPE_INT && args[1].type == TYPE_INT 
+    && *((int *) args[0].p_val) % *((int *) args[1].p_val) == 0
+  ) {
+    // case where we can return int (a is divisible by b and a an b are ints)
+    int *p_res = (int *) malloc(sizeof(int));
+    *p_res = *((int *) args[0].p_val) / *((int *) args[1].p_val);
+    return Generic_new(TYPE_INT, p_res);
+
+  } else {
+    // case where we must return float
+    double *p_res = (double *) malloc(sizeof(double));
+
+    // convert args to approriate types
+    *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
+      / (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
+
+    return Generic_new(TYPE_FLOAT, p_res); 
+  }
+}
+
+// (< a b)
+// returns true if a is less than b
 // creates a new global scope
 Scope *newGlobal() {
   // create global scope
@@ -519,6 +579,7 @@ Scope *newGlobal() {
   Scope_set(p_global, "+", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_add));
   Scope_set(p_global, "-", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_sub));
   Scope_set(p_global, "*", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mult));
+  Scope_set(p_global, "/", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_div));
 
   return p_global;
 }

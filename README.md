@@ -90,6 +90,6 @@ fib = {n ->
 
 ### Mean of Three Items
 ```
-mean = {a b c -> (/ (+ a b c) 3)}
-(print (mean 7 8 3))
+mean = {a b c -> return (/ (+ (+ a b) c) 3)}
+(print (mean 7 8 8))
 ```
