@@ -21,9 +21,13 @@ int lex(Token *p_headToken, char *code, int fileLength) {
   while (i < fileLength) {
     char c = code[i];
 
+
     if (c == '\n') lineNumber++;
 
-    if (c == '(') {
+    if (c == '/' && code[i + 1] == '/') {
+      // comments
+      while (code[i] != '\n' && i < fileLength) i++;
+    } else if (c == '(') {
       Token_push(p_headToken, NULL, APPLYOPEN, lineNumber);
       tokenCount++;
     } else if (c == ')') {
