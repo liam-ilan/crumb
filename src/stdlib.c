@@ -71,7 +71,10 @@ Generic applyFunc(Generic func, Scope *p_scope, Generic args[], int length, int 
 Generic StdLib_print(Scope *p_scope, Generic args[], int length, int lineNumber) {
   for (int i = 0; i < length; i++) {
     Generic_print(args[i]);
+    if (i < length - 1) printf(" ");
   }
+
+  printf("\n");
 
   return Generic_new(TYPE_VOID, NULL);
 }

@@ -6,17 +6,17 @@
 // print generic nicely
 void Generic_print(Generic in) {
   if (in.type == TYPE_INT) {
-    printf("%i\n", *((int *) in.p_val));
+    printf("%i", *((int *) in.p_val));
   } else if (in.type == TYPE_FLOAT) {
-    printf("%f\n", *((double *) in.p_val));
+    printf("%f", *((double *) in.p_val));
   } else if (in.type == TYPE_STRING) {
-    printf("%s\n", *((char **) in.p_val));
+    printf("%s", *((char **) in.p_val));
   } else if (in.type == TYPE_VOID) {
-    printf("[Void]\n");
+    printf("[Void]");
   } else if (in.type == TYPE_FUNCTION) {
-    printf("[Function]\n");
+    printf("[Function]");
   }  else if (in.type == TYPE_NATIVEFUNCTION) {
-    printf("[Native Function]\n");
+    printf("[Native Function]");
   }
 }
 
