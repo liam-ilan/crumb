@@ -71,6 +71,23 @@ fact = {n ->
 (print (fact 7))
 ```
 
+### Fibonacci
+```
+fib = {n ->
+  return (if (is n 0) {
+    return 0
+  } {
+    return (if (is n 1) {
+      return 1
+    } {
+      return (+ (fib (- n 1)) (fib (- n 2)))
+    })
+  })
+}
+
+(print (fib 26))
+```
+
 ### Mean of Three Items
 ```
 mean = {a b c -> (/ (+ a b c) 3)}

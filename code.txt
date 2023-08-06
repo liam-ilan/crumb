@@ -1,15 +1,13 @@
-(loop 100 {i -> 
-  (if (is (% i 15) 0) {
-    (print "fizzbuzz")
+fib = {n ->
+  return (if (is n 0) {
+    return 0
   } {
-    (if (is (% i 3) 0) {
-      (print "fizz")
+    return (if (is n 1) {
+      return 1
     } {
-      (if (is (% i 5) 0) {
-        (print "buzz")
-      } {
-        (print i)
-      })
+      return (+ (fib (- n 1)) (fib (- n 2)))
     })
   })
-})
+}
+
+(print (fib 26))

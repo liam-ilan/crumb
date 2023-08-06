@@ -98,6 +98,7 @@ Generic StdLib_is(Scope *p_scope, Generic args[], int length, int lineNumber) {
   }
 
   int *p_res = (int *) malloc(sizeof(int));
+  *p_res = 0;
 
   if (args[0].type == args[1].type) {
     switch (args[0].type) {
