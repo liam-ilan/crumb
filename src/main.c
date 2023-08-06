@@ -183,9 +183,10 @@ Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) 
 
 // (if c f g*)
 // applys f if c == 1
+// applys g or nothing if c == 0
 Generic StdLib_if(Scope *p_scope, Generic args[], int length, int lineNumber) {
   // error handling for incorrect number of args
-  if (length > 2) {
+  if (length > 3) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
@@ -216,9 +217,17 @@ Generic StdLib_if(Scope *p_scope, Generic args[], int length, int lineNumber) {
       lineNumber, getTypeString(args[1].type)
     );
     exit(0);
+  } else if (length == 3 && args[2].type != TYPE_FUNCTION && args[2].type != TYPE_NATIVEFUNCTION) {
+    // supplied too little args, throw error
+    printf(
+      "Runtime Error @ Line %i: if function requires function or native function type for it's 3rd argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[2].type)
+    );
+    exit(0);
   }
 
   if (*((int *) args[0].p_val) == 1) applyFunc(args[1], p_scope, NULL, 0, lineNumber);
+  else if (length == 3 && *((int *) args[0].p_val) == 0) applyFunc(args[2], p_scope, NULL, 0, lineNumber);
   else if (*((int *) args[0].p_val) != 0) {
     // c is not 1 or 0, throw err
     printf(
@@ -387,8 +396,8 @@ int main(int argc, char *argv[]) {
   Scope_set(p_global, "apply", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_apply));
   Scope_set(p_global, "loop", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_loop));
   Scope_set(p_global, "if", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_if));
-  Scope_set(p_global, "mod", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mod));
-  Scope_set(p_global, "not", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_not));
+  Scope_set(p_global, "%", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mod));
+  Scope_set(p_global, "!", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_not));
 
   eval(p_headAstNode, p_global);
 

@@ -1,16 +1,13 @@
-(loop 10000 {i -> 
-  (if (is (mod i 15) 0) {
-    (print "fizz")
-  })
-  (if (not (is (mod i 15) 0)) {
-    (if (is (mod i 5) 0) {
-      (print "buzz")
-    })
-    (if (not (is (mod i 5) 0)) {
-      (if (is (mod i 3) 0) {
-        (print "fizz")
-      })
-      (if (not (is (mod i 3) 0)) {
+(loop 100 {i -> 
+  (if (is (% i 15) 0) {
+    (print "fizzbuzz")
+  } {
+    (if (is (% i 3) 0) {
+      (print "fizz")
+    } {
+      (if (is (% i 5) 0) {
+        (print "buzz")
+      } {
         (print i)
       })
     })
