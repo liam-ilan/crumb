@@ -12,7 +12,6 @@
 #include "stdlib.h"
 
 int main(int argc, char *argv[]) {
-  
   if (argc < 2) {
     printf("Error: Supply file path to read from.\n");
     return 0;

@@ -33,6 +33,19 @@ start
 end
 ```
 
+## Standard Libary
+- `print`
+- `is`
+- `apply`
+- `loop`
+- `if`
+- `%`
+- `!`
+- `+`
+- `-`
+- `*`
+- `/`
+
 ## Sample Programs
 ### Hello World
 ```
@@ -92,4 +105,31 @@ fib = {n ->
 ```
 mean = {a b c -> return (/ (+ (+ a b) c) 3)}
 (print (mean 7 8 8))
+```
+
+### Collatz
+```
+// divides 2 if divisible by 2
+// multiplies by 3 and adds 1 if not
+f = {n ->
+  return (if (is (% n 2) 0) {
+    return (/ n 2)
+  } {
+    return (+ (* n 3) 1)
+  })
+}
+
+// returns stopping_time of n
+stopping_time = {n ->
+  return (if (is n 1) {
+    return 0
+  } {
+    return (+ 1 (stopping_time (f n)))
+  })
+}
+
+// run for first 10000 positive integers
+(loop 10000 {n ->
+  (print "Stopping time for" (+ n 1) "-" (stopping_time (+ n 1)))
+})
 ```

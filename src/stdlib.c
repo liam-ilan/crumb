@@ -564,8 +564,6 @@ Generic StdLib_div(Scope *p_scope, Generic args[], int length, int lineNumber) {
   }
 }
 
-// (< a b)
-// returns true if a is less than b
 // creates a new global scope
 Scope *newGlobal() {
   // create global scope
