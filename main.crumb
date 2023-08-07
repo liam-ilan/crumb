@@ -1,13 +1,2 @@
-fib = {n ->
-  return (if (is n 0) {
-    return 0
-  } {
-    return (if (is n 1) {
-      return 1
-    } {
-      return (+ (fib (- n 1)) (fib (- n 2)))
-    })
-  })
-}
-
-(print (fib 26))
+return 139
+(print "hi")

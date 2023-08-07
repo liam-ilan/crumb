@@ -72,7 +72,13 @@ int main(int argc, char *argv[]) {
   /* evaluate */
   printf("\nEVAL\n");
   Scope *p_global = newGlobal();
-  eval(p_headAstNode, p_global);
+  Generic res = eval(p_headAstNode, p_global);
+
+  // get exit code
+  int exitCode = 0;
+  if (res.type == TYPE_INT) {
+    exitCode = *((int *) res.p_val);
+  }
 
   /* free */
   printf("\nFREE\n");
@@ -97,5 +103,6 @@ int main(int argc, char *argv[]) {
   p_global = NULL;
   printf("Global Scope Freed\n");
 
-  return 0;
+  exit(exitCode);
+  return exitCode;
 }
