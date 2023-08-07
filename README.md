@@ -45,6 +45,8 @@ end
 - `-`
 - `*`
 - `/`
+- `read_file`
+- `write_file`
 
 ## Sample Programs
 ### Hello World
@@ -132,4 +134,9 @@ stopping_time = {n ->
 (loop 10000 {n ->
   (print "Stopping time for" (+ n 1) "-" (stopping_time (+ n 1)))
 })
+```
+
+### Cheating Quine
+```
+(print (read_file "main.crumb"))
 ```

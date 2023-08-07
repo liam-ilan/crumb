@@ -135,17 +135,25 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
 
       while (i < count) {
         args[i] = eval(p_curr, p_scope);
-        
+        args[i].refCount++;
+
         i++;
         p_curr = p_curr->p_next;
       }
       
       // call and return
-      return (*cb)(p_local, args, count, p_head->lineNumber);
+      Generic res = (*cb)(p_local, args, count, p_head->lineNumber);
+
+      // drop ref count for args
+      for (int i = 0; i < count; i++) {
+        args[i].refCount--;
+      }
 
       // free scope
       Scope_free(p_local);
       p_local = NULL;
+
+      return res;
 
     } else {
       // if func is not a function type, throw error

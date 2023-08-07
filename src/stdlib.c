@@ -7,13 +7,43 @@
 #include "scope.h"
 #include "eval.h"
 
+// validate number of arguments
+void validateArgCount(int min, int max, int length, int lineNumber) {
+  if (length > max) {
+    // supplied too many args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  } else if (length < min) {
+    // supplied too little args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  }
+}
+
 // applys a func, given arguments
 // used for callbacks from the standard library
 Generic applyFunc(Generic func, Scope *p_scope, Generic args[], int length, int lineNumber) {
   if(func.type == TYPE_NATIVEFUNCTION) {
     // native func case, simply obtain cb and run
     Generic (*cb)(Scope *, Generic[], int, int) = func.p_val;
+
+    // increase ref count
+    for (int i = 0; i < length; i++) {
+      args[i].refCount++;
+    }
+
     return cb(p_scope, args, length, lineNumber);
+
+    // drop ref count
+    for (int i = 0; i < length; i++) {
+      args[i].refCount--;
+    }
 
   } else if (func.type == TYPE_FUNCTION) {
     // non-native func case
@@ -84,27 +114,16 @@ Generic StdLib_print(Scope *p_scope, Generic args[], int length, int lineNumber)
 // checks for equality between a and b
 // returns 1 for true, 0 for false
 Generic StdLib_is(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  // error handling for incorrect number of args
-  if (length < 2) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  } else if (length > 2) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  }
+  validateArgCount(2, 2, length, lineNumber);
 
+  // create res
   int *p_res = (int *) malloc(sizeof(int));
   *p_res = 0;
 
+  // check types
   if (args[0].type == args[1].type) {
+
+    // do type conversions and check data
     switch (args[0].type) {
       case TYPE_FLOAT:
         if (*((double *) args[0].p_val) == *((double *) args[1].p_val)) *p_res = 1;
@@ -127,6 +146,7 @@ Generic StdLib_is(Scope *p_scope, Generic args[], int length, int lineNumber) {
     }
   }
 
+  // return
   return Generic_new(TYPE_INT, p_res, 0);
 }
 
@@ -142,22 +162,7 @@ Generic StdLib_apply(Scope *p_scope, Generic args[], int length, int lineNumber)
 // returns whatever f returns if not void
 // will go to completion and return void if void is all f returns
 Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  // error handling for incorrect number of args
-  if (length > 2) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  } else if (length < 2) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  }
+  validateArgCount(2, 2, length, lineNumber);
 
   // error handling to check that 2nd arg is a function, and 1st arg is an int
   if (args[0].type != TYPE_INT) {
@@ -198,22 +203,7 @@ Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) 
 // applys f if c == 1
 // applys g or nothing if c == 0
 Generic StdLib_if(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  // error handling for incorrect number of args
-  if (length > 3) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  } else if (length < 2) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  }
+  validateArgCount(2, 3, length, lineNumber);
 
   // error handling to check that 1st arg is an int, and 2nd arg is a function
   if (args[0].type != TYPE_INT) {
@@ -256,23 +246,7 @@ Generic StdLib_if(Scope *p_scope, Generic args[], int length, int lineNumber) {
 // (% a b)
 // returns the mod of a and b
 Generic StdLib_mod(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  // check that both args are ints
-  // error handling for incorrect number of args
-  if (length > 2) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  } else if (length < 2) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  }
+  validateArgCount(2, 2, length, lineNumber);
 
   // error handling to check that 1st arg is an int, and 2nd arg is an int
   if (args[0].type != TYPE_INT) {
@@ -300,23 +274,7 @@ Generic StdLib_mod(Scope *p_scope, Generic args[], int length, int lineNumber) {
 // (! a)
 // returns 1 if a = 0, 0 if a = 1
 Generic StdLib_not(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  // check that both args are ints
-  // error handling for incorrect number of args
-  if (length > 1) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  } else if (length < 1) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  }
+  validateArgCount(1, 1, length, lineNumber);
 
   // type check
     // error handling to check that 1st arg is an int, and 2nd arg is an int
@@ -348,22 +306,7 @@ Generic StdLib_not(Scope *p_scope, Generic args[], int length, int lineNumber) {
 // (+ a b)
 // returns a + b
 Generic StdLib_add(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  // error handling for incorrect number of args
-  if (length > 2) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  } else if (length < 2) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  }
+  validateArgCount(2, 2, length, lineNumber);
 
   // error handling for types
   if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
@@ -404,22 +347,7 @@ Generic StdLib_add(Scope *p_scope, Generic args[], int length, int lineNumber) {
 // (- a b)
 // returns a - b
 Generic StdLib_sub(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  // error handling for incorrect number of args
-  if (length > 2) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  } else if (length < 2) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  }
+  validateArgCount(2, 2, length, lineNumber);
 
   // error handling for types
   if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
@@ -460,22 +388,7 @@ Generic StdLib_sub(Scope *p_scope, Generic args[], int length, int lineNumber) {
 // (* a b)
 // returns a * b
 Generic StdLib_mult(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  // error handling for incorrect number of args
-  if (length > 2) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  } else if (length < 2) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  }
+  validateArgCount(2, 2, length, lineNumber);
 
   // error handling for types
   if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
@@ -516,22 +429,7 @@ Generic StdLib_mult(Scope *p_scope, Generic args[], int length, int lineNumber) 
 // (/ a b)
 // returns a / b
 Generic StdLib_div(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  // error handling for incorrect number of args
-  if (length > 2) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied more arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  } else if (length < 2) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
-      lineNumber
-    );
-    exit(0);
-  }
+  validateArgCount(2, 2, length, lineNumber);
 
   // error handling for types
   if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
@@ -571,6 +469,90 @@ Generic StdLib_div(Scope *p_scope, Generic args[], int length, int lineNumber) {
   }
 }
 
+// (read_file filepath)
+// reads text at filepath and returns
+Generic StdLib_readFile(Scope *p_scope, Generic args[], int length, int lineNumber) {
+  validateArgCount(1, 1, length, lineNumber);
+  
+  // check that type of arg is string
+  if (args[0].type != TYPE_STRING) {
+    printf(
+      "Runtime Error @ Line %i: read_file function requires string type for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0].type)
+    );
+    exit(0);
+  }
+
+  FILE *p_file = fopen(*((char ** )args[0].p_val), "r");
+
+  // check the file succesfully opened
+  if (p_file == NULL) {
+    printf(
+      "Runtime Error @ Line %i: Cannot read file %s.\n", 
+      lineNumber, *((char ** )args[0].p_val)
+    );
+    exit(0); 
+  }
+
+  // go to end, and record position (this will be the length of the file)
+  fseek(p_file, 0, SEEK_END);
+  long fileLength = ftell(p_file);
+
+  // rewind to start
+  rewind(p_file);
+
+  // allocate memory (+1 for 0 terminated string)
+  char *res = malloc(fileLength + 1);
+
+  // read file and close
+  fread(res, fileLength, 1, p_file);
+  fclose(p_file);
+
+  // set terminator to 0
+  res[fileLength] = 0;
+
+  // return
+  return Generic_new(TYPE_STRING, &res, 0);
+}
+
+// (write_file filepath string)
+// writes string to filepath
+Generic StdLib_writeFile(Scope *p_scope, Generic args[], int length, int lineNumber) {
+  validateArgCount(2, 2, length, lineNumber);
+  
+  // check that type of args is string
+  if (args[0].type != TYPE_STRING) {
+    printf(
+      "Runtime Error @ Line %i: write_file function requires string type for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0].type)
+    );
+    exit(0);
+  } else if (args[1].type != TYPE_STRING) {
+    printf(
+      "Runtime Error @ Line %i: write_file function requires string type for it's 2nd argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[1].type)
+    );
+    exit(0);
+  }
+
+  FILE *p_file = fopen(*((char ** )args[0].p_val), "w+");
+
+  // check the file succesfully opened
+  if (p_file == NULL) {
+    printf(
+      "Runtime Error @ Line %i: Cannot write file %s.\n", 
+      lineNumber, *((char ** )args[0].p_val)
+    );
+    exit(0); 
+  }
+
+  fprintf(p_file, "%s\n", *((char ** )args[1].p_val));
+  fclose(p_file);
+  return Generic_new(TYPE_VOID, NULL, 0);
+}
+
+// (int x)
+// returns x as an integer, 
 // creates a new global scope
 Scope *newGlobal() {
   // create global scope
@@ -588,6 +570,8 @@ Scope *newGlobal() {
   Scope_set(p_global, "-", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_sub, 1));
   Scope_set(p_global, "*", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mult, 1));
   Scope_set(p_global, "/", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_div, 1));
+  Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_readFile, 1));
+  Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_writeFile, 1));
 
   return p_global;
 }
