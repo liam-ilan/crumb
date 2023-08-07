@@ -175,14 +175,19 @@ Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) 
     exit(0);
   }
 
+  // loop
   for (int i = 0; i < *((int *) args[0].p_val); i++) {
+
+    // get arg to pass to cb
     int *p_arg = (int *) malloc(sizeof(int));
     *p_arg = i;
     Generic newArgs[1] = {Generic_new(TYPE_INT, p_arg)};
     
+    // call cb
     Generic res = applyFunc(args[1], p_scope, newArgs, 1, lineNumber);
+
+    // if void type returned, free
     if (res.type != TYPE_VOID) return res;
-    else Generic_free(res);
   }
 
   return Generic_new(TYPE_VOID, NULL);

@@ -33,12 +33,9 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
     // for each child
     AstNode *p_curr = p_head->p_headChild;
     while (p_curr != NULL) {
-      // if return found, return value out of statement, else just eval (and free generic)
+      // if return found, return value out of statement, else just eval
       if (p_curr->opcode == OP_RETURN) return eval(p_curr, p_scope);
-      else {
-        Generic res = eval(p_curr, p_scope);
-        Generic_free(res);
-      }
+      else eval(p_curr, p_scope);
 
       p_curr = p_curr->p_next;
     }
