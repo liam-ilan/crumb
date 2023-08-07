@@ -1,7 +1,3 @@
-x = 3
-
-(loop 10 {n->
-  return x
-})
-
-(print x)
+n = 0
+f = {n = (+ n 1) (print n) (f)}
+(f)

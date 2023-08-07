@@ -28,6 +28,7 @@ Generic applyFunc(Generic func, Scope *p_scope, Generic args[], int length, int 
     int i = 0;
 
     while (p_curr->opcode != OP_STATEMENT && i < length) {
+      args[i].refCount++;
       Scope_set(p_local, p_curr->val, args[i]);
       p_curr = p_curr->p_next;
       i++;
@@ -76,7 +77,7 @@ Generic StdLib_print(Scope *p_scope, Generic args[], int length, int lineNumber)
 
   printf("\n");
 
-  return Generic_new(TYPE_VOID, NULL);
+  return Generic_new(TYPE_VOID, NULL, 0);
 }
 
 // (is a b)
@@ -126,7 +127,7 @@ Generic StdLib_is(Scope *p_scope, Generic args[], int length, int lineNumber) {
     }
   }
 
-  return Generic_new(TYPE_INT, p_res);
+  return Generic_new(TYPE_INT, p_res, 0);
 }
 
 // (apply f args...)
@@ -181,7 +182,7 @@ Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) 
     // get arg to pass to cb
     int *p_arg = (int *) malloc(sizeof(int));
     *p_arg = i;
-    Generic newArgs[1] = {Generic_new(TYPE_INT, p_arg)};
+    Generic newArgs[1] = {Generic_new(TYPE_INT, p_arg, 0)};
     
     // call cb
     Generic res = applyFunc(args[1], p_scope, newArgs, 1, lineNumber);
@@ -190,7 +191,7 @@ Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) 
     if (res.type != TYPE_VOID) return res;
   }
 
-  return Generic_new(TYPE_VOID, NULL);
+  return Generic_new(TYPE_VOID, NULL, 0);
 }
 
 // (if c f g*)
@@ -249,7 +250,7 @@ Generic StdLib_if(Scope *p_scope, Generic args[], int length, int lineNumber) {
     exit(0);
   }
 
-  return Generic_new(TYPE_VOID, NULL);
+  return Generic_new(TYPE_VOID, NULL, 0);
 }
 
 // (% a b)
@@ -293,7 +294,7 @@ Generic StdLib_mod(Scope *p_scope, Generic args[], int length, int lineNumber) {
   // do modulus and return
   int *p_res = (int *) malloc(sizeof(int));
   *p_res = *((int *) args[0].p_val) % *((int *) args[1].p_val);
-  return Generic_new(TYPE_INT, p_res);
+  return Generic_new(TYPE_INT, p_res, 0);
 }
 
 // (! a)
@@ -341,7 +342,7 @@ Generic StdLib_not(Scope *p_scope, Generic args[], int length, int lineNumber) {
   *p_res = 1 - *((int *) args[0].p_val);
 
   
-  return Generic_new(TYPE_INT, p_res);
+  return Generic_new(TYPE_INT, p_res, 0);
 }
 
 // (+ a b)
@@ -385,7 +386,7 @@ Generic StdLib_add(Scope *p_scope, Generic args[], int length, int lineNumber) {
     // case where we can return int
     int *p_res = (int *) malloc(sizeof(int));
     *p_res = *((int *) args[0].p_val) + *((int *) args[1].p_val);
-    return Generic_new(TYPE_INT, p_res);
+    return Generic_new(TYPE_INT, p_res, 0);
 
   } else {
     // case where we must return float
@@ -396,7 +397,7 @@ Generic StdLib_add(Scope *p_scope, Generic args[], int length, int lineNumber) {
     *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
       + (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
 
-    return Generic_new(TYPE_FLOAT, p_res); 
+    return Generic_new(TYPE_FLOAT, p_res, 0); 
   }
 }
 
@@ -441,7 +442,7 @@ Generic StdLib_sub(Scope *p_scope, Generic args[], int length, int lineNumber) {
     // case where we can return int
     int *p_res = (int *) malloc(sizeof(int));
     *p_res = *((int *) args[0].p_val) - *((int *) args[1].p_val);
-    return Generic_new(TYPE_INT, p_res);
+    return Generic_new(TYPE_INT, p_res, 0);
 
   } else {
     // case where we must return float
@@ -452,7 +453,7 @@ Generic StdLib_sub(Scope *p_scope, Generic args[], int length, int lineNumber) {
     *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
       - (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
 
-    return Generic_new(TYPE_FLOAT, p_res); 
+    return Generic_new(TYPE_FLOAT, p_res, 0); 
   }
 }
 
@@ -497,7 +498,7 @@ Generic StdLib_mult(Scope *p_scope, Generic args[], int length, int lineNumber) 
     // case where we can return int
     int *p_res = (int *) malloc(sizeof(int));
     *p_res = *((int *) args[0].p_val) * *((int *) args[1].p_val);
-    return Generic_new(TYPE_INT, p_res);
+    return Generic_new(TYPE_INT, p_res, 0);
 
   } else {
     // case where we must return float
@@ -508,7 +509,7 @@ Generic StdLib_mult(Scope *p_scope, Generic args[], int length, int lineNumber) 
     *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
       * (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
 
-    return Generic_new(TYPE_FLOAT, p_res); 
+    return Generic_new(TYPE_FLOAT, p_res, 0); 
   }
 }
 
@@ -556,7 +557,7 @@ Generic StdLib_div(Scope *p_scope, Generic args[], int length, int lineNumber) {
     // case where we can return int (a is divisible by b and a an b are ints)
     int *p_res = (int *) malloc(sizeof(int));
     *p_res = *((int *) args[0].p_val) / *((int *) args[1].p_val);
-    return Generic_new(TYPE_INT, p_res);
+    return Generic_new(TYPE_INT, p_res, 0);
 
   } else {
     // case where we must return float
@@ -566,7 +567,7 @@ Generic StdLib_div(Scope *p_scope, Generic args[], int length, int lineNumber) {
     *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
       / (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
 
-    return Generic_new(TYPE_FLOAT, p_res); 
+    return Generic_new(TYPE_FLOAT, p_res, 0); 
   }
 }
 
@@ -576,17 +577,17 @@ Scope *newGlobal() {
   Scope *p_global = Scope_new(NULL);
 
   // populate global scope with stdlib
-  Scope_set(p_global, "print", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_print));
-  Scope_set(p_global, "is", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_is));
-  Scope_set(p_global, "apply", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_apply));
-  Scope_set(p_global, "loop", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_loop));
-  Scope_set(p_global, "if", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_if));
-  Scope_set(p_global, "%", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mod));
-  Scope_set(p_global, "!", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_not));
-  Scope_set(p_global, "+", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_add));
-  Scope_set(p_global, "-", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_sub));
-  Scope_set(p_global, "*", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mult));
-  Scope_set(p_global, "/", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_div));
+  Scope_set(p_global, "print", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_print, 1));
+  Scope_set(p_global, "is", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_is, 1));
+  Scope_set(p_global, "apply", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_apply, 1));
+  Scope_set(p_global, "loop", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_loop, 1));
+  Scope_set(p_global, "if", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_if, 1));
+  Scope_set(p_global, "%", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mod, 1));
+  Scope_set(p_global, "!", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_not, 1));
+  Scope_set(p_global, "+", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_add, 1));
+  Scope_set(p_global, "-", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_sub, 1));
+  Scope_set(p_global, "*", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mult, 1));
+  Scope_set(p_global, "/", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_div, 1));
 
   return p_global;
 }

@@ -90,6 +90,8 @@ void Scope_free(Scope *p_target) {
   while (p_curr != NULL) {
     ScopeItem *p_tmp = p_curr;
     p_curr = p_curr->p_next;
+    if (p_tmp->val.refCount == 1) Generic_free(p_tmp->val);
+    else p_tmp->val.refCount--;
     free(p_tmp);
   }
 

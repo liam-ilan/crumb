@@ -21,8 +21,8 @@ void Generic_print(Generic in) {
 }
 
 // create a new generic and return
-Generic Generic_new(enum Type type, void *p_val) {
-  Generic res = {type, p_val};
+Generic Generic_new(enum Type type, void *p_val, int refCount) {
+  Generic res = {type, p_val, refCount};
   return res;
 }
 

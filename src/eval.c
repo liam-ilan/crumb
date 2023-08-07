@@ -10,19 +10,19 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
     // int case
     int *p_val = (int *) malloc(sizeof(int));
     *p_val = atoi(p_head->val);
-    return Generic_new(TYPE_INT, p_val);
+    return Generic_new(TYPE_INT, p_val, 0);
 
   } else if (p_head->opcode == OP_FLOAT) {
     // float case
     double *p_val = (double *) malloc(sizeof(double));
     *p_val = atof(p_head->val);
-    return Generic_new(TYPE_FLOAT, p_val);
+    return Generic_new(TYPE_FLOAT, p_val, 0);
 
   } else if (p_head->opcode == OP_STRING) {
     // string case
     char **p_val = (char **) malloc(sizeof(char *));
     *p_val = p_head->val;
-    return Generic_new(TYPE_STRING, p_val);
+    return Generic_new(TYPE_STRING, p_val, 0);
 
   } else if (p_head->opcode == OP_RETURN) {
     // simply return the value
@@ -35,13 +35,16 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
     while (p_curr != NULL) {
       // if return found, return value out of statement, else just eval
       if (p_curr->opcode == OP_RETURN) return eval(p_curr, p_scope);
-      else eval(p_curr, p_scope);
+      else {
+        Generic res = eval(p_curr, p_scope);
+        if (res.refCount == 0) Generic_free(res);
+      }
 
       p_curr = p_curr->p_next;
     }
 
     // if no return found, return void generic
-    return Generic_new(TYPE_VOID, NULL);
+    return Generic_new(TYPE_VOID, NULL, 0);
   } else if (p_head->opcode == OP_IDENTIFIER) {
     // identifier case
     // return approriate identifier from scope
@@ -49,13 +52,15 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
 
   } else if (p_head->opcode == OP_ASSIGNMENT) {
     // assignent case
-    Scope_set(p_scope, p_head->p_headChild->val, eval(p_head->p_headChild->p_next, p_scope));
-    return Generic_new(TYPE_VOID, NULL);
+    Generic val = eval(p_head->p_headChild->p_next, p_scope);
+    val.refCount++;
+    Scope_set(p_scope, p_head->p_headChild->val, val);
+    return Generic_new(TYPE_VOID, NULL, 0);
 
   } else if (p_head->opcode == OP_FUNCTION) {
     // function case
     // returns a function generic, whose value is a pointer to the functions ast node
-    return Generic_new(TYPE_FUNCTION, p_head);
+    return Generic_new(TYPE_FUNCTION, p_head, 0);
 
   } else if (p_head->opcode == OP_APPLICATION) {
     // application case
@@ -72,7 +77,9 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
 
       // set vars in local scope
       while (p_currApplyArg != NULL && p_currFuncArg->opcode != OP_STATEMENT) {
-        Scope_set(p_local, p_currFuncArg->val, eval(p_currApplyArg, p_scope));
+        Generic val = eval(p_currApplyArg, p_scope);
+        val.refCount++;
+        Scope_set(p_local, p_currFuncArg->val, val);
         p_currApplyArg = p_currApplyArg->p_next;
         p_currFuncArg = p_currFuncArg->p_next;
       }
