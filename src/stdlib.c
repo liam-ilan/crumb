@@ -38,12 +38,15 @@ Generic applyFunc(Generic func, Scope *p_scope, Generic args[], int length, int 
       args[i].refCount++;
     }
 
-    return cb(p_scope, args, length, lineNumber);
+    Generic res = cb(p_scope, args, length, lineNumber);
 
-    // drop ref count
+    // drop ref count, and free if count is 0
     for (int i = 0; i < length; i++) {
       args[i].refCount--;
+      if (args[i].refCount == 0) Generic_free(args[i]);
     }
+
+    return res;
 
   } else if (func.type == TYPE_FUNCTION) {
     // non-native func case
@@ -511,8 +514,11 @@ Generic StdLib_readFile(Scope *p_scope, Generic args[], int length, int lineNumb
   // set terminator to 0
   res[fileLength] = 0;
 
+  char **p_res = (char **) malloc(sizeof(char *));
+  *p_res = res;
+
   // return
-  return Generic_new(TYPE_STRING, &res, 0);
+  return Generic_new(TYPE_STRING, p_res, 0);
 }
 
 // (write_file filepath string)
@@ -551,6 +557,10 @@ Generic StdLib_writeFile(Scope *p_scope, Generic args[], int length, int lineNum
   return Generic_new(TYPE_VOID, NULL, 0);
 }
 
+Generic StdLib_hi(Scope *p_scope, Generic args[], int length, int lineNumber) {
+  char *hi = (char *) (malloc(6 * sizeof(char)));
+  hi = "Hello";
+}
 // (int x)
 // returns x as an integer, 
 // creates a new global scope

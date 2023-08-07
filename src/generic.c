@@ -28,6 +28,10 @@ Generic Generic_new(enum Type type, void *p_val, int refCount) {
 
 // frees p_val of generic
 void Generic_free(Generic target) {
+  // if string, free contents as well
+  if (target.type == TYPE_STRING) free(*((char **) target.p_val));
+
+  // dont free functions and native functions, as they are either not allocated to heap (native), or belong to the ast (non native)
   if (target.type != TYPE_FUNCTION && target.type != TYPE_NATIVEFUNCTION) free(target.p_val);
   target.p_val = NULL;
 }

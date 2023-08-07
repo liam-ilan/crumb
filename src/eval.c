@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 #include "generic.h"
 #include "scope.h"
@@ -21,7 +22,11 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
   } else if (p_head->opcode == OP_STRING) {
     // string case
     char **p_val = (char **) malloc(sizeof(char *));
-    *p_val = p_head->val;
+
+    // create string and copy from ast
+    *p_val = (char *) malloc(sizeof(char) * (strlen(p_head->val) + 1));
+    strcpy(*p_val, p_head->val);
+
     return Generic_new(TYPE_STRING, p_val, 0);
 
   } else if (p_head->opcode == OP_RETURN) {
@@ -136,6 +141,7 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
       while (i < count) {
         args[i] = eval(p_curr, p_scope);
         args[i].refCount++;
+        
 
         i++;
         p_curr = p_curr->p_next;
@@ -144,9 +150,10 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
       // call and return
       Generic res = (*cb)(p_local, args, count, p_head->lineNumber);
 
-      // drop ref count for args
+      // drop ref count for args, and free if refCount is 0
       for (int i = 0; i < count; i++) {
         args[i].refCount--;
+        if (args[i].refCount == 0) Generic_free(args[i]);
       }
 
       // free scope
