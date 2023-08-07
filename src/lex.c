@@ -27,6 +27,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
     if (c == '/' && code[i + 1] == '/') {
       // comments
       while (code[i] != '\n' && i < fileLength) i++;
+      lineNumber++;
     } else if (c == '(') {
       Token_push(p_headToken, NULL, APPLYOPEN, lineNumber);
       tokenCount++;
@@ -115,13 +116,21 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       // make sure to go back to last char of number
       i--;
 
-    } else if (strchr(" \n\r\t\f\v{}()\"=", c) == NULL && !(c == '-' && code[i + 1] == '>') ) {
+    } else if (
+      strchr(" \n\r\t\f\v{}()\"=", c) == NULL 
+      && !(c == '-' && code[i + 1] == '>')
+      && !(code[i] == '/' && code[i + 1] == '/')
+    ) {
       // case of identifier
       
       int identifierStart = i;
 
       // while valid identifier char
-      while (strchr(" \n\r\t\f\v{}()\"=", code[i]) == NULL && !(code[i] == '-' && code[i + 1] == '>')) i++;
+      while (
+        strchr(" \n\r\t\f\v{}()\"=", code[i]) == NULL 
+        && !(code[i] == '-' && code[i + 1] == '>') 
+        && !(code[i] == '/' && code[i + 1] == '/')
+      ) i++;
 
       // get substring and add token
       char *val = malloc(i - identifierStart + 1);
