@@ -58,7 +58,6 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
   } else if (p_head->opcode == OP_ASSIGNMENT) {
     // assignent case
     Generic val = eval(p_head->p_headChild->p_next, p_scope);
-    val.refCount++;
     Scope_set(p_scope, p_head->p_headChild->val, val);
     return Generic_new(TYPE_VOID, NULL, 0);
 
@@ -83,7 +82,6 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
       // set vars in local scope
       while (p_currApplyArg != NULL && p_currFuncArg->opcode != OP_STATEMENT) {
         Generic val = eval(p_currApplyArg, p_scope);
-        val.refCount++;
         Scope_set(p_local, p_currFuncArg->val, val);
         p_currApplyArg = p_currApplyArg->p_next;
         p_currFuncArg = p_currFuncArg->p_next;

@@ -61,7 +61,6 @@ Generic applyFunc(Generic func, Scope *p_scope, Generic args[], int length, int 
     int i = 0;
 
     while (p_curr->opcode != OP_STATEMENT && i < length) {
-      args[i].refCount++;
       Scope_set(p_local, p_curr->val, args[i]);
       p_curr = p_curr->p_next;
       i++;
@@ -557,31 +556,57 @@ Generic StdLib_writeFile(Scope *p_scope, Generic args[], int length, int lineNum
   return Generic_new(TYPE_VOID, NULL, 0);
 }
 
-Generic StdLib_hi(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  char *hi = (char *) (malloc(6 * sizeof(char)));
-  hi = "Hello";
-}
 // (int x)
-// returns x as an integer, 
+// returns x as an integer, if string, float, or int passed
+Generic StdLib_int(Scope *p_scope, Generic args[], int length, int lineNumber) {
+  validateArgCount(1, 1, length, lineNumber);
+
+  // make sure first type is string
+  // check that type of arg is string or int or float
+  if (args[0].type != TYPE_STRING && args[0].type != TYPE_FLOAT && args[0].type != TYPE_INT) {
+    printf(
+      "Runtime Error @ Line %i: int function requires string or int or float type for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0].type)
+    );
+    exit(0);
+  }
+
+  int *p_res = malloc(sizeof(int));
+
+  if (args[0].type == TYPE_STRING) {
+    char *str = *((char **) args[0].p_val);
+    *p_res = atoi(str);
+  } else if (args[0].type == TYPE_FLOAT) {
+    double f = *((double *) args[0].p_val);
+    *p_res = (int) f;
+  } else {
+    int i = *((int *) args[0].p_val);
+    *p_res = i;
+  }
+
+  return Generic_new(TYPE_INT, p_res, 0);
+}
+
 // creates a new global scope
 Scope *newGlobal() {
   // create global scope
   Scope *p_global = Scope_new(NULL);
 
   // populate global scope with stdlib
-  Scope_set(p_global, "print", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_print, 1));
-  Scope_set(p_global, "is", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_is, 1));
-  Scope_set(p_global, "apply", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_apply, 1));
-  Scope_set(p_global, "loop", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_loop, 1));
-  Scope_set(p_global, "if", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_if, 1));
-  Scope_set(p_global, "%", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mod, 1));
-  Scope_set(p_global, "!", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_not, 1));
-  Scope_set(p_global, "+", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_add, 1));
-  Scope_set(p_global, "-", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_sub, 1));
-  Scope_set(p_global, "*", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mult, 1));
-  Scope_set(p_global, "/", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_div, 1));
-  Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_readFile, 1));
-  Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_writeFile, 1));
+  Scope_set(p_global, "print", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_print, 0));
+  Scope_set(p_global, "is", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_is, 0));
+  Scope_set(p_global, "apply", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_apply, 0));
+  Scope_set(p_global, "loop", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_loop, 0));
+  Scope_set(p_global, "if", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_if, 0));
+  Scope_set(p_global, "%", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mod, 0));
+  Scope_set(p_global, "!", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_not, 0));
+  Scope_set(p_global, "+", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_add, 0));
+  Scope_set(p_global, "-", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_sub, 0));
+  Scope_set(p_global, "*", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_mult, 0));
+  Scope_set(p_global, "/", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_div, 0));
+  Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_readFile, 0));
+  Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_writeFile, 0));
+  Scope_set(p_global, "int", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_int, 0));
 
   return p_global;
 }

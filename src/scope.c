@@ -41,6 +41,8 @@ void Scope_print(Scope *p_in) {
 // sets a key in the scope to val
 // if the key does not exist, creates a new scope item to house it
 void Scope_set(Scope *p_target, char *key, Generic val) {
+  val.refCount++;
+
   // set p_p_curr to the ScopeItem with the correct key, or NULL if not found
   ScopeItem **p_p_curr = &(p_target->p_head);
   while (*(p_p_curr) != NULL && strcmp((*p_p_curr)->key, key) != 0) p_p_curr = &((*p_p_curr)->p_next);
@@ -49,7 +51,9 @@ void Scope_set(Scope *p_target, char *key, Generic val) {
     // case where variable was previously undefined, create new item
     *p_p_curr = ScopeItem_new(key, val);
   } else {
-    // case where variable was previosuly defined, simply overwrite value
+    // case where variable was previosuly defined, simply overwrite value, and decrease ref count of old value (if 0, free)
+    (*p_p_curr)->val.refCount--;
+    if ((*p_p_curr)->val.refCount == 0) Generic_free((*p_p_curr)->val);
     (*p_p_curr)->val = val;
   }
 }
