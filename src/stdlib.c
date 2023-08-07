@@ -133,7 +133,7 @@ Generic StdLib_is(Scope *p_scope, Generic args[], int length, int lineNumber) {
 // applys args to f
 Generic StdLib_apply(Scope *p_scope, Generic args[], int length, int lineNumber) {
   Generic *newArgs = &(args[1]); 
-  applyFunc(args[0], p_scope, newArgs, length - 1, lineNumber);
+  return applyFunc(args[0], p_scope, newArgs, length - 1, lineNumber);
 }
 
 // (loop n f)
@@ -182,6 +182,7 @@ Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) 
     
     Generic res = applyFunc(args[1], p_scope, newArgs, 1, lineNumber);
     if (res.type != TYPE_VOID) return res;
+    else Generic_free(res);
   }
 
   return Generic_new(TYPE_VOID, NULL);

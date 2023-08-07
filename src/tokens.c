@@ -55,3 +55,17 @@ void Token_push(Token *p_head, char *val, enum TokenType type, int lineNumber) {
   p_curr->p_next->p_next = NULL;
   p_curr->p_next->lineNumber = lineNumber;
 }
+
+// frees all tokens, and their values
+void Token_free(Token *p_head) {
+  Token *p_curr = p_head;
+  Token *p_tmp = p_curr;
+
+  while (p_curr != NULL) {
+    p_tmp = p_curr;
+    p_curr = p_curr->p_next;
+
+    free(p_tmp->val);
+    free(p_tmp);
+  }
+}

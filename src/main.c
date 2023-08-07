@@ -46,26 +46,56 @@ int main(int argc, char *argv[]) {
   /* lex */
   printf("\nTOKENS\n");
 
-  Token headToken = {NULL, START, NULL, 1};
-  int tokenCount = lex(&headToken, code, fileLength);
+  // create initial token
+  Token *p_headToken = (Token *) malloc(sizeof(Token));
+  p_headToken->lineNumber = 1;
+  p_headToken->type = START;
+  p_headToken->val = NULL;
+  p_headToken->p_next = NULL;
+
+  // lex
+  int tokenCount = lex(p_headToken, code, fileLength);
 
   // print tokens
-  Token_print(&headToken, tokenCount);
+  Token_print(p_headToken, tokenCount);
   printf("Token Count: %i\n", tokenCount);
 
   /* parse */
   printf("\nAST\n");
 
   // parse
-  AstNode *p_headAstNode = parseProgram(&headToken, tokenCount);
+  AstNode *p_headAstNode = parseProgram(p_headToken, tokenCount);
 
   // print AST
   AstNode_print(p_headAstNode, 0);
 
   /* evaluate */
   printf("\nEVAL\n");
+  Scope *p_global = newGlobal();
+  eval(p_headAstNode, p_global);
 
-  eval(p_headAstNode, newGlobal());
+  /* free */
+  printf("\nFREE\n");
+
+  // free code
+  free(code);
+  code = NULL;
+  printf("Code Freed\n");
+
+  // free tokens
+  Token_free(p_headToken);
+  p_headToken = NULL;
+  printf("Tokens Freed\n");
+
+  // free ast
+  AstNode_free(p_headAstNode);
+  p_headAstNode = NULL;
+  printf("AST Freed\n");
+  
+  // free global scope
+  Scope_free(p_global);
+  p_global = NULL;
+  printf("Global Scope Freed\n");
 
   return 0;
 }

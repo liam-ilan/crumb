@@ -31,5 +31,6 @@ typedef struct Token {
 char* getTokenTypeString(enum TokenType);
 void Token_print(Token *, int);
 void Token_push(Token *, char *, enum TokenType, int);
+void Token_free(Token *);
 
 #endif

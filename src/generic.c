@@ -26,13 +26,11 @@ Generic Generic_new(enum Type type, void *p_val) {
   return res;
 }
 
-// free generic
-// note: we are actually just freeing the val of generic
-// protects against freeing functions (as they store ast nodes) and strings (as they r properties of ast nodes)
-void Generic_free(Generic in) {
-  if (in.type != TYPE_FUNCTION) free(in.p_val);
+// frees p_val of generic
+void Generic_free(Generic target) {
+  if (target.type != TYPE_FUNCTION && target.type != TYPE_NATIVEFUNCTION) free(target.p_val);
+  target.p_val = NULL;
 }
-
 
 // returns type as a string given enum
 char *getTypeString(enum Type type) {

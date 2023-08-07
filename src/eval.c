@@ -35,7 +35,11 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
     while (p_curr != NULL) {
       // if return found, return value out of statement, else just eval (and free generic)
       if (p_curr->opcode == OP_RETURN) return eval(p_curr, p_scope);
-      else eval(p_curr, p_scope);
+      else {
+        Generic res = eval(p_curr, p_scope);
+        Generic_free(res);
+      }
+
       p_curr = p_curr->p_next;
     }
 
@@ -98,6 +102,7 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
 
       // free local scope
       Scope_free(p_local);
+      p_local = NULL;
 
       // return 
       return res;
@@ -136,6 +141,7 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
 
       // free scope
       Scope_free(p_local);
+      p_local = NULL;
 
     } else {
       // if func is not a function type, throw error
