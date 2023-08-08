@@ -25,4 +25,5 @@ char* getTypeString(enum Type);
 void Generic_print(Generic *);
 Generic *Generic_new(enum Type, void *, int refCount);
 void Generic_free(Generic *);
+Generic *Generic_copy(Generic *);
 #endif

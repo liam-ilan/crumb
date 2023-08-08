@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "generic.h"
 #include "ast.h"
 
@@ -52,4 +53,27 @@ char *getTypeString(enum Type type) {
     case TYPE_VOID: return "float";
     case TYPE_NATIVEFUNCTION: return "native function";
   }
+}
+
+Generic *Generic_copy(Generic *target) {
+  Generic *res = (Generic *) malloc(sizeof(Generic));
+  res->type = target->type;
+  res->refCount = 0;
+
+  if (res->type == TYPE_STRING) {
+    res->p_val = (char **) malloc(sizeof(char *));
+    strcpy(*((char **) res->p_val), *((char **) target->p_val));
+  } else if (res->type == TYPE_FUNCTION || res->type == TYPE_NATIVEFUNCTION) {
+    res->p_val = target->p_val;
+  } else if (res->type == TYPE_VOID) {
+    res->p_val = NULL;
+  } else if (res->type == TYPE_INT) {
+    res->p_val = (int *) malloc(sizeof(int));
+    *((int *) res->p_val) = *((int *) target->p_val);
+  } else if (res->type == TYPE_FLOAT) {
+    res->p_val = (double *) malloc(sizeof(double));
+    *((double *) res->p_val) = *((double *) target->p_val);
+  }
+
+  return res;
 }

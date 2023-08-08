@@ -140,3 +140,20 @@ stopping_time = {n ->
 ```
 (print (read_file "main.crumb"))
 ```
+
+### Euclidean Algorithim for Finding the GCD
+```
+gcd = {a b ->
+  return (if (is a 0) {
+    return b
+  } {
+    return (gcd (% b a) a)
+  })
+}
+
+(loop 20 {x ->
+  (loop 20 {y ->
+    (print "The gcd of" x "and" y "is" (gcd x y))
+  })
+})
+```
