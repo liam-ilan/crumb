@@ -24,13 +24,15 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
     char **p_val = (char **) malloc(sizeof(char *));
 
     // create string and copy from ast
-    *p_val = (char *) malloc(sizeof(char) * (strlen(p_head->val) + 1));
-    strcpy(*p_val, p_head->val);
+    char *val = (char *) malloc(sizeof(char) * (strlen(p_head->val) + 1));
+    strcpy(val, p_head->val);
+    *p_val = val;
 
     return Generic_new(TYPE_STRING, p_val, 0);
 
   } else if (p_head->opcode == OP_RETURN) {
     // simply return the value
+
     Generic *res = eval(p_head->p_headChild, p_scope);
     Generic *copy = Generic_copy(res);
     if (res->refCount == 0) Generic_free(res);
@@ -113,6 +115,7 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
 
       // free local scope
       Scope_free(p_local);
+      
       p_local = NULL;
 
       // return 

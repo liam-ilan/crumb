@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
   // free generic for exit code
   Generic_free(res);
   res = NULL;
-  printf("Exit Code Generic Freed");
+  printf("Exit Code Generic Freed\n");
 
   return exitCode;
 }

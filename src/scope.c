@@ -98,9 +98,9 @@ void Scope_free(Scope *p_target) {
   while (p_curr != NULL) {
     ScopeItem *p_tmp = p_curr;
     p_curr = p_curr->p_next;
-    
-    if (p_tmp->p_val->refCount == 1) Generic_free(p_tmp->p_val);
-    else p_tmp->p_val->refCount--;
+
+    p_tmp->p_val->refCount--;
+    if (p_tmp->p_val->refCount == 0) Generic_free(p_tmp->p_val);
 
     free(p_tmp);
   }

@@ -62,6 +62,7 @@ Generic *Generic_copy(Generic *target) {
 
   if (res->type == TYPE_STRING) {
     res->p_val = (char **) malloc(sizeof(char *));
+    *((char **) res->p_val) = malloc(sizeof(char) * (strlen(*((char **) target->p_val)) + 1));
     strcpy(*((char **) res->p_val), *((char **) target->p_val));
   } else if (res->type == TYPE_FUNCTION || res->type == TYPE_NATIVEFUNCTION) {
     res->p_val = target->p_val;

@@ -587,6 +587,80 @@ Generic *StdLib_int(Scope *p_scope, Generic *args[], int length, int lineNumber)
   return Generic_new(TYPE_INT, p_res, 0);
 }
 
+// (str x)
+// returns x as a string, if string, float, or int passed
+Generic *StdLib_str(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(1, 1, length, lineNumber);
+
+  // type check
+  if (args[0]->type != TYPE_STRING && args[0]->type != TYPE_FLOAT && args[0]->type != TYPE_INT) {
+    printf(
+      "Runtime Error @ Line %i: str function requires string or int or float type for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0]->type)
+    );
+    exit(0);
+  }
+  
+  char *res;
+
+  if (args[0]->type == TYPE_FLOAT) {
+    int length = snprintf(NULL, 0, "%f", *((double *) args[0]->p_val)); // get length
+    res = malloc(sizeof(char) * (length + 1)); // allocate memory
+    snprintf(res, length + 1, "%f", *((double *) args[0]->p_val)); // populate memory
+  } else if (args[0]->type == TYPE_INT) {
+    int length = snprintf(NULL, 0, "%i", *((int *) args[0]->p_val));
+    res = malloc(sizeof(char) * (length + 1));
+    snprintf(res, length + 1, "%i", *((int *) args[0]->p_val));
+  } else {
+    int length = snprintf(NULL, 0, "%s", *((char **) args[0]->p_val));
+    res = malloc(sizeof(char) * (length + 1));
+    snprintf(res, length + 1, "%s", *((char **) args[0]->p_val));
+  }
+
+  char **p_res = (char **) malloc(sizeof(char *));
+  *p_res = res;
+
+  return Generic_new(TYPE_STRING, p_res, 0);
+}
+
+// (join str1 str2)
+// joins strings together, and returns a new string
+Generic *StdLib_join(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(2, 2, length, lineNumber);
+
+  // type checking
+  if (args[0]->type != TYPE_STRING) {
+    printf(
+      "Runtime Error @ Line %i: join function requires string for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0]->type)
+    );
+    exit(0);
+  } else if (args[1]->type != TYPE_STRING) {
+    printf(
+      "Runtime Error @ Line %i: join function requires string for it's 2nd argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[1]->type)
+    );
+    exit(0);
+  }
+
+  char *res = (char *) malloc(
+    sizeof(char) * 
+    (
+      strlen(*((char **) args[0]->p_val))
+      + strlen(*((char **) args[1]->p_val))
+      + 1
+    )
+  );
+
+  strcpy(res, *((char **) args[0]->p_val));
+  strcat(res, *((char **) args[1]->p_val));
+
+  char **p_res = (char **) malloc(sizeof(char *));
+  *p_res = res;
+
+  return Generic_new(TYPE_STRING, p_res, 0);
+}
+
 // creates a new global scope
 Scope *newGlobal() {
   // create global scope
@@ -607,6 +681,8 @@ Scope *newGlobal() {
   Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_readFile, 0));
   Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_writeFile, 0));
   Scope_set(p_global, "int", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_int, 0));
+  Scope_set(p_global, "join", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_join, 0));
+  Scope_set(p_global, "str", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_str, 0));
 
   return p_global;
 }

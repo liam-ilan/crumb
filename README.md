@@ -1,10 +1,11 @@
 # Crumb Programming Language
-## Compile
+## Development
+### Compile
 ```bash
 gcc src/* -o crumb
 ```
 
-## run
+### run
 ```bash
 ./crumb path_to_file
 ```
@@ -160,5 +161,24 @@ gcd = {a b ->
   (loop 20 {y ->
     (print "The gcd of" x "and" y "is" (gcd x y))
   })
+})
+```
+
+### Multiplication Table
+```
+// returns a row of the multiplication table as a string
+// x is the number of values to generate
+// n is the number to multiply by (for example the 2nd row in the multiplication table has n = 2)
+createRow = {x n ->
+  return (if (is x 1) {
+    return (str (* n x))
+  } {
+    return (join (join (createRow (- x 1) n) " ") (str (* n x)))
+  })
+}
+
+// print table
+(loop 10 {n -> 
+  (print (createRow 10 (+ n 1)))
 })
 ```
