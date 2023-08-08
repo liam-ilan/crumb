@@ -20,6 +20,11 @@ int main(int argc, char *argv[]) {
   // open file
   FILE *p_file = fopen(argv[1], "r");
 
+  if (p_file == NULL) {
+    printf("Error: Could not read %s.\n", argv[1]);
+    return 0;
+  }
+
   // go to end, and record position (this will be the length of the file)
   fseek(p_file, 0, SEEK_END);
   long fileLength = ftell(p_file);
