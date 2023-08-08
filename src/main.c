@@ -80,6 +80,8 @@ int main(int argc, char *argv[]) {
     exitCode = *((int *) res->p_val);
   }
 
+  res->refCount = 0;
+
   /* free */
   printf("\nFREE\n");
 
@@ -103,6 +105,10 @@ int main(int argc, char *argv[]) {
   p_global = NULL;
   printf("Global Scope Freed\n");
 
-  exit(exitCode);
+  // free generic for exit code
+  Generic_free(res);
+  res = NULL;
+  printf("Exit Code Generic Freed");
+
   return exitCode;
 }
