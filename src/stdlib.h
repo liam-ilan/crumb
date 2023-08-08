@@ -5,6 +5,6 @@
 
 // prototypes
 Scope *newGlobal();
-Generic applyFunc(Generic, Scope *, Generic[], int, int);
+Generic *applyFunc(Generic *, Scope *, Generic *[], int, int);
 
 #endif

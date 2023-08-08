@@ -72,12 +72,12 @@ int main(int argc, char *argv[]) {
   /* evaluate */
   printf("\nEVAL\n");
   Scope *p_global = newGlobal();
-  Generic res = eval(p_headAstNode, p_global);
+  Generic *res = eval(p_headAstNode, p_global);
 
   // get exit code
   int exitCode = 0;
-  if (res.type == TYPE_INT) {
-    exitCode = *((int *) res.p_val);
+  if (res->type == TYPE_INT) {
+    exitCode = *((int *) res->p_val);
   }
 
   /* free */

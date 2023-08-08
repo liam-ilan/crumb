@@ -28,30 +28,30 @@ void validateArgCount(int min, int max, int length, int lineNumber) {
 
 // applys a func, given arguments
 // used for callbacks from the standard library
-Generic applyFunc(Generic func, Scope *p_scope, Generic args[], int length, int lineNumber) {
-  if(func.type == TYPE_NATIVEFUNCTION) {
+Generic *applyFunc(Generic *func, Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  if(func->type == TYPE_NATIVEFUNCTION) {
     // native func case, simply obtain cb and run
-    Generic (*cb)(Scope *, Generic[], int, int) = func.p_val;
+    Generic *(*cb)(Scope *, Generic *[], int, int) = func->p_val;
 
     // increase ref count
     for (int i = 0; i < length; i++) {
-      args[i].refCount++;
+      args[i]->refCount++;
     }
 
-    Generic res = cb(p_scope, args, length, lineNumber);
+    Generic *res = cb(p_scope, args, length, lineNumber);
 
     // drop ref count, and free if count is 0
     for (int i = 0; i < length; i++) {
-      args[i].refCount--;
-      if (args[i].refCount == 0) Generic_free(args[i]);
+      args[i]->refCount--;
+      if (args[i]->refCount == 0) Generic_free(args[i]);
     }
 
     return res;
 
-  } else if (func.type == TYPE_FUNCTION) {
+  } else if (func->type == TYPE_FUNCTION) {
     // non-native func case
     // get ast node at head of function
-    AstNode *p_head = ((AstNode *) func.p_val)->p_headChild;
+    AstNode *p_head = ((AstNode *) func->p_val)->p_headChild;
 
     // create local scope
     Scope *p_local = Scope_new(p_scope);
@@ -84,7 +84,7 @@ Generic applyFunc(Generic func, Scope *p_scope, Generic args[], int length, int 
     }
 
     // run statement with local scope
-    Generic res = eval(p_curr, p_local);
+    Generic *res = eval(p_curr, p_local);
 
     // free scope and return
     Scope_free(p_local);
@@ -93,7 +93,7 @@ Generic applyFunc(Generic func, Scope *p_scope, Generic args[], int length, int 
   } else {
     printf(
       "Runtime Error @ Line %i: Attempted to call %s instead of function.\n", 
-      lineNumber, getTypeString(func.type)
+      lineNumber, getTypeString(func->type)
     );
     exit(0);
   }
@@ -101,7 +101,7 @@ Generic applyFunc(Generic func, Scope *p_scope, Generic args[], int length, int 
 
 // (print args...)
 // prints given arguments
-Generic StdLib_print(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_print(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   for (int i = 0; i < length; i++) {
     Generic_print(args[i]);
     if (i < length - 1) printf(" ");
@@ -115,7 +115,7 @@ Generic StdLib_print(Scope *p_scope, Generic args[], int length, int lineNumber)
 // (is a b)
 // checks for equality between a and b
 // returns 1 for true, 0 for false
-Generic StdLib_is(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_is(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
 
   // create res
@@ -123,27 +123,27 @@ Generic StdLib_is(Scope *p_scope, Generic args[], int length, int lineNumber) {
   *p_res = 0;
 
   // check types
-  if (args[0].type == args[1].type) {
+  if (args[0]->type == args[1]->type) {
 
     // do type conversions and check data
-    switch (args[0].type) {
+    switch (args[0]->type) {
       case TYPE_FLOAT:
-        if (*((double *) args[0].p_val) == *((double *) args[1].p_val)) *p_res = 1;
+        if (*((double *) args[0]->p_val) == *((double *) args[1]->p_val)) *p_res = 1;
         break;
       case TYPE_INT:
-        if (*((int *) args[0].p_val) == *((int *) args[1].p_val)) *p_res = 1;
+        if (*((int *) args[0]->p_val) == *((int *) args[1]->p_val)) *p_res = 1;
         break;
       case TYPE_STRING:
-        if (strcmp(*((char **) args[0].p_val), *((char **) args[1].p_val)) == 0) *p_res = 1;
+        if (strcmp(*((char **) args[0]->p_val), *((char **) args[1]->p_val)) == 0) *p_res = 1;
         break;
       case TYPE_VOID:
         *p_res = 1;
         break;
       case TYPE_NATIVEFUNCTION:
-        if (args[0].p_val == args[1].p_val) *p_res = 1;
+        if (args[0]->p_val == args[1]->p_val) *p_res = 1;
         break;
       case TYPE_FUNCTION:
-        if (args[0].p_val == args[1].p_val) *p_res = 1;
+        if (args[0]->p_val == args[1]->p_val) *p_res = 1;
         break;
     }
   }
@@ -154,8 +154,8 @@ Generic StdLib_is(Scope *p_scope, Generic args[], int length, int lineNumber) {
 
 // (apply f args...)
 // applys args to f
-Generic StdLib_apply(Scope *p_scope, Generic args[], int length, int lineNumber) {
-  Generic *newArgs = &(args[1]); 
+Generic *StdLib_apply(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  Generic **newArgs = &(args[1]); 
   return applyFunc(args[0], p_scope, newArgs, length - 1, lineNumber);
 }
 
@@ -163,39 +163,39 @@ Generic StdLib_apply(Scope *p_scope, Generic args[], int length, int lineNumber)
 // applys f, n times, passing the current index to f
 // returns whatever f returns if not void
 // will go to completion and return void if void is all f returns
-Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_loop(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
 
   // error handling to check that 2nd arg is a function, and 1st arg is an int
-  if (args[0].type != TYPE_INT) {
+  if (args[0]->type != TYPE_INT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: loop function requires int type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
-  } else if (args[1].type != TYPE_FUNCTION && args[1].type != TYPE_NATIVEFUNCTION) {
+  } else if (args[1]->type != TYPE_FUNCTION && args[1]->type != TYPE_NATIVEFUNCTION) {
     // supplied too little args, throw error
     printf(
       "Runtime Error @ Line %i: loop function requires function or native function type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1].type)
+      lineNumber, getTypeString(args[1]->type)
     );
     exit(0);
   }
 
   // loop
-  for (int i = 0; i < *((int *) args[0].p_val); i++) {
+  for (int i = 0; i < *((int *) args[0]->p_val); i++) {
 
     // get arg to pass to cb
     int *p_arg = (int *) malloc(sizeof(int));
     *p_arg = i;
-    Generic newArgs[1] = {Generic_new(TYPE_INT, p_arg, 0)};
+    Generic *newArgs[1] = {Generic_new(TYPE_INT, p_arg, 0)};
     
     // call cb
-    Generic res = applyFunc(args[1], p_scope, newArgs, 1, lineNumber);
+    Generic *res = applyFunc(args[1], p_scope, newArgs, 1, lineNumber);
 
     // if void type returned, free
-    if (res.type != TYPE_VOID) return res;
+    if (res->type != TYPE_VOID) return res;
   }
 
   return Generic_new(TYPE_VOID, NULL, 0);
@@ -204,40 +204,40 @@ Generic StdLib_loop(Scope *p_scope, Generic args[], int length, int lineNumber) 
 // (if c f g*)
 // applys f if c == 1
 // applys g or nothing if c == 0
-Generic StdLib_if(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_if(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 3, length, lineNumber);
 
   // error handling to check that 1st arg is an int, and 2nd arg is a function
-  if (args[0].type != TYPE_INT) {
+  if (args[0]->type != TYPE_INT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: if function requires int type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
-  } else if (args[1].type != TYPE_FUNCTION && args[1].type != TYPE_NATIVEFUNCTION) {
+  } else if (args[1]->type != TYPE_FUNCTION && args[1]->type != TYPE_NATIVEFUNCTION) {
     // supplied too little args, throw error
     printf(
       "Runtime Error @ Line %i: if function requires function or native function type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1].type)
+      lineNumber, getTypeString(args[1]->type)
     );
     exit(0);
-  } else if (length == 3 && args[2].type != TYPE_FUNCTION && args[2].type != TYPE_NATIVEFUNCTION) {
+  } else if (length == 3 && args[2]->type != TYPE_FUNCTION && args[2]->type != TYPE_NATIVEFUNCTION) {
     // supplied too little args, throw error
     printf(
       "Runtime Error @ Line %i: if function requires function or native function type for it's 3rd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[2].type)
+      lineNumber, getTypeString(args[2]->type)
     );
     exit(0);
   }
 
-  if (*((int *) args[0].p_val) == 1) return applyFunc(args[1], p_scope, NULL, 0, lineNumber);
-  else if (length == 3 && *((int *) args[0].p_val) == 0) return applyFunc(args[2], p_scope, NULL, 0, lineNumber);
-  else if (*((int *) args[0].p_val) != 0) {
+  if (*((int *) args[0]->p_val) == 1) return applyFunc(args[1], p_scope, NULL, 0, lineNumber);
+  else if (length == 3 && *((int *) args[0]->p_val) == 0) return applyFunc(args[2], p_scope, NULL, 0, lineNumber);
+  else if (*((int *) args[0]->p_val) != 0) {
     // c is not 1 or 0, throw err
     printf(
       "Runtime Error @ Line %i: if function expected 0 or 1 for it's 1st argument, %i supplied instead.\n", 
-      lineNumber, *((int *) args[0].p_val)
+      lineNumber, *((int *) args[0]->p_val)
     );
     exit(0);
   }
@@ -247,59 +247,59 @@ Generic StdLib_if(Scope *p_scope, Generic args[], int length, int lineNumber) {
 
 // (% a b)
 // returns the mod of a and b
-Generic StdLib_mod(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_mod(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
 
   // error handling to check that 1st arg is an int, and 2nd arg is an int
-  if (args[0].type != TYPE_INT) {
+  if (args[0]->type != TYPE_INT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: %% function requires int type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
-  } else if (args[1].type != TYPE_INT) {
+  } else if (args[1]->type != TYPE_INT) {
     // supplied too little args, throw error
     printf(
       "Runtime Error @ Line %i: %% function requires int type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1].type)
+      lineNumber, getTypeString(args[1]->type)
     );
     exit(0);
   }
 
   // do modulus and return
   int *p_res = (int *) malloc(sizeof(int));
-  *p_res = *((int *) args[0].p_val) % *((int *) args[1].p_val);
+  *p_res = *((int *) args[0]->p_val) % *((int *) args[1]->p_val);
   return Generic_new(TYPE_INT, p_res, 0);
 }
 
 // (! a)
 // returns 1 if a = 0, 0 if a = 1
-Generic StdLib_not(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_not(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(1, 1, length, lineNumber);
 
   // type check
     // error handling to check that 1st arg is an int, and 2nd arg is an int
-  if (args[0].type != TYPE_INT) {
+  if (args[0]->type != TYPE_INT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: not function requires int type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
   }
 
   // a is not 1 or 0, throw err
-  if (*((int *) args[0].p_val) != 0 && *((int *) args[0].p_val) != 1) {
+  if (*((int *) args[0]->p_val) != 0 && *((int *) args[0]->p_val) != 1) {
     printf(
       "Runtime Error @ Line %i: not function expected 0 or 1 for it's 1st argument, %i supplied instead.\n", 
-      lineNumber, *((int *) args[0].p_val)
+      lineNumber, *((int *) args[0]->p_val)
     );
     exit(0);
   }
 
   int *p_res = (int *) malloc(sizeof(int));
-  *p_res = 1 - *((int *) args[0].p_val);
+  *p_res = 1 - *((int *) args[0]->p_val);
 
   
   return Generic_new(TYPE_INT, p_res, 0);
@@ -307,30 +307,30 @@ Generic StdLib_not(Scope *p_scope, Generic args[], int length, int lineNumber) {
 
 // (+ a b)
 // returns a + b
-Generic StdLib_add(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_add(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
 
   // error handling for types
-  if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
+  if (args[0]->type != TYPE_INT && args[0]->type != TYPE_FLOAT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: + function requires int or float type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
-  } else if (args[1].type != TYPE_INT && args[1].type != TYPE_FLOAT) {
+  } else if (args[1]->type != TYPE_INT && args[1]->type != TYPE_FLOAT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: + function requires int or float type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1].type)
+      lineNumber, getTypeString(args[1]->type)
     );
     exit(0);
   }
   
-  if (args[0].type == TYPE_INT && args[1].type == TYPE_INT) {
+  if (args[0]->type == TYPE_INT && args[1]->type == TYPE_INT) {
     // case where we can return int
     int *p_res = (int *) malloc(sizeof(int));
-    *p_res = *((int *) args[0].p_val) + *((int *) args[1].p_val);
+    *p_res = *((int *) args[0]->p_val) + *((int *) args[1]->p_val);
     return Generic_new(TYPE_INT, p_res, 0);
 
   } else {
@@ -339,8 +339,8 @@ Generic StdLib_add(Scope *p_scope, Generic args[], int length, int lineNumber) {
 
     // convert args to approriate types
 
-    *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
-      + (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
+    *p_res = (args[0]->type == TYPE_FLOAT ? *((double *) args[0]->p_val) : *((int *) args[0]->p_val))
+      + (args[1]->type == TYPE_FLOAT ? *((double *) args[1]->p_val) : *((int *) args[1]->p_val));
 
     return Generic_new(TYPE_FLOAT, p_res, 0); 
   }
@@ -348,30 +348,30 @@ Generic StdLib_add(Scope *p_scope, Generic args[], int length, int lineNumber) {
 
 // (- a b)
 // returns a - b
-Generic StdLib_sub(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_sub(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
 
   // error handling for types
-  if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
+  if (args[0]->type != TYPE_INT && args[0]->type != TYPE_FLOAT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: - function requires int or float type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
-  } else if (args[1].type != TYPE_INT && args[1].type != TYPE_FLOAT) {
+  } else if (args[1]->type != TYPE_INT && args[1]->type != TYPE_FLOAT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: - function requires int or float type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1].type)
+      lineNumber, getTypeString(args[1]->type)
     );
     exit(0);
   }
   
-  if (args[0].type == TYPE_INT && args[1].type == TYPE_INT) {
+  if (args[0]->type == TYPE_INT && args[1]->type == TYPE_INT) {
     // case where we can return int
     int *p_res = (int *) malloc(sizeof(int));
-    *p_res = *((int *) args[0].p_val) - *((int *) args[1].p_val);
+    *p_res = *((int *) args[0]->p_val) - *((int *) args[1]->p_val);
     return Generic_new(TYPE_INT, p_res, 0);
 
   } else {
@@ -380,8 +380,8 @@ Generic StdLib_sub(Scope *p_scope, Generic args[], int length, int lineNumber) {
 
     // convert args to approriate types
 
-    *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
-      - (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
+    *p_res = (args[0]->type == TYPE_FLOAT ? *((double *) args[0]->p_val) : *((int *) args[0]->p_val))
+      - (args[1]->type == TYPE_FLOAT ? *((double *) args[1]->p_val) : *((int *) args[1]->p_val));
 
     return Generic_new(TYPE_FLOAT, p_res, 0); 
   }
@@ -389,30 +389,30 @@ Generic StdLib_sub(Scope *p_scope, Generic args[], int length, int lineNumber) {
 
 // (* a b)
 // returns a * b
-Generic StdLib_mult(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_mult(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
 
   // error handling for types
-  if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
+  if (args[0]->type != TYPE_INT && args[0]->type != TYPE_FLOAT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: * function requires int or float type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
-  } else if (args[1].type != TYPE_INT && args[1].type != TYPE_FLOAT) {
+  } else if (args[1]->type != TYPE_INT && args[1]->type != TYPE_FLOAT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: * function requires int or float type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1].type)
+      lineNumber, getTypeString(args[1]->type)
     );
     exit(0);
   }
   
-  if (args[0].type == TYPE_INT && args[1].type == TYPE_INT) {
+  if (args[0]->type == TYPE_INT && args[1]->type == TYPE_INT) {
     // case where we can return int
     int *p_res = (int *) malloc(sizeof(int));
-    *p_res = *((int *) args[0].p_val) * *((int *) args[1].p_val);
+    *p_res = *((int *) args[0]->p_val) * *((int *) args[1]->p_val);
     return Generic_new(TYPE_INT, p_res, 0);
 
   } else {
@@ -421,8 +421,8 @@ Generic StdLib_mult(Scope *p_scope, Generic args[], int length, int lineNumber) 
 
     // convert args to approriate types
 
-    *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
-      * (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
+    *p_res = (args[0]->type == TYPE_FLOAT ? *((double *) args[0]->p_val) : *((int *) args[0]->p_val))
+      * (args[1]->type == TYPE_FLOAT ? *((double *) args[1]->p_val) : *((int *) args[1]->p_val));
 
     return Generic_new(TYPE_FLOAT, p_res, 0); 
   }
@@ -430,33 +430,33 @@ Generic StdLib_mult(Scope *p_scope, Generic args[], int length, int lineNumber) 
 
 // (/ a b)
 // returns a / b
-Generic StdLib_div(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_div(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
 
   // error handling for types
-  if (args[0].type != TYPE_INT && args[0].type != TYPE_FLOAT) {
+  if (args[0]->type != TYPE_INT && args[0]->type != TYPE_FLOAT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: / function requires int or float type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
-  } else if (args[1].type != TYPE_INT && args[1].type != TYPE_FLOAT) {
+  } else if (args[1]->type != TYPE_INT && args[1]->type != TYPE_FLOAT) {
     // supplied too many args, throw error
     printf(
       "Runtime Error @ Line %i: / function requires int or float type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1].type)
+      lineNumber, getTypeString(args[1]->type)
     );
     exit(0);
   }
   
   if (
-    args[0].type == TYPE_INT && args[1].type == TYPE_INT 
-    && *((int *) args[0].p_val) % *((int *) args[1].p_val) == 0
+    args[0]->type == TYPE_INT && args[1]->type == TYPE_INT 
+    && *((int *) args[0]->p_val) % *((int *) args[1]->p_val) == 0
   ) {
     // case where we can return int (a is divisible by b and a an b are ints)
     int *p_res = (int *) malloc(sizeof(int));
-    *p_res = *((int *) args[0].p_val) / *((int *) args[1].p_val);
+    *p_res = *((int *) args[0]->p_val) / *((int *) args[1]->p_val);
     return Generic_new(TYPE_INT, p_res, 0);
 
   } else {
@@ -464,8 +464,8 @@ Generic StdLib_div(Scope *p_scope, Generic args[], int length, int lineNumber) {
     double *p_res = (double *) malloc(sizeof(double));
 
     // convert args to approriate types
-    *p_res = (args[0].type == TYPE_FLOAT ? *((double *) args[0].p_val) : *((int *) args[0].p_val))
-      / (args[1].type == TYPE_FLOAT ? *((double *) args[1].p_val) : *((int *) args[1].p_val));
+    *p_res = (args[0]->type == TYPE_FLOAT ? *((double *) args[0]->p_val) : *((int *) args[0]->p_val))
+      / (args[1]->type == TYPE_FLOAT ? *((double *) args[1]->p_val) : *((int *) args[1]->p_val));
 
     return Generic_new(TYPE_FLOAT, p_res, 0); 
   }
@@ -473,25 +473,25 @@ Generic StdLib_div(Scope *p_scope, Generic args[], int length, int lineNumber) {
 
 // (read_file filepath)
 // reads text at filepath and returns
-Generic StdLib_readFile(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_readFile(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(1, 1, length, lineNumber);
   
   // check that type of arg is string
-  if (args[0].type != TYPE_STRING) {
+  if (args[0]->type != TYPE_STRING) {
     printf(
       "Runtime Error @ Line %i: read_file function requires string type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
   }
 
-  FILE *p_file = fopen(*((char ** )args[0].p_val), "r");
+  FILE *p_file = fopen(*((char ** )args[0]->p_val), "r");
 
   // check the file succesfully opened
   if (p_file == NULL) {
     printf(
       "Runtime Error @ Line %i: Cannot read file %s.\n", 
-      lineNumber, *((char ** )args[0].p_val)
+      lineNumber, *((char ** )args[0]->p_val)
     );
     exit(0); 
   }
@@ -522,65 +522,65 @@ Generic StdLib_readFile(Scope *p_scope, Generic args[], int length, int lineNumb
 
 // (write_file filepath string)
 // writes string to filepath
-Generic StdLib_writeFile(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_writeFile(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
   
   // check that type of args is string
-  if (args[0].type != TYPE_STRING) {
+  if (args[0]->type != TYPE_STRING) {
     printf(
       "Runtime Error @ Line %i: write_file function requires string type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
-  } else if (args[1].type != TYPE_STRING) {
+  } else if (args[1]->type != TYPE_STRING) {
     printf(
       "Runtime Error @ Line %i: write_file function requires string type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1].type)
+      lineNumber, getTypeString(args[1]->type)
     );
     exit(0);
   }
 
-  FILE *p_file = fopen(*((char ** )args[0].p_val), "w+");
+  FILE *p_file = fopen(*((char ** )args[0]->p_val), "w+");
 
   // check the file succesfully opened
   if (p_file == NULL) {
     printf(
       "Runtime Error @ Line %i: Cannot write file %s.\n", 
-      lineNumber, *((char ** )args[0].p_val)
+      lineNumber, *((char ** )args[0]->p_val)
     );
     exit(0); 
   }
 
-  fprintf(p_file, "%s\n", *((char ** )args[1].p_val));
+  fprintf(p_file, "%s\n", *((char ** )args[1]->p_val));
   fclose(p_file);
   return Generic_new(TYPE_VOID, NULL, 0);
 }
 
 // (int x)
 // returns x as an integer, if string, float, or int passed
-Generic StdLib_int(Scope *p_scope, Generic args[], int length, int lineNumber) {
+Generic *StdLib_int(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(1, 1, length, lineNumber);
 
   // make sure first type is string
   // check that type of arg is string or int or float
-  if (args[0].type != TYPE_STRING && args[0].type != TYPE_FLOAT && args[0].type != TYPE_INT) {
+  if (args[0]->type != TYPE_STRING && args[0]->type != TYPE_FLOAT && args[0]->type != TYPE_INT) {
     printf(
       "Runtime Error @ Line %i: int function requires string or int or float type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0].type)
+      lineNumber, getTypeString(args[0]->type)
     );
     exit(0);
   }
 
   int *p_res = malloc(sizeof(int));
 
-  if (args[0].type == TYPE_STRING) {
-    char *str = *((char **) args[0].p_val);
+  if (args[0]->type == TYPE_STRING) {
+    char *str = *((char **) args[0]->p_val);
     *p_res = atoi(str);
-  } else if (args[0].type == TYPE_FLOAT) {
-    double f = *((double *) args[0].p_val);
+  } else if (args[0]->type == TYPE_FLOAT) {
+    double f = *((double *) args[0]->p_val);
     *p_res = (int) f;
   } else {
-    int i = *((int *) args[0].p_val);
+    int i = *((int *) args[0]->p_val);
     *p_res = i;
   }
 

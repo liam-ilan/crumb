@@ -6,7 +6,7 @@
 #include "scope.h"
 
 // evaluates an ast in a given scope
-Generic eval(AstNode *p_head, Scope *p_scope) {
+Generic *eval(AstNode *p_head, Scope *p_scope) {
   if (p_head->opcode == OP_INT) {
     // int case
     int *p_val = (int *) malloc(sizeof(int));
@@ -41,8 +41,8 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
       // if return found, return value out of statement, else just eval
       if (p_curr->opcode == OP_RETURN) return eval(p_curr, p_scope);
       else {
-        Generic res = eval(p_curr, p_scope);
-        if (res.refCount == 0) Generic_free(res);
+        Generic *res = eval(p_curr, p_scope);
+        if (res->refCount == 0) Generic_free(res);
       }
 
       p_curr = p_curr->p_next;
@@ -57,8 +57,9 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
 
   } else if (p_head->opcode == OP_ASSIGNMENT) {
     // assignent case
-    Generic val = eval(p_head->p_headChild->p_next, p_scope);
-    Scope_set(p_scope, p_head->p_headChild->val, val);
+    Generic *p_val = eval(p_head->p_headChild->p_next, p_scope);
+    Scope_set(p_scope, p_head->p_headChild->val, p_val);
+    
     return Generic_new(TYPE_VOID, NULL, 0);
 
   } else if (p_head->opcode == OP_FUNCTION) {
@@ -69,20 +70,20 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
   } else if (p_head->opcode == OP_APPLICATION) {
     // application case
     // get function
-    Generic func = eval(p_head->p_headChild, p_scope);
+    Generic *func = eval(p_head->p_headChild, p_scope);
 
-    if (func.type == TYPE_FUNCTION) {
+    if (func->type == TYPE_FUNCTION) {
       // if function found, create new scope, with current scope as parent
       Scope *p_local = Scope_new(p_scope);
 
       // loop over arguments
       AstNode *p_currApplyArg = p_head->p_headChild->p_next;
-      AstNode *p_currFuncArg = ((AstNode *) func.p_val)->p_headChild;
+      AstNode *p_currFuncArg = ((AstNode *) func->p_val)->p_headChild;
 
       // set vars in local scope
       while (p_currApplyArg != NULL && p_currFuncArg->opcode != OP_STATEMENT) {
-        Generic val = eval(p_currApplyArg, p_scope);
-        Scope_set(p_local, p_currFuncArg->val, val);
+        Generic *p_val = eval(p_currApplyArg, p_scope);
+        Scope_set(p_local, p_currFuncArg->val, p_val);
         p_currApplyArg = p_currApplyArg->p_next;
         p_currFuncArg = p_currFuncArg->p_next;
       }
@@ -105,7 +106,7 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
       }
 
       // now p_currFuncArg points to the statement, so we eval it on the local scope, and return the result
-      Generic res = eval(p_currFuncArg, p_local);
+      Generic *res = eval(p_currFuncArg, p_local);
 
       // free local scope
       Scope_free(p_local);
@@ -113,10 +114,10 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
 
       // return 
       return res;
-    } else if (func.type == TYPE_NATIVEFUNCTION) {
+    } else if (func->type == TYPE_NATIVEFUNCTION) {
       // native functions contain pointers to c functions
       // get function
-      Generic (*cb)(Scope *, Generic[], int, int) = func.p_val;
+      Generic *(*cb)(Scope *, Generic *[], int, int) = func->p_val;
 
       Scope *p_local = Scope_new(p_scope);
 
@@ -131,27 +132,26 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
       }
 
       // second round, append to list
-      Generic args[count];
+      Generic *args[count];
 
       int i = 0;
       p_curr = p_head->p_headChild->p_next;
 
       while (i < count) {
         args[i] = eval(p_curr, p_scope);
-        args[i].refCount++;
-        
+        args[i]->refCount++;
 
         i++;
         p_curr = p_curr->p_next;
       }
       
       // call and return
-      Generic res = (*cb)(p_local, args, count, p_head->lineNumber);
+      Generic *res = (*cb)(p_local, args, count, p_head->lineNumber);
 
       // drop ref count for args, and free if refCount is 0
       for (int i = 0; i < count; i++) {
-        args[i].refCount--;
-        if (args[i].refCount == 0) Generic_free(args[i]);
+        args[i]->refCount--;
+        if (args[i]->refCount == 0) Generic_free(args[i]);
       }
 
       // free scope
@@ -164,7 +164,7 @@ Generic eval(AstNode *p_head, Scope *p_scope) {
       // if func is not a function type, throw error
       printf(
         "Runtime Error @ Line %i: Attempted to call %s instead of function.\n", 
-        p_head->lineNumber, getTypeString(func.type)
+        p_head->lineNumber, getTypeString(func->type)
       );
       exit(0);
     }

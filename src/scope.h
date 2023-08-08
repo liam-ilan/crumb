@@ -5,7 +5,7 @@
 // a key value pair held in Scope (linked list)
 typedef struct ScopeItem {
   char* key;
-  Generic val;
+  Generic *p_val;
   struct ScopeItem *p_next;
 } ScopeItem;
 
@@ -18,11 +18,11 @@ typedef struct Scope {
 } Scope;
 
 // prototypes
-ScopeItem *ScopeItem_new(char*, Generic);
+ScopeItem *ScopeItem_new(char*, Generic *);
 Scope *Scope_new(Scope *);
 void Scope_print(Scope *);
-void Scope_set(Scope *, char *, Generic);
-Generic Scope_get(Scope *, char *, int);
+void Scope_set(Scope *, char *, Generic *);
+Generic *Scope_get(Scope *, char *, int);
 void Scope_free(Scope *);
 
 #endif

@@ -5,10 +5,10 @@
 #include "generic.h"
 
 // creates a new scope item, allocates memory, returns pointer
-ScopeItem *ScopeItem_new(char* key, Generic val) {
+ScopeItem *ScopeItem_new(char* key, Generic *p_val) {
   ScopeItem *res = (ScopeItem *) malloc(sizeof(ScopeItem));
   res->key = key;
-  res->val = val;
+  res->p_val = p_val;
   res->p_next = NULL;
 
   return res;
@@ -32,7 +32,8 @@ void Scope_print(Scope *p_in) {
   ScopeItem *p_curr = p_in->p_head;
   while (p_curr != NULL) {
     printf("%s = ", p_curr->key);
-    Generic_print(p_curr->val);
+    Generic_print(p_curr->p_val);
+    printf("\n");
     p_curr = p_curr->p_next;
   }
 }
@@ -40,8 +41,8 @@ void Scope_print(Scope *p_in) {
 // gets a pointer to the scope
 // sets a key in the scope to val
 // if the key does not exist, creates a new scope item to house it
-void Scope_set(Scope *p_target, char *key, Generic val) {
-  val.refCount++;
+void Scope_set(Scope *p_target, char *key, Generic *p_val) {
+  p_val->refCount++;
 
   // set p_p_curr to the ScopeItem with the correct key, or NULL if not found
   ScopeItem **p_p_curr = &(p_target->p_head);
@@ -49,18 +50,21 @@ void Scope_set(Scope *p_target, char *key, Generic val) {
 
   if (*p_p_curr == NULL) {
     // case where variable was previously undefined, create new item
-    *p_p_curr = ScopeItem_new(key, val);
+    *p_p_curr = ScopeItem_new(key, p_val);
   } else {
+
     // case where variable was previosuly defined, simply overwrite value, and decrease ref count of old value (if 0, free)
-    (*p_p_curr)->val.refCount--;
-    if ((*p_p_curr)->val.refCount == 0) Generic_free((*p_p_curr)->val);
-    (*p_p_curr)->val = val;
+    (*p_p_curr)->p_val->refCount--;
+    if ((*p_p_curr)->p_val->refCount == 0) {
+      Generic_free((*p_p_curr)->p_val);
+    } 
+    (*p_p_curr)->p_val = p_val;
   }
 }
 
 // returns the generic in the requested key of the target scope
 // if the generic cannot be found, attempts to search parent recursively
-Generic Scope_get(Scope *p_target, char *key, int lineNumber) {
+Generic *Scope_get(Scope *p_target, char *key, int lineNumber) {
   // set p_curr to the item with correct key, or NULL
   ScopeItem *p_curr = p_target->p_head;
   while (p_curr != NULL && strcmp(p_curr->key, key) != 0) p_curr = p_curr->p_next;
@@ -80,7 +84,7 @@ Generic Scope_get(Scope *p_target, char *key, int lineNumber) {
     }
   } else {
     // if key exists, return generic
-    return p_curr->val;
+    return p_curr->p_val;
   }
 }
 
@@ -94,8 +98,10 @@ void Scope_free(Scope *p_target) {
   while (p_curr != NULL) {
     ScopeItem *p_tmp = p_curr;
     p_curr = p_curr->p_next;
-    if (p_tmp->val.refCount == 1) Generic_free(p_tmp->val);
-    else p_tmp->val.refCount--;
+    
+    if (p_tmp->p_val->refCount == 1) Generic_free(p_tmp->p_val);
+    else p_tmp->p_val->refCount--;
+
     free(p_tmp);
   }
 

@@ -14,7 +14,6 @@ enum Type {
 // generic struct
 // p_val: a void pointer to the value
 // type: the type of *p_val
-// note - We tend to pass around generic by value, not by pointer, unlike tokens and ast nodes.
 typedef struct Generic {
   enum Type type;
   void *p_val;
@@ -23,7 +22,7 @@ typedef struct Generic {
 
 // prototypes
 char* getTypeString(enum Type);
-void Generic_print(Generic);
-Generic Generic_new(enum Type, void *, int refCount);
-void Generic_free(Generic);
+void Generic_print(Generic *);
+Generic *Generic_new(enum Type, void *, int refCount);
+void Generic_free(Generic *);
 #endif

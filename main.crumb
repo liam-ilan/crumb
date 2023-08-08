@@ -1,2 +1,9 @@
-return 139
-(print "hi")
+a = "hello"
+(print a)
+
+b = a
+(print b)
+
+a = "hi"
+(print b)
+(print a)
