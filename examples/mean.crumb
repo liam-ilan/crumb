@@ -1,0 +1,2 @@
+mean = {a b c -> return (/ (+ (+ a b) c) 3)}
+(print (mean 7 8 8))

@@ -1,7 +1,12 @@
 # Crumb Programming Language
-## Compile and Run
+## Compile
 ```bash
-gcc src/* -o main && ./main code.crumb
+gcc src/* -o crumb
+```
+
+## run
+```bash
+./crumb path_to_file
 ```
 
 ## Syntax
