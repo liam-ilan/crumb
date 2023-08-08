@@ -196,6 +196,7 @@ Generic *StdLib_loop(Scope *p_scope, Generic *args[], int length, int lineNumber
 
     // if void type returned, free
     if (res->type != TYPE_VOID) return res;
+    else Generic_free(res);
   }
 
   return Generic_new(TYPE_VOID, NULL, 0);

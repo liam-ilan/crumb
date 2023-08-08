@@ -101,7 +101,6 @@ void Scope_free(Scope *p_target) {
 
     p_tmp->p_val->refCount--;
     if (p_tmp->p_val->refCount == 0) Generic_free(p_tmp->p_val);
-
     free(p_tmp);
   }
 

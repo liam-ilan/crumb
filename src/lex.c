@@ -139,6 +139,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
 
       if (strcmp(val, "return") == 0) {
         Token_push(p_headToken, NULL, RETURN, lineNumber);
+        free(val);
       } else {
         Token_push(p_headToken, val, IDENTIFIER, lineNumber);
       }

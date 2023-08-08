@@ -10,6 +10,11 @@ gcc src/* -o crumb
 ./crumb path_to_file
 ```
 
+### Debug with Valgrind
+```bash
+gcc src/* -g -o crumb && valgrind --leak-check=full -s ./crumb _test.crumb
+```
+
 ## Syntax
 ### EBNF
 ```ebnf
