@@ -32,11 +32,7 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
 
   } else if (p_head->opcode == OP_RETURN) {
     // simply return the value
-
-    Generic *res = eval(p_head->p_headChild, p_scope);
-    Generic *copy = Generic_copy(res);
-    if (res->refCount == 0) Generic_free(res);
-    return copy;
+    return eval(p_head->p_headChild, p_scope);
 
   } else if (p_head->opcode == OP_STATEMENT) {
     // statement case
