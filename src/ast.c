@@ -30,6 +30,7 @@ char* getOpcodeString(enum Opcodes code) {
     case OP_STATEMENT: return "statement";
     case OP_APPLICATION: return "application";
     case OP_FUNCTION: return "function";
+    default: return "unknown";
   }
 }
 
@@ -74,4 +75,5 @@ AstNode* AstNode_new(char* val, enum Opcodes opcode, int lineNumber) {
   res->p_next = NULL;
   res->val = val;
   res->lineNumber = lineNumber;
+  return res;
 }

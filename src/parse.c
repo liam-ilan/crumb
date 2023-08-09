@@ -26,7 +26,7 @@ void skipClosure(int *p_index, Token **p_p_curr, enum TokenType open, enum Token
 // parse application
 // ebnf: application = "(", {value}, ")";
 AstNode *parseApplication(Token *p_head, int length) {
-  if (p_head->type != APPLYOPEN) {
+  if (p_head->type != TOK_APPLYOPEN) {
     // error handling for invalid first token
     printf(
       "Syntax Error @ Line %i: Unexpected %s token.\n", 
@@ -42,9 +42,9 @@ AstNode *parseApplication(Token *p_head, int length) {
   Token *p_curr = p_head->p_next;
   int i = 1;
 
-  while(p_curr->type != APPLYCLOSE && i < length) {
+  while(p_curr->type != TOK_APPLYCLOSE && i < length) {
 
-    if (p_curr->type == APPLYOPEN || p_curr->type == FUNCOPEN) {
+    if (p_curr->type == TOK_APPLYOPEN || p_curr->type == TOK_FUNCOPEN) {
       // case of value which is closure
       // record first token
       Token *p_start = p_curr;
@@ -64,7 +64,7 @@ AstNode *parseApplication(Token *p_head, int length) {
     i++;
   }
   
-  if (p_curr->type != APPLYCLOSE) {
+  if (p_curr->type != TOK_APPLYCLOSE) {
     // error handling for invalid closing token
     printf(
       "Syntax Error @ Line %i: Application not closed.\n", 
@@ -81,13 +81,13 @@ AstNode *parseApplication(Token *p_head, int length) {
 AstNode *parseValue(Token *p_head, int length) {
   if (length == 1) {
     // int, float, or string
-    if (p_head->type == STRING) {
+    if (p_head->type == TOK_STRING) {
       return AstNode_new(p_head->val, OP_STRING, p_head->lineNumber);
-    } else if (p_head->type == FLOAT) {
+    } else if (p_head->type == TOK_FLOAT) {
       return AstNode_new(p_head->val, OP_FLOAT, p_head->lineNumber);
-    } else if (p_head->type == INT) {
+    } else if (p_head->type == TOK_INT) {
       return AstNode_new(p_head->val, OP_INT, p_head->lineNumber);
-    } else if (p_head->type == IDENTIFIER) {
+    } else if (p_head->type == TOK_IDENTIFIER) {
       return AstNode_new(p_head->val, OP_IDENTIFIER, p_head->lineNumber);
     } else {
       printf(
@@ -98,9 +98,9 @@ AstNode *parseValue(Token *p_head, int length) {
     }
   } else if (length > 1) {
     // application and function
-    if (p_head->type == APPLYOPEN) {
+    if (p_head->type == TOK_APPLYOPEN) {
       return parseApplication(p_head, length);
-    } else if (p_head->type == FUNCOPEN) {
+    } else if (p_head->type == TOK_FUNCOPEN) {
       return parseFunction(p_head, length);    
     } else {
       printf(
@@ -110,6 +110,8 @@ AstNode *parseValue(Token *p_head, int length) {
       exit(0);
     }
   }
+
+  return NULL;
 }
 
 // parse assignment
@@ -122,7 +124,7 @@ AstNode *parseAssignment(Token *p_head, int length) {
     );
     exit(0);
 
-  } else if (p_head->type != IDENTIFIER) {
+  } else if (p_head->type != TOK_IDENTIFIER) {
     // error handling if first token not identifier
     printf(
       "Syntax Error @ Line %i: Unexpected %s token.\n", 
@@ -130,7 +132,7 @@ AstNode *parseAssignment(Token *p_head, int length) {
     );
     exit(0); 
 
-  } else if (p_head->p_next->type != ASSIGNMENT) {
+  } else if (p_head->p_next->type != TOK_ASSIGNMENT) {
     // error handling if second token not assignment
     printf(
       "Syntax Error @ Line %i: Unexpected %s token.\n", 
@@ -158,7 +160,7 @@ AstNode *parseReturn(Token *p_head, int length) {
     );
     exit(0);
 
-  } else if (p_head->type != RETURN) {
+  } else if (p_head->type != TOK_RETURN) {
     printf(
       "Syntax Error @ Line %i: Unexpected %s token.\n", 
       p_head->lineNumber, getTokenTypeString(p_head->type)
@@ -186,13 +188,13 @@ AstNode *parseStatement(Token *p_head, int length) {
   int i = 0;
 
   while (p_curr != NULL && i < length) {
-    if (p_curr->type == RETURN) {
+    if (p_curr->type == TOK_RETURN) {
       // return case
       // first token of return
       Token *p_returnStart = p_curr; 
       int returnIndex = i;
 
-      if (p_curr->p_next->type == APPLYOPEN || p_curr->p_next->type == FUNCOPEN) {
+      if (p_curr->p_next->type == TOK_APPLYOPEN || p_curr->p_next->type == TOK_FUNCOPEN) {
 
         // go to open apply token
         p_curr = p_curr->p_next;
@@ -213,7 +215,7 @@ AstNode *parseStatement(Token *p_head, int length) {
         i++;
         p_curr = p_curr->p_next;
       }
-    } else if (p_curr->type == IDENTIFIER && p_curr->p_next->type == ASSIGNMENT) {
+    } else if (p_curr->type == TOK_IDENTIFIER && p_curr->p_next->type == TOK_ASSIGNMENT) {
       // assignment case
       // first token of assignment
       Token *p_assignmentStart = p_curr;
@@ -224,7 +226,7 @@ AstNode *parseStatement(Token *p_head, int length) {
       i++;
       
       // if closure
-      if (p_curr->p_next->type == APPLYOPEN || p_curr->p_next->type == FUNCOPEN) {
+      if (p_curr->p_next->type == TOK_APPLYOPEN || p_curr->p_next->type == TOK_FUNCOPEN) {
 
         // go to open apply token
         p_curr = p_curr->p_next;
@@ -245,7 +247,7 @@ AstNode *parseStatement(Token *p_head, int length) {
         i++;
         p_curr = p_curr->p_next;
       }
-    } else if (p_curr->type == APPLYOPEN || p_curr->type == FUNCOPEN) {
+    } else if (p_curr->type == TOK_APPLYOPEN || p_curr->type == TOK_FUNCOPEN) {
       // case of value which is closure
       // record first token
       Token *p_start = p_curr;
@@ -273,7 +275,7 @@ AstNode *parseStatement(Token *p_head, int length) {
 AstNode *parseFunction(Token *p_head, int length) {
 
   // if first token is not {, return error
-  if (p_head->type != FUNCOPEN) {
+  if (p_head->type != TOK_FUNCOPEN) {
     printf(
       "Syntax Error @ Line %i: Unexpected %s token.\n", 
       p_head->lineNumber, getTokenTypeString(p_head->type)
@@ -290,21 +292,21 @@ AstNode *parseFunction(Token *p_head, int length) {
   Token *p_curr = p_head;
   int i = 0;
 
-  while (p_curr->type != ARROW && i < length - 1) {
+  while (p_curr->type != TOK_ARROW && i < length - 1) {
     p_curr = p_curr->p_next;
     i++;
   }
 
-  if (p_curr->type == FUNCCLOSE) {
+  if (p_curr->type == TOK_FUNCCLOSE) {
     // case where there are no arguments
     res->p_headChild = parseStatement(p_head->p_next, length - 2);
-  } else if (p_curr->type == ARROW) {
+  } else if (p_curr->type == TOK_ARROW) {
     // case where there are arguments
     // go to first argument
     Token *p_curr = p_head->p_next;
 
-    while (p_curr->type != ARROW) {
-      if (p_curr->type != IDENTIFIER) {
+    while (p_curr->type != TOK_ARROW) {
+      if (p_curr->type != TOK_IDENTIFIER) {
         // error handling in case identifier not found
         printf(
           "Syntax Error @ Line %i: Unexpected %s token.\n", 
@@ -337,7 +339,7 @@ AstNode *parseFunction(Token *p_head, int length) {
 // parse program
 // ebnf: program = start, statement, end;
 AstNode *parseProgram(Token *p_head, int length) {
-  if (p_head->type != START) {
+  if (p_head->type != TOK_START) {
     printf("Syntax Error @ Line 1: Missing start token.\n");
     exit(0);
   }
@@ -345,7 +347,7 @@ AstNode *parseProgram(Token *p_head, int length) {
   Token *p_curr = p_head;
   for (int i = 0; i < length - 1; i++) p_curr = p_curr->p_next;
   
-  if(p_curr->type != END) {
+  if(p_curr->type != TOK_END) {
     printf("Syntax Error @ Line %i: Missing start token.\n", p_curr->lineNumber);
     exit(0);
   }

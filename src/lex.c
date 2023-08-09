@@ -29,22 +29,22 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       while (code[i] != '\n' && i < fileLength) i++;
       lineNumber++;
     } else if (c == '(') {
-      Token_push(p_headToken, NULL, APPLYOPEN, lineNumber);
+      Token_push(p_headToken, NULL, TOK_APPLYOPEN, lineNumber);
       tokenCount++;
     } else if (c == ')') {
-      Token_push(p_headToken, NULL, APPLYCLOSE, lineNumber);
+      Token_push(p_headToken, NULL, TOK_APPLYCLOSE, lineNumber);
       tokenCount++;
     } else if (c == '=') {
-      Token_push(p_headToken, NULL, ASSIGNMENT, lineNumber);
+      Token_push(p_headToken, NULL, TOK_ASSIGNMENT, lineNumber);
       tokenCount++;
     } else if (c == '{') {
-      Token_push(p_headToken, NULL, FUNCOPEN, lineNumber);
+      Token_push(p_headToken, NULL, TOK_FUNCOPEN, lineNumber);
       tokenCount++;
     } else if (c == '}') {
-      Token_push(p_headToken, NULL, FUNCCLOSE, lineNumber);
+      Token_push(p_headToken, NULL, TOK_FUNCCLOSE, lineNumber);
       tokenCount++;
     } else if (c == '-' && code[i + 1] == '>') {
-      Token_push(p_headToken, NULL, ARROW, lineNumber);
+      Token_push(p_headToken, NULL, TOK_ARROW, lineNumber);
       i++;
       tokenCount++;
     } else if (c == '"') {
@@ -75,7 +75,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       char *val = malloc(i - stringStart + 1);
       strncpy(val, &code[stringStart], i - stringStart);
       val[i - stringStart] = '\0';
-      Token_push(p_headToken, val, STRING, lineNumber);
+      Token_push(p_headToken, val, TOK_STRING, lineNumber);
       tokenCount++;
 
     } else if (isdigit(c) > 0 || (c == '-' && isdigit(code[i + 1]) > 0)) {
@@ -109,8 +109,8 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       strncpy(val, &code[numStart], i - numStart);
       val[i - numStart] = '\0';
 
-      if (isFloat) Token_push(p_headToken, val, FLOAT, lineNumber);
-      else Token_push(p_headToken, val, INT, lineNumber);
+      if (isFloat) Token_push(p_headToken, val, TOK_FLOAT, lineNumber);
+      else Token_push(p_headToken, val, TOK_INT, lineNumber);
       tokenCount++;
 
       // make sure to go back to last char of number
@@ -138,10 +138,10 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       val[i - identifierStart] = '\0';
 
       if (strcmp(val, "return") == 0) {
-        Token_push(p_headToken, NULL, RETURN, lineNumber);
+        Token_push(p_headToken, NULL, TOK_RETURN, lineNumber);
         free(val);
       } else {
-        Token_push(p_headToken, val, IDENTIFIER, lineNumber);
+        Token_push(p_headToken, val, TOK_IDENTIFIER, lineNumber);
       }
 
       tokenCount++;
@@ -157,7 +157,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
     i++;
   }
 
-  Token_push(p_headToken, NULL, END, lineNumber); 
+  Token_push(p_headToken, NULL, TOK_END, lineNumber); 
   tokenCount++;
 
   return tokenCount;

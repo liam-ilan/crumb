@@ -5,20 +5,21 @@
 // get token type as string, given enum
 char* getTokenTypeString(enum TokenType type) {
   switch (type) {
-    case ASSIGNMENT: return "assignment";
-    case APPLYOPEN: return "applyopen";
-    case APPLYCLOSE: return "applyclose";
-    case FUNCOPEN: return "funcopen";
-    case FUNCCLOSE: return "funcclose";
-    case COMMA: return "comma";
-    case ARROW: return "arrow";
-    case RETURN: return "return";
-    case IDENTIFIER: return "identifier";
-    case INT: return "int";
-    case FLOAT: return "float";
-    case STRING: return "string";
-    case START: return "start";
-    case END: return "end";
+    case TOK_ASSIGNMENT: return "assignment";
+    case TOK_APPLYOPEN: return "applyopen";
+    case TOK_APPLYCLOSE: return "applyclose";
+    case TOK_FUNCOPEN: return "funcopen";
+    case TOK_FUNCCLOSE: return "funcclose";
+    case TOK_COMMA: return "comma";
+    case TOK_ARROW: return "arrow";
+    case TOK_RETURN: return "return";
+    case TOK_IDENTIFIER: return "identifier";
+    case TOK_INT: return "int";
+    case TOK_FLOAT: return "float";
+    case TOK_STRING: return "string";
+    case TOK_START: return "start";
+    case TOK_END: return "end";
+    default: return "unknown";
   }
 }
 

@@ -2,7 +2,7 @@
 ## Development
 ### Compile
 ```bash
-gcc src/* -o crumb
+gcc src/* -Wall -o crumb
 ```
 
 ### run
@@ -12,7 +12,7 @@ gcc src/* -o crumb
 
 ### Debug with Valgrind
 ```bash
-gcc src/* -g -o crumb && valgrind --leak-check=full -s ./crumb _test.crumb
+gcc src/* -g -Wall -o crumb && valgrind --leak-check=full -s ./crumb _test.crumb
 ```
 
 ## Syntax

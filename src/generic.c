@@ -52,6 +52,7 @@ char *getTypeString(enum Type type) {
     case TYPE_STRING: return "string";
     case TYPE_VOID: return "float";
     case TYPE_NATIVEFUNCTION: return "native function";
+    default: return "unknown";
   }
 }
 

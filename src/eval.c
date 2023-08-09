@@ -175,4 +175,6 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
       exit(0);
     }
   }
+
+  return NULL;
 }

@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
   // create initial token
   Token *p_headToken = (Token *) malloc(sizeof(Token));
   p_headToken->lineNumber = 1;
-  p_headToken->type = START;
+  p_headToken->type = TOK_START;
   p_headToken->val = NULL;
   p_headToken->p_next = NULL;
 
