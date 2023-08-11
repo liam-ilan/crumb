@@ -4,9 +4,11 @@
 #include "ast.h"
 #include "generic.h"
 #include "scope.h"
+#include "function.h"
 
 // evaluates an ast in a given scope
 Generic *eval(AstNode *p_head, Scope *p_scope) {
+
   if (p_head->opcode == OP_INT) {
     // int case
     int *p_val = (int *) malloc(sizeof(int));
@@ -69,8 +71,8 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
 
   } else if (p_head->opcode == OP_FUNCTION) {
     // function case
-    // returns a function generic, whose value is a pointer to the functions ast node
-    return Generic_new(TYPE_FUNCTION, p_head, 0);
+    // returns a function generic
+    return Generic_new(TYPE_FUNCTION, Function_new(p_head, p_scope), 0);
 
   } else if (p_head->opcode == OP_APPLICATION) {
     // application case
@@ -78,12 +80,15 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
     Generic *func = eval(p_head->p_headChild, p_scope);
 
     if (func->type == TYPE_FUNCTION) {
-      // if function found, create new scope, with current scope as parent
-      Scope *p_local = Scope_new(p_scope);
+      // if function found, create new scope, with the scope in which the function was created, as its parent
+      // this allows for local functions to maintain knowledge of their scope
+      Scope *p_funcScope = Scope_copy(((Function *) func->p_val)->p_scope);
+      p_funcScope->p_parent = p_scope;
+      Scope *p_local = Scope_new(p_funcScope);
 
       // loop over arguments
       AstNode *p_currApplyArg = p_head->p_headChild->p_next;
-      AstNode *p_currFuncArg = ((AstNode *) func->p_val)->p_headChild;
+      AstNode *p_currFuncArg = (((Function *) func->p_val)->p_ast)->p_headChild;
 
       // set vars in local scope
       while (p_currApplyArg != NULL && p_currFuncArg->opcode != OP_STATEMENT) {
@@ -115,6 +120,7 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
 
       // free local scope
       Scope_free(p_local);
+      Scope_free(p_funcScope);
       
       p_local = NULL;
 

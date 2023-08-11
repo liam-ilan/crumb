@@ -12,7 +12,7 @@ gcc src/* -Wall -o crumb
 
 ### Debug with Valgrind
 ```bash
-gcc src/* -g -Wall -o crumb && valgrind --leak-check=full -s ./crumb _test.crumb
+gcc src/* -g -Wall -o crumb && valgrind --leak-check=full --show-leak-kinds=all -s ./crumb _test.crumb
 ```
 
 ## Syntax
@@ -58,6 +58,9 @@ end
 - `/`
 - `read_file`
 - `write_file`
+
+## Todo
+- Generators
 
 ## Sample Programs
 ### Hello World

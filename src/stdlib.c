@@ -6,6 +6,7 @@
 #include "ast.h"
 #include "scope.h"
 #include "eval.h"
+#include "function.h"
 
 // validate number of arguments
 void validateArgCount(int min, int max, int length, int lineNumber) {
@@ -51,10 +52,12 @@ Generic *applyFunc(Generic *func, Scope *p_scope, Generic *args[], int length, i
   } else if (func->type == TYPE_FUNCTION) {
     // non-native func case
     // get ast node at head of function
-    AstNode *p_head = ((AstNode *) func->p_val)->p_headChild;
+    AstNode *p_head = (((Function *) func->p_val)->p_ast)->p_headChild;
 
     // create local scope
-    Scope *p_local = Scope_new(p_scope);
+    Scope *p_funcScope = Scope_copy(((Function *) func->p_val)->p_scope);
+    p_funcScope->p_parent = p_scope;
+    Scope *p_local = Scope_new(p_funcScope);
 
     // loop until statement found, and populate local scope
     AstNode *p_curr = p_head;
@@ -88,6 +91,7 @@ Generic *applyFunc(Generic *func, Scope *p_scope, Generic *args[], int length, i
 
     // free scope and return
     Scope_free(p_local);
+    Scope_free(p_funcScope);
     return res;
 
   } else {

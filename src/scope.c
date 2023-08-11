@@ -94,7 +94,7 @@ Generic *Scope_get(Scope *p_target, char *key, int lineNumber) {
 void Scope_free(Scope *p_target) {
   // set p_curr to the item with correct key, or NULL
   ScopeItem *p_curr = p_target->p_head;
-
+ 
   while (p_curr != NULL) {
     ScopeItem *p_tmp = p_curr;
     p_curr = p_curr->p_next;
@@ -105,4 +105,19 @@ void Scope_free(Scope *p_target) {
   }
 
   free(p_target);
+}
+
+// returns a copy of the scope
+Scope *Scope_copy(Scope *p_target) {
+  Scope *res = Scope_new(NULL);
+  
+  // loop through every key value pair in p_target
+  ScopeItem *p_curr = p_target->p_head;
+  
+  while (p_curr != NULL) {
+    Scope_set(res, p_curr->key, Generic_copy(p_curr->p_val));
+    p_curr = p_curr->p_next;
+  }
+
+  return res;
 }

@@ -24,5 +24,7 @@ void Scope_print(Scope *);
 void Scope_set(Scope *, char *, Generic *);
 Generic *Scope_get(Scope *, char *, int);
 void Scope_free(Scope *);
+Scope* Scope_copy(Scope *);
+
 
 #endif

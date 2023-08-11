@@ -3,6 +3,7 @@
 #include <string.h>
 #include "generic.h"
 #include "ast.h"
+#include "function.h"
 
 // print generic nicely
 void Generic_print(Generic *in) {
@@ -36,7 +37,8 @@ void Generic_free(Generic *target) {
   if (target->type == TYPE_STRING) free(*((char **) target->p_val));
 
   // dont free functions and native functions, as they are either not allocated to heap (native), or belong to the ast (non native)
-  if (target->type != TYPE_FUNCTION && target->type != TYPE_NATIVEFUNCTION) free(target->p_val);
+  if (target->type == TYPE_FUNCTION) Function_free((Function *) (target->p_val));
+  else if (target->type != TYPE_NATIVEFUNCTION) free(target->p_val);
   target->p_val = NULL;
 
   // free generic itself
@@ -65,8 +67,8 @@ Generic *Generic_copy(Generic *target) {
     res->p_val = (char **) malloc(sizeof(char *));
     *((char **) res->p_val) = malloc(sizeof(char) * (strlen(*((char **) target->p_val)) + 1));
     strcpy(*((char **) res->p_val), *((char **) target->p_val));
-  } else if (res->type == TYPE_FUNCTION || res->type == TYPE_NATIVEFUNCTION) {
-    res->p_val = target->p_val;
+  } else if (res->type == TYPE_FUNCTION) {
+    res->p_val = Function_copy(target->p_val);
   } else if (res->type == TYPE_VOID) {
     res->p_val = NULL;
   } else if (res->type == TYPE_INT) {
@@ -75,6 +77,8 @@ Generic *Generic_copy(Generic *target) {
   } else if (res->type == TYPE_FLOAT) {
     res->p_val = (double *) malloc(sizeof(double));
     *((double *) res->p_val) = *((double *) target->p_val);
+  } else if (res->type == TYPE_NATIVEFUNCTION) {
+    res->p_val = target->p_val;
   }
 
   return res;
