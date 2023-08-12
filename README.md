@@ -45,25 +45,132 @@ end
 ```
 
 ## Standard Libary
-- `print`
-- `is`
-- `apply`
-- `loop`
-- `if`
-- `%`
-- `!`
-- `+`
-- `-`
-- `*`
-- `/`
-- `read_file`
-- `write_file`
-- `join`
-- `str`
-- `list`
-- `get`
-- `put`
-- `delete`
+### IO
+- `arguments`
+  - A list of arguments passed into the terminal
+
+- `arguments_count`
+  - The number of items in `arguments`
+
+- `(print arg1 arg2 arg3 ...)`
+  - Prints all arguments to stdout, returns nothing.
+
+### Comparisons
+- `(is a b)`
+  - Checks if `a` and `b` are equal, returns `1` if so, else returns `0`.
+
+- `(less_than a b)`
+  - Checks if `a` is less than `b`, returns `1` if so, else returns `0`.
+  - `a`: `integer` or `float`
+  - `b`: `integer` or `float`
+
+- `(greater_than a b)`
+  - Checks if `a` is greater than `b`, returns `1` if so, else returns `0`.
+  - `a`: `integer` or `float`
+  - `b`: `integer` or `float`
+
+### Logical Operators
+- `(not a)`
+  - Returns `0` if `a` is `1`, and `1` if `a` is `0`.
+  - `a`: `integer`, which is `1` or `0`
+
+- `(and a b)`
+  - Returns `1` if `a` and `b` are both `1`, else returns `0`
+  - `a`: `integer`, which is `1` or `0`
+  - `b`: `integer`, which is `1` or `0`
+
+- `(or a b)`
+  - Returns `1` if `a` or `b` are `1`, else returns `0`
+  - `a`: `integer`, which is `1` or `0`
+  - `b`: `integer`, which is `1` or `0`
+
+### Arithmetic
+- `(add a b)`
+  - Returns `a` plus `b`.
+  - `a`: `integer` or `float`
+  - `b`: `integer` or `float`
+
+- `(subtract a b)`
+  - Returns `a` minus `b`.
+  - `a`: `integer` or `float`
+  - `b`: `integer` or `float`
+
+- `(divide a b)`
+  - Returns `a` divided by `b`.
+  - `a`: `integer` or `float`
+  - `b`: `integer` or `float`
+
+- `(multiply a b)`
+  - Returns `a` multiplied by `b`.
+  - `a`: `integer` or `float`
+  - `b`: `integer` or `float`
+
+- `(remainder a b)`
+  - Returns the remainder of `a` and `b`.
+  - `a`: `integer` or `float`
+  - `b`: `integer` or `float`
+
+### Control
+- `(loop count fn)`
+  - Applys `fn`, `count` times. If `fn` returns, the loop breaks, and `loop` returns whatever `fn` returned, else repeats until loop is completed.
+  - `count`: `integer`, which is greater than or equal to `0`
+  - `fn`: `function`, which is in the form `{n -> ...}`, where n is the current loop index (starting at `0`).
+
+- `(if condition fn1)` or `(if condition fn1 fn2)`
+  - If `condition` is `1`, applys `fn1`. (like the "then" part in an if statement).
+  - If `condition` is `0`, and `fn2` was supplied, apply `fn2`. (the "else" part in an if statement).
+
+### File
+- `(read_file path)`
+  - Returns the contents of the file designated by `path`, in a string
+  - `path`: `string`
+
+- `(write_file path contents)`
+  - Writes the string `contents` into the file designated by `path`, returns nothing.
+  - `path`: `string`
+  - `contents`: `string`
+
+### Typecasting
+- `(integer a)`
+  - Returns `a` as an `integer`.
+  - `a`: `string`, `float`, or `integer`.
+
+- `(string a)`
+  - Returns `a` as a `string`.
+  - `a`: `string`, `float`, or `integer`.
+
+- `(float a)`
+  - Returns `a` as a `float`.
+  - `a`: `string`, `float`, or `integer`.
+
+### List and String Methods
+- `(list arg1 arg2 arg3 ...)`
+  - Returns a `list`, with the arguments as it's contents.
+
+- `(join a b)`
+  - Returns `a` joined with `b`
+  - `a`: `string`, or `list`.
+  - `b`: `string`, `list`.
+
+- `(get x index1)` or `(get x index1 index2)`
+  - Returns the item in `x` at `index1`. If x is a `string`, this is a single char.
+  - If `index2` is supplied, returns a subarray or substring from `index1` to `index2`, not including `index2`.
+  - `x`: `string` or `list`.
+  - `index1`: `int`.
+  - `index2`: `int`.
+
+- `(delete x index1)` or `(delete x index1 index2)`
+  - Returns a `string` or `list`, where `index1` was removed from `x`.
+  - If `index2` is supplied, all items from `index1` to `index2` are removed, not including `index2`.
+  - `x`: `string` or `list`.
+  - `index1`: `int`.
+  - `index2`: `int`.
+
+- `(put x item)` or `(put x item index)`
+  - Returns a `list` or `string`, in which `item` was inserted into `x` at `index`.
+  - If `index` not supplied, `item` is assumed to be put at the end of `x`.
+  - `x`: `string` or `list`.
+  - `index`: `int`.
 
 ## Sample Programs
 ### Hello World
