@@ -8,7 +8,8 @@ enum Type {
   TYPE_STRING,
   TYPE_VOID,
   TYPE_FUNCTION,
-  TYPE_NATIVEFUNCTION
+  TYPE_NATIVEFUNCTION,
+  TYPE_LIST
 };
 
 // generic struct

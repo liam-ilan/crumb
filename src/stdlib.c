@@ -6,6 +6,7 @@
 #include "ast.h"
 #include "scope.h"
 #include "eval.h"
+#include "list.h"
 
 // validate number of arguments
 void validateArgCount(int min, int max, int length, int lineNumber) {
@@ -145,6 +146,9 @@ Generic *StdLib_is(Scope *p_scope, Generic *args[], int length, int lineNumber) 
       case TYPE_FUNCTION:
         if (args[0]->p_val == args[1]->p_val) *p_res = 1;
         break;
+      case TYPE_LIST:
+        printf("TODO\n");
+        exit(0);
     }
   }
 
@@ -662,12 +666,106 @@ Generic *StdLib_join(Scope *p_scope, Generic *args[], int length, int lineNumber
   return Generic_new(TYPE_STRING, p_res, 0);
 }
 
+// (list args...)
+// returns a new list with args as values
+Generic *StdLib_list(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  return Generic_new(TYPE_LIST, List_new(args, length), 0);
+}
+
+// (get list index)
+// returns item from list
+Generic *StdLib_get(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(2, 2, length, lineNumber);
+
+  // type check
+  if (args[0]->type != TYPE_LIST) {
+    printf(
+      "Runtime Error @ Line %i: get function requires list for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0]->type)
+    );
+    exit(0);
+  } else if (args[1]->type != TYPE_INT) {
+    printf(
+      "Runtime Error @ Line %i: get function requires int for it's 2nd argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[1]->type)
+    );
+    exit(0);
+  }
+
+  return List_get((List *) (args[0]->p_val), *((int *) args[1]->p_val));
+}
+
+// (put list item index)
+// returns list, modified with item at index
+Generic *StdLib_put(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(3, 3, length, lineNumber);
+
+  if (args[0]->type != TYPE_LIST) {
+    printf(
+      "Runtime Error @ Line %i: put function requires list for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0]->type)
+    );
+    exit(0);
+  } else if (args[2]->type != TYPE_INT) {
+    printf(
+      "Runtime Error @ Line %i: put function requires int for it's 3rd argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[2]->type)
+    );
+    exit(0);
+  }
+
+  return Generic_new(TYPE_LIST, List_put((List *) (args[0]->p_val), args[1], *((int *) args[2]->p_val)), 0);
+}
+
+// (delete list index)
+// deletes item from list and returns
+Generic *StdLib_delete(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(2, 2, length, lineNumber);
+
+  // type check
+  if (args[0]->type != TYPE_LIST) {
+    printf(
+      "Runtime Error @ Line %i: delete function requires list for it's 1st argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[0]->type)
+    );
+    exit(0);
+  } else if (args[1]->type != TYPE_INT) {
+    printf(
+      "Runtime Error @ Line %i: delete function requires int for it's 2nd argument, %s type supplied instead.\n", 
+      lineNumber, getTypeString(args[1]->type)
+    );
+    exit(0);
+  }
+
+  return Generic_new(TYPE_LIST, List_delete((List *) (args[0]->p_val), *((int *) args[1]->p_val)), 0);
+}
+
 // creates a new global scope
-Scope *newGlobal() {
+Scope *newGlobal(int argc, char *argv[]) {
   // create global scope
   Scope *p_global = Scope_new(NULL);
 
+  Generic *args[argc];
+
+  // for each arg
+  for (int i = 0; i < argc; i++) {
+    char **p_val = (char **) malloc(sizeof(char *));
+
+    // create string
+    char *val = (char *) malloc(sizeof(char) * (strlen(argv[i]) + 1));
+    strcpy(val, argv[i]);
+    *p_val = val;
+
+    // ad to args
+    args[i] = Generic_new(TYPE_STRING, p_val, 0);
+  }
+
+  int *p_argsCount = (int *) malloc(sizeof(int));
+  *p_argsCount = argc;
+
   // populate global scope with stdlib
+  Scope_set(p_global, "arguments", Generic_new(TYPE_LIST, List_new(args, argc), 0));
+  Scope_set(p_global, "arguments_count", Generic_new(TYPE_INT, p_argsCount, 0));
   Scope_set(p_global, "print", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_print, 0));
   Scope_set(p_global, "is", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_is, 0));
   Scope_set(p_global, "apply", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_apply, 0));
@@ -684,6 +782,10 @@ Scope *newGlobal() {
   Scope_set(p_global, "int", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_int, 0));
   Scope_set(p_global, "join", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_join, 0));
   Scope_set(p_global, "str", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_str, 0));
+  Scope_set(p_global, "list", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_list, 0));
+  Scope_set(p_global, "get", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_get, 0));
+  Scope_set(p_global, "put", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_put, 0));
+  Scope_set(p_global, "delete", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_delete, 0));
 
   return p_global;
 }

@@ -3,6 +3,7 @@
 #include <string.h>
 #include "generic.h"
 #include "ast.h"
+#include "list.h"
 
 // print generic nicely
 void Generic_print(Generic *in) {
@@ -16,8 +17,10 @@ void Generic_print(Generic *in) {
     printf("[Void]");
   } else if (in->type == TYPE_FUNCTION) {
     printf("[Function]");
-  }  else if (in->type == TYPE_NATIVEFUNCTION) {
+  } else if (in->type == TYPE_NATIVEFUNCTION) {
     printf("[Native Function]");
+  } else if (in->type == TYPE_LIST) {
+    List_print((List *) (in->p_val));
   }
 }
 
@@ -35,8 +38,13 @@ void Generic_free(Generic *target) {
   // if string, free contents as well
   if (target->type == TYPE_STRING) free(*((char **) target->p_val));
 
+  // use list's own free function
+  if (target->type == TYPE_LIST) {
+    List_free((List *) (target->p_val));
+  }
+
   // dont free functions and native functions, as they are either not allocated to heap (native), or belong to the ast (non native)
-  if (target->type != TYPE_FUNCTION && target->type != TYPE_NATIVEFUNCTION) free(target->p_val);
+  else if (target->type != TYPE_FUNCTION && target->type != TYPE_NATIVEFUNCTION) free(target->p_val);
   target->p_val = NULL;
 
   // free generic itself
@@ -50,8 +58,9 @@ char *getTypeString(enum Type type) {
     case TYPE_INT: return "int";
     case TYPE_FUNCTION: return "function";
     case TYPE_STRING: return "string";
-    case TYPE_VOID: return "float";
+    case TYPE_VOID: return "void";
     case TYPE_NATIVEFUNCTION: return "native function";
+    case TYPE_LIST: return "list";
     default: return "unknown";
   }
 }
@@ -75,6 +84,8 @@ Generic *Generic_copy(Generic *target) {
   } else if (res->type == TYPE_FLOAT) {
     res->p_val = (double *) malloc(sizeof(double));
     *((double *) res->p_val) = *((double *) target->p_val);
+  } else if (res->type == TYPE_LIST) {
+    res->p_val = List_copy((List *) target->p_val);
   }
 
   return res;

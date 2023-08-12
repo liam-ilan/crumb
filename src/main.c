@@ -12,6 +12,7 @@
 #include "stdlib.h"
 
 int main(int argc, char *argv[]) {
+
   if (argc < 2) {
     printf("Error: Supply file path to read from.\n");
     return 0;
@@ -76,7 +77,7 @@ int main(int argc, char *argv[]) {
 
   /* evaluate */
   printf("\nEVAL\n");
-  Scope *p_global = newGlobal();
+  Scope *p_global = newGlobal(argc, argv);
   Generic *res = eval(p_headAstNode, p_global);
 
   // get exit code

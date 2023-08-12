@@ -61,7 +61,7 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
     return Scope_get(p_scope, p_head->val, p_head->lineNumber);
 
   } else if (p_head->opcode == OP_ASSIGNMENT) {
-    // assignent case
+    // assignment case
     Generic *p_val = eval(p_head->p_headChild->p_next, p_scope);
     Scope_set(p_scope, p_head->p_headChild->val, p_val);
     

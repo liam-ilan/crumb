@@ -58,6 +58,12 @@ end
 - `/`
 - `read_file`
 - `write_file`
+- `join`
+- `str`
+- `list`
+- `get`
+- `put`
+- `delete`
 
 ## Sample Programs
 ### Hello World
