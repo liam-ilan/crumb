@@ -46,69 +46,73 @@ end
 
 ## Standard Libary
 ### IO
-- `arguments`
+- `arguments` ✅
   - A list of arguments passed into the terminal
 
-- `arguments_count`
+- `arguments_count` ✅
   - The number of items in `arguments`
 
-- `(print arg1 arg2 arg3 ...)`
+- `(print arg1 arg2 arg3 ...)` ✅
   - Prints all arguments to stdout, returns nothing.
 
 ### Comparisons
-- `(is a b)`
+- `(is a b)` ✅
   - Checks if `a` and `b` are equal, returns `1` if so, else returns `0`.
 
-- `(less_than a b)`
+- `(less_than a b)` ✅
   - Checks if `a` is less than `b`, returns `1` if so, else returns `0`.
   - `a`: `integer` or `float`
   - `b`: `integer` or `float`
 
-- `(greater_than a b)`
+- `(greater_than a b)` ✅
   - Checks if `a` is greater than `b`, returns `1` if so, else returns `0`.
   - `a`: `integer` or `float`
   - `b`: `integer` or `float`
 
 ### Logical Operators
-- `(not a)`
+- `(not a)` ✅
   - Returns `0` if `a` is `1`, and `1` if `a` is `0`.
   - `a`: `integer`, which is `1` or `0`
 
-- `(and a b)`
+- `(and a b)` ✅
   - Returns `1` if `a` and `b` are both `1`, else returns `0`
   - `a`: `integer`, which is `1` or `0`
   - `b`: `integer`, which is `1` or `0`
 
-- `(or a b)`
+- `(or a b)` ✅
   - Returns `1` if `a` or `b` are `1`, else returns `0`
   - `a`: `integer`, which is `1` or `0`
   - `b`: `integer`, which is `1` or `0`
 
 ### Arithmetic
-- `(add a b)`
-  - Returns `a` plus `b`.
-  - `a`: `integer` or `float`
-  - `b`: `integer` or `float`
+- `(add arg1 arg2 arg3 ...)` ✅
+  - Returns `arg1` + `arg2` + `arg3` + ...
+  - Requires a minimum of two args
+  - `arg1`, `arg2`, `arg3`, ...: `integer` or `float`
 
-- `(subtract a b)`
-  - Returns `a` minus `b`.
-  - `a`: `integer` or `float`
-  - `b`: `integer` or `float`
+- `(subtract arg1 arg2 arg3 ...)` ✅
+  - Returns `arg1` - `arg2` - `arg3` - ...
+  - Requires a minimum of two args
+  - `arg1`, `arg2`, `arg3`, ...: `integer` or `float`
 
-- `(divide a b)`
-  - Returns `a` divided by `b`.
-  - `a`: `integer` or `float`
-  - `b`: `integer` or `float`
+- `(divide arg1 arg2 arg3 ...)` ✅
+  - Returns `arg1` / `arg2` / `arg3` / ...
+  - Requires a minimum of two args
+  - `arg1`, `arg2`, `arg3`, ...: `integer` or `float`
 
-- `(multiply a b)`
-  - Returns `a` multiplied by `b`.
-  - `a`: `integer` or `float`
-  - `b`: `integer` or `float`
+- `(multiply arg1 arg2 arg3 ...)` ✅
+  - Returns `arg1` * `arg2` * `arg3` * ...
+  - Requires a minimum of two args
+  - `arg1`, `arg2`, `arg3`, ...: `integer` or `float`
 
-- `(remainder a b)`
+- `(remainder a b)` ✅
   - Returns the remainder of `a` and `b`.
+  - `a`: `integer`
+  - `b`: `integer`
+
+- `(negative a)` ✅
+  - Returns -`a`.
   - `a`: `integer` or `float`
-  - `b`: `integer` or `float`
 
 ### Control
 - `(loop count fn)`
@@ -119,6 +123,10 @@ end
 - `(if condition fn1)` or `(if condition fn1 fn2)`
   - If `condition` is `1`, applys `fn1`. (like the "then" part in an if statement).
   - If `condition` is `0`, and `fn2` was supplied, apply `fn2`. (the "else" part in an if statement).
+  - Returns whatever `fn1` or `fn2` return
+  - `condition`: `integer`, which is `1` or `0`
+  - `fn1`: `function`
+  - `fn2`: `function`
 
 ### File
 - `(read_file path)`
@@ -147,10 +155,10 @@ end
 - `(list arg1 arg2 arg3 ...)`
   - Returns a `list`, with the arguments as it's contents.
 
-- `(join a b)`
-  - Returns `a` joined with `b`
-  - `a`: `string`, or `list`.
-  - `b`: `string`, `list`.
+- `(join arg1 arg2 arg3 ...)`
+  - Returns all args joined together.
+  - All args must be of the same type.
+  - `arg1`, `arg2`, `arg3`, ...: `string` or `list`.
 
 - `(get x index1)` or `(get x index1 index2)`
   - Returns the item in `x` at `index1`. If x is a `string`, this is a single char.
@@ -171,6 +179,10 @@ end
   - If `index` not supplied, `item` is assumed to be put at the end of `x`.
   - `x`: `string` or `list`.
   - `index`: `int`.
+
+- `(length x)`
+  - Returns the length of `x`
+  - `x`: `string` or `list`.
 
 ## Sample Programs
 ### Hello World
