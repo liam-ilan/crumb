@@ -115,12 +115,12 @@ end
   - `a`: `integer` or `float`
 
 ### Control
-- `(loop count fn)`
+- `(loop count fn)` ✅
   - Applys `fn`, `count` times. If `fn` returns, the loop breaks, and `loop` returns whatever `fn` returned, else repeats until loop is completed.
   - `count`: `integer`, which is greater than or equal to `0`
   - `fn`: `function`, which is in the form `{n -> ...}`, where n is the current loop index (starting at `0`).
 
-- `(if condition fn1)` or `(if condition fn1 fn2)`
+- `(if condition fn1)` or `(if condition fn1 fn2)` ✅
   - If `condition` is `1`, applys `fn1`. (like the "then" part in an if statement).
   - If `condition` is `0`, and `fn2` was supplied, apply `fn2`. (the "else" part in an if statement).
   - Returns whatever `fn1` or `fn2` return
@@ -129,25 +129,25 @@ end
   - `fn2`: `function`
 
 ### File
-- `(read_file path)`
+- `(read_file path)` ✅
   - Returns the contents of the file designated by `path`, in a string
   - `path`: `string`
 
-- `(write_file path contents)`
+- `(write_file path contents)` ✅
   - Writes the string `contents` into the file designated by `path`, returns nothing.
   - `path`: `string`
   - `contents`: `string`
 
 ### Typecasting
-- `(integer a)`
+- `(integer a)` ✅
   - Returns `a` as an `integer`.
   - `a`: `string`, `float`, or `integer`.
 
-- `(string a)`
+- `(string a)` ✅
   - Returns `a` as a `string`.
   - `a`: `string`, `float`, or `integer`.
 
-- `(float a)`
+- `(float a)` ✅
   - Returns `a` as a `float`.
   - `a`: `string`, `float`, or `integer`.
 

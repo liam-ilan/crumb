@@ -492,6 +492,7 @@ Generic *StdLib_negative(Scope *p_scope, Generic *args[], int length, int lineNu
   }
 }
 
+/* control */
 // (loop n f)
 // applys f, n times, passing the current index to f
 // returns whatever f returns if not void
@@ -499,22 +500,11 @@ Generic *StdLib_negative(Scope *p_scope, Generic *args[], int length, int lineNu
 Generic *StdLib_loop(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
 
-  // error handling to check that 2nd arg is a function, and 1st arg is an int
-  if (args[0]->type != TYPE_INT) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: loop function requires int type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0]->type)
-    );
-    exit(0);
-  } else if (args[1]->type != TYPE_FUNCTION && args[1]->type != TYPE_NATIVEFUNCTION) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: loop function requires function or native function type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1]->type)
-    );
-    exit(0);
-  }
+  enum Type allowedTypes1[] = {TYPE_INT};
+  enum Type allowedTypes2[] = {TYPE_NATIVEFUNCTION, TYPE_FUNCTION};
+
+  validateType(allowedTypes1, 1, args[0]->type, 1, lineNumber, "loop");
+  validateType(allowedTypes2, 2, args[1]->type, 2, lineNumber, "loop");
 
   // loop
   for (int i = 0; i < *((int *) args[0]->p_val); i++) {
@@ -541,40 +531,18 @@ Generic *StdLib_loop(Scope *p_scope, Generic *args[], int length, int lineNumber
 Generic *StdLib_if(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 3, length, lineNumber);
 
-  // error handling to check that 1st arg is an int, and 2nd arg is a function
-  if (args[0]->type != TYPE_INT) {
-    // supplied too many args, throw error
-    printf(
-      "Runtime Error @ Line %i: if function requires int type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0]->type)
-    );
-    exit(0);
-  } else if (args[1]->type != TYPE_FUNCTION && args[1]->type != TYPE_NATIVEFUNCTION) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: if function requires function or native function type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1]->type)
-    );
-    exit(0);
-  } else if (length == 3 && args[2]->type != TYPE_FUNCTION && args[2]->type != TYPE_NATIVEFUNCTION) {
-    // supplied too little args, throw error
-    printf(
-      "Runtime Error @ Line %i: if function requires function or native function type for it's 3rd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[2]->type)
-    );
-    exit(0);
-  }
+  enum Type allowedTypes1[] = {TYPE_INT};
+  enum Type allowedTypes2[] = {TYPE_NATIVEFUNCTION, TYPE_FUNCTION};
+  enum Type allowedTypes3[] = {TYPE_NATIVEFUNCTION, TYPE_FUNCTION};
+
+  validateType(allowedTypes1, 1, args[0]->type, 1, lineNumber, "if");
+  validateType(allowedTypes2, 2, args[1]->type, 2, lineNumber, "if");
+  if (length == 3) validateType(allowedTypes3, 2, args[2]->type, 3, lineNumber, "if");
+  
+  validateBinary(args[0]->p_val, 1, lineNumber, "if");
 
   if (*((int *) args[0]->p_val) == 1) return applyFunc(args[1], p_scope, NULL, 0, lineNumber);
   else if (length == 3 && *((int *) args[0]->p_val) == 0) return applyFunc(args[2], p_scope, NULL, 0, lineNumber);
-  else if (*((int *) args[0]->p_val) != 0) {
-    // c is not 1 or 0, throw err
-    printf(
-      "Runtime Error @ Line %i: if function expected 0 or 1 for it's 1st argument, %i supplied instead.\n", 
-      lineNumber, *((int *) args[0]->p_val)
-    );
-    exit(0);
-  }
 
   return Generic_new(TYPE_VOID, NULL, 0);
 }
@@ -582,17 +550,11 @@ Generic *StdLib_if(Scope *p_scope, Generic *args[], int length, int lineNumber) 
 
 // (read_file filepath)
 // reads text at filepath and returns
-Generic *StdLib_readFile(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+Generic *StdLib_read_file(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(1, 1, length, lineNumber);
   
-  // check that type of arg is string
-  if (args[0]->type != TYPE_STRING) {
-    printf(
-      "Runtime Error @ Line %i: read_file function requires string type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0]->type)
-    );
-    exit(0);
-  }
+  enum Type allowedTypes[] = {TYPE_STRING};
+  validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "read_file");
 
   FILE *p_file = fopen(*((char ** )args[0]->p_val), "r");
 
@@ -631,23 +593,13 @@ Generic *StdLib_readFile(Scope *p_scope, Generic *args[], int length, int lineNu
 
 // (write_file filepath string)
 // writes string to filepath
-Generic *StdLib_writeFile(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+Generic *StdLib_write_file(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
   
   // check that type of args is string
-  if (args[0]->type != TYPE_STRING) {
-    printf(
-      "Runtime Error @ Line %i: write_file function requires string type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0]->type)
-    );
-    exit(0);
-  } else if (args[1]->type != TYPE_STRING) {
-    printf(
-      "Runtime Error @ Line %i: write_file function requires string type for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1]->type)
-    );
-    exit(0);
-  }
+  enum Type allowedTypes[] = {TYPE_STRING};
+  validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "write_file");
+  validateType(allowedTypes, 1, args[1]->type, 2, lineNumber, "write_file");
 
   FILE *p_file = fopen(*((char ** )args[0]->p_val), "w+");
 
@@ -667,18 +619,11 @@ Generic *StdLib_writeFile(Scope *p_scope, Generic *args[], int length, int lineN
 
 // (int x)
 // returns x as an integer, if string, float, or int passed
-Generic *StdLib_int(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+Generic *StdLib_integer(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(1, 1, length, lineNumber);
 
-  // make sure first type is string
-  // check that type of arg is string or int or float
-  if (args[0]->type != TYPE_STRING && args[0]->type != TYPE_FLOAT && args[0]->type != TYPE_INT) {
-    printf(
-      "Runtime Error @ Line %i: int function requires string or int or float type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0]->type)
-    );
-    exit(0);
-  }
+  enum Type allowedTypes[] = {TYPE_STRING, TYPE_INT, TYPE_FLOAT};
+  validateType(allowedTypes, 3, args[0]->type, 1, lineNumber, "integer");
 
   int *p_res = malloc(sizeof(int));
 
@@ -696,19 +641,13 @@ Generic *StdLib_int(Scope *p_scope, Generic *args[], int length, int lineNumber)
   return Generic_new(TYPE_INT, p_res, 0);
 }
 
-// (str x)
+// (string x)
 // returns x as a string, if string, float, or int passed
-Generic *StdLib_str(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+Generic *StdLib_string(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(1, 1, length, lineNumber);
 
-  // type check
-  if (args[0]->type != TYPE_STRING && args[0]->type != TYPE_FLOAT && args[0]->type != TYPE_INT) {
-    printf(
-      "Runtime Error @ Line %i: str function requires string or int or float type for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0]->type)
-    );
-    exit(0);
-  }
+  enum Type allowedTypes[] = {TYPE_STRING, TYPE_INT, TYPE_FLOAT};
+  validateType(allowedTypes, 3, args[0]->type, 1, lineNumber, "string");
   
   char *res;
 
@@ -730,6 +669,30 @@ Generic *StdLib_str(Scope *p_scope, Generic *args[], int length, int lineNumber)
   *p_res = res;
 
   return Generic_new(TYPE_STRING, p_res, 0);
+}
+
+// (float x)
+// returns x as an float, if string, float, or int passed
+Generic *StdLib_float(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(1, 1, length, lineNumber);
+
+  enum Type allowedTypes[] = {TYPE_STRING, TYPE_INT, TYPE_FLOAT};
+  validateType(allowedTypes, 3, args[0]->type, 1, lineNumber, "float");
+
+  double *p_res = malloc(sizeof(double));
+
+  if (args[0]->type == TYPE_STRING) {
+    char *str = *((char **) args[0]->p_val);
+    *p_res = atof(str);
+  } else if (args[0]->type == TYPE_FLOAT) {
+    double f = *((double *) args[0]->p_val);
+    *p_res = f;
+  } else {
+    int i = *((int *) args[0]->p_val);
+    *p_res = (double) i;
+  }
+
+  return Generic_new(TYPE_FLOAT, p_res, 0);
 }
 
 // (join str1 str2)
@@ -899,15 +862,20 @@ Scope *newGlobal(int argc, char *argv[]) {
   Scope_set(p_global, "remainder", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_remainder, 0));
   Scope_set(p_global, "negative", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_negative, 0));
 
+  /* control */
   Scope_set(p_global, "loop", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_loop, 0));
   Scope_set(p_global, "if", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_if, 0));
 
+  /* file */
+  Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_read_file, 0));
+  Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_write_file, 0));
 
-  Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_readFile, 0));
-  Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_writeFile, 0));
-  Scope_set(p_global, "int", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_int, 0));
+  /* typecasting */
+  Scope_set(p_global, "integer", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_integer, 0));
+  Scope_set(p_global, "string", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_string, 0));
+  Scope_set(p_global, "float", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_float, 0));
+
   Scope_set(p_global, "join", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_join, 0));
-  Scope_set(p_global, "str", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_str, 0));
   Scope_set(p_global, "list", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_list, 0));
   Scope_set(p_global, "get", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_get, 0));
   Scope_set(p_global, "put", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_put, 0));
