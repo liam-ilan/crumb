@@ -49,9 +49,6 @@ end
 - `arguments` ✅
   - A list of arguments passed into the terminal
 
-- `arguments_count` ✅
-  - The number of items in `arguments`
-
 - `(print arg1 arg2 arg3 ...)` ✅
   - Prints all arguments to stdout, returns nothing.
 
@@ -125,8 +122,8 @@ end
   - If `condition` is `0`, and `fn2` was supplied, apply `fn2`. (the "else" part in an if statement).
   - Returns whatever `fn1` or `fn2` return
   - `condition`: `integer`, which is `1` or `0`
-  - `fn1`: `function`
-  - `fn2`: `function`
+  - `fn1`: `function`, which takes no arguments
+  - `fn2`: `function`, which takes no arguments
 
 ### File
 - `(read_file path)` ✅
@@ -151,22 +148,32 @@ end
   - Returns `a` as a `float`.
   - `a`: `string`, `float`, or `integer`.
 
-### List and String Methods
-- `(list arg1 arg2 arg3 ...)`
+### List and String
+- `(list arg1 arg2 arg3 ...)` ✅
   - Returns a `list`, with the arguments as it's contents.
 
-- `(join arg1 arg2 arg3 ...)`
+- `(length x)` ✅
+  - Returns the length of `x`
+  - `x`: `string` or `list`.
+
+- `(join arg1 arg2 arg3 ...)` ✅
   - Returns all args joined together.
   - All args must be of the same type.
   - `arg1`, `arg2`, `arg3`, ...: `string` or `list`.
 
-- `(get x index1)` or `(get x index1 index2)`
+- `(get x index1)` or `(get x index1 index2)` ✅
   - Returns the item in `x` at `index1`. If x is a `string`, this is a single char.
   - If `index2` is supplied, returns a subarray or substring from `index1` to `index2`, not including `index2`.
   - `x`: `string` or `list`.
   - `index1`: `int`.
   - `index2`: `int`.
 
+- `(put x item)` or `(put x item index)` ✅
+  - Returns a `list` or `string`, in which `item` was inserted into `x` at `index`.
+  - If `index` not supplied, `item` is assumed to be put at the end of `x`.
+  - `x`: `string` or `list`.
+  - `index`: `int`.
+  
 - `(delete x index1)` or `(delete x index1 index2)`
   - Returns a `string` or `list`, where `index1` was removed from `x`.
   - If `index2` is supplied, all items from `index1` to `index2` are removed, not including `index2`.
@@ -174,15 +181,19 @@ end
   - `index1`: `int`.
   - `index2`: `int`.
 
-- `(put x item)` or `(put x item index)`
-  - Returns a `list` or `string`, in which `item` was inserted into `x` at `index`.
-  - If `index` not supplied, `item` is assumed to be put at the end of `x`.
-  - `x`: `string` or `list`.
-  - `index`: `int`.
+- `(map arr fn)`
+  - Returns a list created by calling `fn` on every item of `arr`, and using the values returned by `fn` to populate the returned array.
+  - `arr`: `list`.
+  - `fn`: `function`, which is in the form `{item i -> ...}`, where `item` is the current item, and `i` is the current index.
 
-- `(length x)`
-  - Returns the length of `x`
-  - `x`: `string` or `list`.
+- `(reduce arr fn)`
+  - Returns a value, computed via running `fn` on every item in `arr`
+  - `arr`: `list`.
+  - `fn`: `function`, which is in the form `{item acc item i -> ...}`, where `item` is the current item, `acc` is the accumulator (the result of `fn` from the last item), and `i` is the current index.
+
+- `(range n)`
+  - Returns a list with the integers from `0` to `n`.
+  - `n`: `integer`, which is greater than or equal to 0.
 
 ## Sample Programs
 ### Hello World

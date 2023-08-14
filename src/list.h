@@ -22,5 +22,8 @@ Generic *List_get(List *, int);
 List *List_put(List *, Generic *, int);
 List *List_delete(List *, int);
 void List_free(List *);
+List *List_join(List **, int);
+List *List_sublist(List *, int, int);
+int List_length(List *);
 
 #endif

@@ -68,6 +68,17 @@ void validateBinary(int *p_val, int argNum, int lineNumber, char* funcName) {
   }
 }
 
+// validate that argument is within a range
+void validateRange(int *p_val, int min, int max, int argNum, int lineNumber, char* funcName) {
+  if (*p_val > max || *p_val < min) {
+    printf(
+      "Runtime Error @ Line %i: %s function expected a value from %i to %i for argument #%i, %i supplied instead.\n", 
+      lineNumber, funcName, min, max, argNum, *p_val
+    );
+    exit(0);
+  }
+}
+
 // applys a func, given arguments
 // used for callbacks from the standard library
 Generic *applyFunc(Generic *func, Scope *p_scope, Generic *args[], int length, int lineNumber) {
@@ -547,7 +558,7 @@ Generic *StdLib_if(Scope *p_scope, Generic *args[], int length, int lineNumber) 
   return Generic_new(TYPE_VOID, NULL, 0);
 }
 
-
+/* file */
 // (read_file filepath)
 // reads text at filepath and returns
 Generic *StdLib_read_file(Scope *p_scope, Generic *args[], int length, int lineNumber) {
@@ -617,6 +628,7 @@ Generic *StdLib_write_file(Scope *p_scope, Generic *args[], int length, int line
   return Generic_new(TYPE_VOID, NULL, 0);
 }
 
+/* typecasting */
 // (int x)
 // returns x as an integer, if string, float, or int passed
 Generic *StdLib_integer(Scope *p_scope, Generic *args[], int length, int lineNumber) {
@@ -695,93 +707,216 @@ Generic *StdLib_float(Scope *p_scope, Generic *args[], int length, int lineNumbe
   return Generic_new(TYPE_FLOAT, p_res, 0);
 }
 
-// (join str1 str2)
-// joins strings together, and returns a new string
-Generic *StdLib_join(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, 2, length, lineNumber);
-
-  // type checking
-  if (args[0]->type != TYPE_STRING) {
-    printf(
-      "Runtime Error @ Line %i: join function requires string for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0]->type)
-    );
-    exit(0);
-  } else if (args[1]->type != TYPE_STRING) {
-    printf(
-      "Runtime Error @ Line %i: join function requires string for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1]->type)
-    );
-    exit(0);
-  }
-
-  char *res = (char *) malloc(
-    sizeof(char) * 
-    (
-      strlen(*((char **) args[0]->p_val))
-      + strlen(*((char **) args[1]->p_val))
-      + 1
-    )
-  );
-
-  strcpy(res, *((char **) args[0]->p_val));
-  strcat(res, *((char **) args[1]->p_val));
-
-  char **p_res = (char **) malloc(sizeof(char *));
-  *p_res = res;
-
-  return Generic_new(TYPE_STRING, p_res, 0);
-}
-
+/* list and string */
 // (list args...)
 // returns a new list with args as values
 Generic *StdLib_list(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   return Generic_new(TYPE_LIST, List_new(args, length), 0);
 }
 
-// (get list index)
-// returns item from list
-Generic *StdLib_get(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, 2, length, lineNumber);
+// (length list)
+// returns list length
+Generic *StdLib_length(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(1, 1, length, lineNumber);
+  
+  enum Type allowedTypes[] = {TYPE_LIST, TYPE_STRING};
+  validateType(allowedTypes, 2, args[0]->type, 1, lineNumber, "length");
 
-  // type check
-  if (args[0]->type != TYPE_LIST) {
-    printf(
-      "Runtime Error @ Line %i: get function requires list for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0]->type)
-    );
-    exit(0);
-  } else if (args[1]->type != TYPE_INT) {
-    printf(
-      "Runtime Error @ Line %i: get function requires int for it's 2nd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[1]->type)
-    );
-    exit(0);
-  }
+  // create int
+  int *p_res = (int *) malloc(sizeof(int));
 
-  return List_get((List *) (args[0]->p_val), *((int *) args[1]->p_val));
+  // get length and return
+  if (args[0]->type == TYPE_LIST) *p_res = List_length((List *) args[0]->p_val);
+  else *p_res = strlen(*((char **) args[0]->p_val));
+  return Generic_new(TYPE_INT, p_res, 0);
 }
 
-// (put list item index)
-// returns list, modified with item at index
-Generic *StdLib_put(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(3, 3, length, lineNumber);
+// (join arg1 arg2 arg3 ...)
+// returns args joined together
+Generic *StdLib_join(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(1, (int) INFINITY, length, lineNumber);
 
-  if (args[0]->type != TYPE_LIST) {
-    printf(
-      "Runtime Error @ Line %i: put function requires list for it's 1st argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[0]->type)
-    );
-    exit(0);
-  } else if (args[2]->type != TYPE_INT) {
-    printf(
-      "Runtime Error @ Line %i: put function requires int for it's 3rd argument, %s type supplied instead.\n", 
-      lineNumber, getTypeString(args[2]->type)
-    );
-    exit(0);
+  // validate first type
+  enum Type allowedTypes[] = {TYPE_LIST, TYPE_STRING};
+  validateType(allowedTypes, 2, args[0]->type, 1, lineNumber, "join");
+
+  // validate rest of types
+  enum Type selectedType[] = {args[0]->type};
+  for (int i = 1; i < length; i++) {
+    validateType(selectedType, 1, args[i]->type, i + 1, lineNumber, "join");
+  }
+  
+  if (args[0]->type == TYPE_STRING) {
+    // string case
+    // calculate size (starts at 1 for \0)
+    int stringSize = 1;
+    for (int i = 0; i < length; i++) stringSize += strlen(*((char **) args[i]->p_val));
+
+    // malloc memory
+    char *res = (char *) malloc(sizeof(char) * stringSize);
+
+    // copy / concat
+    strcpy(res, *((char **) args[0]->p_val));
+    for (int i = 1; i < length; i++) strcat(res, *((char **) args[i]->p_val));
+
+    // malloc pointer
+    char **p_res = (char **) malloc(sizeof(char *));
+    *p_res = res;
+
+    return Generic_new(TYPE_STRING, p_res, 0);
+  } else {
+    // list case
+    // create array of lists
+    List *lists[length];
+    
+    // populate
+    for (int i = 0; i < length; i++) lists[i] = ((List *) args[i]->p_val);
+
+    // return new generic using List_join
+    return Generic_new(TYPE_LIST, List_join(lists, length), 0);
+  }
+}
+
+// (get list index1) or (get list index1 index2)
+// returns item from list/string, or sublist/substring
+Generic *StdLib_get(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(2, 3, length, lineNumber);
+
+  enum Type allowedTypes1[] = {TYPE_LIST, TYPE_STRING};
+  validateType(allowedTypes1, 2, args[0]->type, 1, lineNumber, "get");
+
+  enum Type allowedTypes2[] = {TYPE_INT};
+  validateType(allowedTypes2, 1, args[1]->type, 2, lineNumber, "get");
+  if (length == 3) validateType(allowedTypes2, 1, args[2]->type, 3, lineNumber, "get");
+
+  if (args[0]->type == TYPE_LIST) {
+    int inputLength = List_length((List *) args[0]->p_val);
+    validateRange(args[1]->p_val, 0, inputLength - 1, 2, lineNumber, "get");
+
+    // single item from list
+    if (length == 2) return List_get((List *) (args[0]->p_val), *((int *) args[1]->p_val));
+
+    // multiple items from list
+    else if (length == 3) {
+      validateRange(args[2]->p_val, *((int *) args[1]->p_val) + 1, inputLength, 3, lineNumber, "get");
+
+      return Generic_new(TYPE_LIST, List_sublist(
+        (List *) (args[0]->p_val), 
+        *((int *) args[1]->p_val), 
+        *((int *) args[2]->p_val)
+      ), 0);
+    }
+
+  } else if (args[0]->type == TYPE_STRING) {
+    int inputLength = strlen(*((char **) args[0]->p_val));
+    validateRange(args[1]->p_val, 0, inputLength - 1, 2, lineNumber, "get");
+
+    if (length == 2) {
+      // single item from string
+      char *res = malloc(sizeof(char) * 2);
+      res[0] = (*((char **) args[0]->p_val))[*((int *) args[1]->p_val)];
+      res[1] = '\0';
+
+      char **p_res = (char **) malloc(sizeof(char *));
+      *p_res = res;
+
+      return Generic_new(TYPE_STRING, p_res, 0);
+    } else if (length == 3) {
+      // mutliple items from string
+      validateRange(args[2]->p_val, *((int *) args[1]->p_val) + 1, inputLength, 3, lineNumber, "get");
+
+      // create substring
+      int start = *((int *) args[1]->p_val);
+      int end = *((int *) args[2]->p_val);
+
+      char *res = malloc(sizeof(char) * (end - start + 1));
+      strncpy(
+        res, 
+        &(*((char **) args[0]->p_val))[start], 
+        end - start
+      );
+      
+      res[end - start] = 0;
+
+      // create pointer
+      char **p_res = (char **) malloc(sizeof(char *));
+      *p_res = res;
+
+      // return
+      return Generic_new(TYPE_STRING, p_res, 0);
+    }
   }
 
-  return Generic_new(TYPE_LIST, List_put((List *) (args[0]->p_val), args[1], *((int *) args[2]->p_val)), 0);
+  return Generic_new(TYPE_VOID, NULL, 0);
+}
+
+// (put list item index) or (put list item)
+// returns list or string, modified with item at index, if no index supplied, end is assumed
+Generic *StdLib_put(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+
+  // input validation
+  validateArgCount(2, 3, length, lineNumber);
+
+  enum Type allowedTypes1[] = {TYPE_LIST, TYPE_STRING};
+  validateType(allowedTypes1, 2, args[0]->type, 1, lineNumber, "put");
+
+  enum Type allowedTypes2[] = {TYPE_STRING};
+  if (args[0]->type == TYPE_STRING) 
+    validateType(allowedTypes2, 1, args[1]->type, 2, lineNumber, "put");
+
+  if (length == 3) {
+    enum Type allowedTypes3[] = {TYPE_INT};
+    validateType(allowedTypes3, 1, args[2]->type, 3, lineNumber, "put");
+
+    int inputLength = args[0]->type == TYPE_LIST 
+      ? List_length((List *) args[0]->p_val)
+      : strlen(*((char **) args[0]->p_val));
+    validateRange(args[2]->p_val, 0, inputLength, 3, lineNumber, "put");
+  }
+
+  if (args[0]->type == TYPE_LIST) {
+    
+    // list case
+    if (length == 2) {
+      return Generic_new(TYPE_LIST, List_put(
+        (List *) (args[0]->p_val), args[1], List_length((List *) (args[0]->p_val))
+      ), 0);
+    } else if (length == 3) {
+      return Generic_new(TYPE_LIST, List_put(
+        (List *) (args[0]->p_val), args[1], *((int *) args[2]->p_val)
+      ), 0); 
+    }
+  } else if (args[0]->type == TYPE_STRING) {
+
+    // string case
+    if (length == 2) {
+
+      // when an index is not supplied, put simply acts like join
+      return StdLib_join(p_scope, args, length, lineNumber);
+    } else if (length == 3) {
+      int stringSize = strlen(*((char **) args[0]->p_val)) + strlen(*((char **) args[1]->p_val)) + 1;
+
+      // malloc memory
+      char *res = (char *) malloc(sizeof(char) * stringSize);
+
+
+      // copy / concat
+      strncpy(res, *((char **) args[0]->p_val), *((int *) args[2]->p_val));
+      res[*((int *) args[2]->p_val)] = '\0';
+      
+      strcat(res, *((char **) args[1]->p_val));
+      strcat(res, &((*((char **) args[0]->p_val))[*((int *) args[2]->p_val)]));
+
+      // pointer
+      char **p_res = (char **) malloc(sizeof(char *));
+      *p_res = res;
+
+      // return
+      return Generic_new(TYPE_STRING, p_res, 0);
+    }
+  }
+
+  return Generic_new(TYPE_VOID, NULL, 0);
 }
 
 // (delete list index)
@@ -827,12 +962,8 @@ Scope *newGlobal(int argc, char *argv[]) {
     args[i] = Generic_new(TYPE_STRING, p_val, 0);
   }
 
-  int *p_argsCount = (int *) malloc(sizeof(int));
-  *p_argsCount = argc;
-
   // add arguments and arguments count
   Scope_set(p_global, "arguments", Generic_new(TYPE_LIST, List_new(args, argc), 0));
-  Scope_set(p_global, "arguments_count", Generic_new(TYPE_INT, p_argsCount, 0));
 
   // free arguments memory (as List_new does a copy)
   for (int i = 0; i < argc; i++) {
@@ -875,9 +1006,12 @@ Scope *newGlobal(int argc, char *argv[]) {
   Scope_set(p_global, "string", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_string, 0));
   Scope_set(p_global, "float", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_float, 0));
 
-  Scope_set(p_global, "join", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_join, 0));
+  /* list and string */
   Scope_set(p_global, "list", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_list, 0));
+  Scope_set(p_global, "length", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_length, 0));
+  Scope_set(p_global, "join", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_join, 0));
   Scope_set(p_global, "get", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_get, 0));
+
   Scope_set(p_global, "put", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_put, 0));
   Scope_set(p_global, "delete", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_delete, 0));
 

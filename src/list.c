@@ -172,3 +172,81 @@ void List_free(List *p_target) {
 
   free(p_target);
 }
+
+// joins all lists into a single one, and returns
+List *List_join(List *lists[], int count) {
+  // initialize result
+  List *res = List_copy(lists[0]);
+
+  // for each list, itterate on res next item is null, and then add the list to res
+  ListNode *p_curr = res->p_head;
+  for (int i = 1; i < count; i++) {
+
+    // next list to add
+    List *nextList = List_copy(lists[i]);
+
+    // go to null, and add list
+    while (p_curr->p_next != NULL) p_curr = p_curr->p_next;
+    p_curr->p_next = nextList->p_head;
+
+    // frees List without freeing nodes
+    free(nextList);
+  }
+
+  return res;
+}
+
+// returns the sublist from index1 to index2
+List *List_sublist(List *p_target, int index1, int index2) {
+
+  // create copy
+  List *res = List_copy(p_target);
+
+  // get to index1
+  ListNode *p_curr = res->p_head;
+  ListNode *p_tmp;
+
+  for (int i = 0; i < index1; i++) {
+    // free items as we go
+    p_tmp = p_curr;
+    p_curr = p_curr->p_next;
+
+    Generic_free(p_tmp->p_val);
+    free(p_tmp);
+    p_tmp = NULL;
+  };
+  
+  // set item at index 1 to new head
+  res->p_head = p_curr;
+
+  // get to end of sublist
+  for (int i = 0; i < index2 - index1 - 1; i++) p_curr = p_curr->p_next;
+
+  // keep track of end
+  ListNode *p_end = p_curr;
+
+  // free items to end of list
+  p_curr = p_curr->p_next;
+  while (p_curr != NULL) {
+    p_tmp = p_curr;
+    p_curr = p_curr->p_next;
+
+    Generic_free(p_tmp->p_val);
+    free(p_tmp);
+  }
+  
+  // make sure list ends with NULL
+  p_end->p_next = NULL;
+  return res;
+}
+
+// get length of list
+int List_length(List *p_target) {
+  ListNode *p_curr = p_target->p_head;
+  int length = 0;
+  while (p_curr != NULL) {
+    p_curr = p_curr->p_next;
+    length++;
+  }
+  return length;
+}
