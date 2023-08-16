@@ -5,9 +5,9 @@
 #include <stdbool.h>
 #include "lex.h"
 #include "tokens.h"
+#include "string.h"
 
 // lex code with length fileLength into tokens
-// 
 int lex(Token *p_headToken, char *code, int fileLength) {
 
   // token count
@@ -69,13 +69,16 @@ int lex(Token *p_headToken, char *code, int fileLength) {
           printf("Syntax Error @ Line %i: Unexpected end of file before string closed.\n", lineNumber);
           exit(0);
         }
-      };
+      }
 
       // get substring and add token
       char *val = malloc(i - stringStart + 1);
       strncpy(val, &code[stringStart], i - stringStart);
       val[i - stringStart] = '\0';
-      Token_push(p_headToken, val, TOK_STRING, lineNumber);
+
+      Token_push(p_headToken, parseString(val), TOK_STRING, lineNumber);
+
+      free(val);
       tokenCount++;
 
     } else if (isdigit(c) > 0 || (c == '-' && isdigit(code[i + 1]) > 0)) {

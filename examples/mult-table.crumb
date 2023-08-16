@@ -1,4 +1,4 @@
-(map (map (map (range 10) {row y ->
+(print (reduce (map (map (range 10) {row y ->
   return (map (range 10) {item x ->
     return (multiply (add y 1) (add x 1))
   })
@@ -6,6 +6,6 @@
   return (reduce row {acc item i -> 
     return (join (string acc) " " (string item))
   })
-}) {row y ->
-  (print row)
-})
+}) {acc row y ->
+  return (join acc "\n" row)
+}))
