@@ -2,7 +2,7 @@ gcd = {a b ->
   return (if (is a 0) {
     return b
   } {
-    return (gcd (% b a) a)
+    return (gcd (remainder b a) a)
   })
 }
 

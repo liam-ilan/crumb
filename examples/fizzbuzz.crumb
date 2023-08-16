@@ -1,11 +1,11 @@
 (loop 100 {i -> 
-  (if (is (% i 15) 0) {
+  (if (is (remainder i 15) 0) {
     (print "fizzbuzz")
   } {
-    (if (is (% i 3) 0) {
+    (if (is (remainder i 3) 0) {
       (print "fizz")
     } {
-      (if (is (% i 5) 0) {
+      (if (is (remainder i 5) 0) {
         (print "buzz")
       } {
         (print i)

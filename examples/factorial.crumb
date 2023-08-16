@@ -1,9 +1,9 @@
-fact = {n ->
+factorial = {n ->
   return (if (is n 0) {
     return 1
   } {
-    return (* n (fact (- n 1)))
+    return (multiply n (factorial (subtract n 1)))
   })
 }
 
-(print (fact 7))
+(print (factorial 7))

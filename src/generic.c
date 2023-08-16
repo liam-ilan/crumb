@@ -55,7 +55,7 @@ void Generic_free(Generic *target) {
 char *getTypeString(enum Type type) {
   switch (type) {
     case TYPE_FLOAT: return "float";
-    case TYPE_INT: return "int";
+    case TYPE_INT: return "integer";
     case TYPE_FUNCTION: return "function";
     case TYPE_STRING: return "string";
     case TYPE_VOID: return "void";

@@ -1,10 +1,10 @@
 // divides 2 if divisible by 2
 // multiplies by 3 and adds 1 if not
 f = {n ->
-  return (if (is (% n 2) 0) {
-    return (/ n 2)
+  return (if (is (remainder n 2) 0) {
+    return (integer (divide n 2))
   } {
-    return (+ (* n 3) 1)
+    return (add (multiply n 3) 1)
   })
 }
 
@@ -13,11 +13,11 @@ stopping_time = {n ->
   return (if (is n 1) {
     return 0
   } {
-    return (+ 1 (stopping_time (f n)))
+    return (add 1 (stopping_time (f n)))
   })
 }
 
 // run for first 10000 positive integers
 (loop 10000 {n ->
-  (print "Stopping time for" (+ n 1) "-" (stopping_time (+ n 1)))
+  (print "Stopping time for" (add n 1) "-" (stopping_time (add n 1)))
 })

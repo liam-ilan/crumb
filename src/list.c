@@ -59,7 +59,10 @@ List *List_copy(List *p_target) {
 // make a new list struct, given a list of generics
 List *List_new(Generic *items[], int length) {
   // edge case
-  if (length == 0) return NULL;
+  List *res = (List *) malloc(sizeof(List));
+  res->p_head = NULL;
+
+  if (length == 0) return res;
 
   // create first node
   ListNode *p_head = (ListNode *) malloc(sizeof(ListNode));
@@ -83,12 +86,12 @@ List *List_new(Generic *items[], int length) {
   }
 
 
-  List *res = (List *) malloc(sizeof(List));
   res->p_head = p_head;
 
   return res;
 }
 
+// get item from list
 Generic *List_get(List *p_target, int index) {
 
   // go to index
@@ -100,8 +103,8 @@ Generic *List_get(List *p_target, int index) {
   return Generic_copy(p_curr->p_val);
 }
 
-// put item at index
-List *List_put(List *p_target, Generic *p_val, int index) {
+// insert item at index
+List *List_insert(List *p_target, Generic *p_val, int index) {
   List *res = List_copy(p_target);
 
   ListNode *p_head = res->p_head;
@@ -130,6 +133,7 @@ List *List_put(List *p_target, Generic *p_val, int index) {
   return res;
 }
 
+// delete item from list
 List *List_delete(List *p_target, int index) {
   List *res = List_copy(p_target);
   ListNode *p_head = res->p_head;
@@ -159,6 +163,7 @@ List *List_delete(List *p_target, int index) {
   return res;
 }
 
+// free list
 void List_free(List *p_target) {
   ListNode* p_curr = p_target->p_head;
   ListNode* p_tmp;
@@ -240,6 +245,22 @@ List *List_sublist(List *p_target, int index1, int index2) {
   return res;
 }
 
+// set item in list
+List *List_set(List *p_target, Generic *p_val, int index) {
+  // make copy for result
+  List *res = List_copy(p_target);
+
+  // increment to correct node
+  ListNode *p_curr = res->p_head;
+  for (int i = 0; i < index; i++) p_curr = p_curr->p_next;
+
+  // replace old value with new value, and free old value
+  Generic_free(p_curr->p_val);
+  p_curr->p_val = Generic_copy(p_val);
+
+  return res;
+}
+
 // get length of list
 int List_length(List *p_target) {
   ListNode *p_curr = p_target->p_head;
@@ -249,4 +270,55 @@ int List_length(List *p_target) {
     length++;
   }
   return length;
+}
+
+// delete multiple items from list from index1 to index2
+// delete item from list
+List *List_deleteMultiple(List *p_target, int index1, int index2) {
+  List *res = List_copy(p_target);
+  ListNode *p_head = res->p_head;
+
+  if (index1 == 0) {
+    
+    ListNode *p_curr = p_head;
+    ListNode *p_tmp;
+
+    // edge case, simply increment the head, and free
+    for (int i = 0; i < index2; i++) {
+      p_tmp = p_curr;
+      p_curr = p_curr->p_next;
+
+      Generic_free(p_tmp->p_val);
+      free(p_tmp);
+    }
+
+    res->p_head = p_curr;
+
+  } else {
+
+    // go to item before index1
+    ListNode *p_curr = p_head;
+    for (int i = 0; i < index1 - 1; i++) p_curr = p_curr->p_next;
+    
+    // store this item for later
+    ListNode *p_end = p_curr;
+
+    // delete all items after p_end
+    p_curr = p_curr->p_next;
+
+    ListNode *p_tmp;
+    for (int i = 0; i < index2 - index1; i++) {
+      p_tmp = p_curr;
+      p_curr = p_curr->p_next;
+
+      Generic_free(p_tmp->p_val);
+      free(p_tmp);
+    };
+
+    // append both lists, seperated by deleted items, together
+    p_end->p_next = p_curr;
+
+  }
+
+  return res;
 }

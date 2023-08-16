@@ -5,7 +5,7 @@ fib = {n ->
     return (if (is n 1) {
       return 1
     } {
-      return (+ (fib (- n 1)) (fib (- n 2)))
+      return (add (fib (subtract n 1)) (fib (subtract n 2)))
     })
   })
 }

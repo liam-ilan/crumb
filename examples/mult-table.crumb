@@ -1,15 +1,11 @@
-// returns a row of the multiplication table as a string
-// x is the number of values to generate
-// n is the number to multiply by (for example the 2nd row in the multiplication table has n = 2)
-createRow = {x n ->
-  return (if (is x 1) {
-    return (str (* n x))
-  } {
-    return (join (join (createRow (- x 1) n) " ") (str (* n x)))
+(map (map (map (range 10) {row y ->
+  return (map (range 10) {item x ->
+    return (multiply (add y 1) (add x 1))
   })
-}
-
-// print table
-(loop 10 {n -> 
-  (print (createRow 10 (+ n 1)))
+}) {row y ->
+  return (reduce row {acc item i -> 
+    return (join (string acc) " " (string item))
+  })
+}) {row y ->
+  (print row)
 })

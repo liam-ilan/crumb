@@ -168,158 +168,34 @@ end
   - `index1`: `int`.
   - `index2`: `int`.
 
-- `(put x item)` or `(put x item index)` ✅
-  - Returns a `list` or `string`, in which `item` was inserted into `x` at `index`.
+- `(insert x item)` or `(insert x item index)` ✅
+  - Returns a `list` or `string`, in which `item` was inserted into `x` at `index`. Does not overwrite any data.
   - If `index` not supplied, `item` is assumed to be put at the end of `x`.
   - `x`: `string` or `list`.
   - `index`: `int`.
   
-- `(delete x index1)` or `(delete x index1 index2)`
+- `(set x item index)` ✅
+  - Returns a `list` or `string`, in which the item located at `index` in `x`, was replaced by `item`.Overwrites data.
+  - `x`: `string` or `list`.
+  - `index`: `int`.
+
+- `(delete x index1)` or `(delete x index1 index2)` ✅
   - Returns a `string` or `list`, where `index1` was removed from `x`.
   - If `index2` is supplied, all items from `index1` to `index2` are removed, not including `index2`.
   - `x`: `string` or `list`.
   - `index1`: `int`.
   - `index2`: `int`.
 
-- `(map arr fn)`
+- `(map arr fn)` ✅
   - Returns a list created by calling `fn` on every item of `arr`, and using the values returned by `fn` to populate the returned array.
-  - `arr`: `list`.
+  - `arr`: `list`
   - `fn`: `function`, which is in the form `{item i -> ...}`, where `item` is the current item, and `i` is the current index.
 
-- `(reduce arr fn)`
+- `(reduce arr fn)` ✅
   - Returns a value, computed via running `fn` on every item in `arr`
   - `arr`: `list`.
-  - `fn`: `function`, which is in the form `{item acc item i -> ...}`, where `item` is the current item, `acc` is the accumulator (the result of `fn` from the last item), and `i` is the current index.
+  - `fn`: `function`, which is in the form `{item acc item i -> ...}`, where `item` is the current item, `acc` is the accumulator (the result of `fn` from the last item), and `i` is the current index. `acc` is assumed to be the first item for the first iteration.
 
-- `(range n)`
-  - Returns a list with the integers from `0` to `n`.
+- `(range n)` ✅
+  - Returns a list with the integers from `0` to `n`, not including `n`.
   - `n`: `integer`, which is greater than or equal to 0.
-
-## Sample Programs
-### Hello World
-```
-(print "hello world")
-```
-
-### Fizzbuzz
-```
-(loop 100 {i -> 
-  (if (is (% i 15) 0) {
-    (print "fizzbuzz")
-  } {
-    (if (is (% i 3) 0) {
-      (print "fizz")
-    } {
-      (if (is (% i 5) 0) {
-        (print "buzz")
-      } {
-        (print i)
-      })
-    })
-  })
-})
-```
-
-### Factorial
-```
-fact = {n ->
-  return (if (is n 0) {
-    return 1
-  } {
-    return (* n (fact (- n 1)))
-  })
-}
-
-(print (fact 7))
-```
-
-### Fibonacci
-```
-fib = {n ->
-  return (if (is n 0) {
-    return 0
-  } {
-    return (if (is n 1) {
-      return 1
-    } {
-      return (+ (fib (- n 1)) (fib (- n 2)))
-    })
-  })
-}
-
-(print (fib 26))
-```
-
-### Mean of Three Items
-```
-mean = {a b c -> return (/ (+ (+ a b) c) 3)}
-(print (mean 7 8 8))
-```
-
-### Collatz
-```
-// divides 2 if divisible by 2
-// multiplies by 3 and adds 1 if not
-f = {n ->
-  return (if (is (% n 2) 0) {
-    return (/ n 2)
-  } {
-    return (+ (* n 3) 1)
-  })
-}
-
-// returns stopping_time of n
-stopping_time = {n ->
-  return (if (is n 1) {
-    return 0
-  } {
-    return (+ 1 (stopping_time (f n)))
-  })
-}
-
-// run for first 10000 positive integers
-(loop 10000 {n ->
-  (print "Stopping time for" (+ n 1) "-" (stopping_time (+ n 1)))
-})
-```
-
-### Cheating Quine
-```
-(print (read_file "main.crumb"))
-```
-
-### Euclidean Algorithim for Finding the GCD
-```
-gcd = {a b ->
-  return (if (is a 0) {
-    return b
-  } {
-    return (gcd (% b a) a)
-  })
-}
-
-(loop 20 {x ->
-  (loop 20 {y ->
-    (print "The gcd of" x "and" y "is" (gcd x y))
-  })
-})
-```
-
-### Multiplication Table
-```
-// returns a row of the multiplication table as a string
-// x is the number of values to generate
-// n is the number to multiply by (for example the 2nd row in the multiplication table has n = 2)
-createRow = {x n ->
-  return (if (is x 1) {
-    return (str (* n x))
-  } {
-    return (join (join (createRow (- x 1) n) " ") (str (* n x)))
-  })
-}
-
-// print table
-(loop 10 {n -> 
-  (print (createRow 10 (+ n 1)))
-})
-```
