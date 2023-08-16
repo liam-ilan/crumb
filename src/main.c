@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   /* evaluate */
   printf("\nEVAL\n");
   Scope *p_global = newGlobal(argc, argv);
-  Generic *res = eval(p_headAstNode, p_global);
+  Generic *res = eval(p_headAstNode, p_global, 0);
 
   // get exit code
   int exitCode = 0;

@@ -6,7 +6,7 @@
 
 // skips closure, such as function or application
 // particulary useful for parsing statement
-// p_p_curr is the pointer to the pointer to then token containing the open of the closure ("(" or "{")
+// p_p_curr is the pointer to the pointer to the token containing the open of the closure ("(" or "{")
 // open and close are the respective token types designating the open and close types
 // p_index is a pointer to the loop itterating over the tokens
 // length is the length of the parent expression
@@ -294,6 +294,7 @@ AstNode *parseFunction(Token *p_head, int length) {
 
   while (p_curr->type != TOK_ARROW && i < length - 1) {
     p_curr = p_curr->p_next;
+    if (p_curr->type == TOK_FUNCOPEN) skipClosure(&i, &p_curr, TOK_FUNCOPEN, TOK_FUNCCLOSE, length);
     i++;
   }
 

@@ -146,7 +146,7 @@ Generic *applyFunc(Generic *func, Scope *p_scope, Generic *args[], int length, i
     }
 
     // run statement with local scope
-    Generic *res = eval(p_curr, p_local);
+    Generic *res = eval(p_curr, p_local, 0);
 
     // free scope and return
     Scope_free(p_local);

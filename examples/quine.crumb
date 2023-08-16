@@ -1,1 +1,1 @@
-(print (read_file "quine.crumb"))
+(print (read_file (get arguments 1)))

@@ -6,7 +6,16 @@
 #include "scope.h"
 
 // evaluates an ast in a given scope
-Generic *eval(AstNode *p_head, Scope *p_scope) {
+Generic *eval(AstNode *p_head, Scope *p_scope, int depth) {
+  // protect against infinite recursion
+  if (depth > 20000) {
+    printf(
+      "Runtime Error @ Line %i: Exceeded recursion limit.\n", 
+      p_head->lineNumber
+    );
+    exit(0);
+  }
+
   if (p_head->opcode == OP_INT) {
     // int case
     int *p_val = (int *) malloc(sizeof(int));
@@ -33,7 +42,7 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
   } else if (p_head->opcode == OP_RETURN) {
     // simply return the value
 
-    Generic *res = eval(p_head->p_headChild, p_scope);
+    Generic *res = eval(p_head->p_headChild, p_scope, depth + 1);
     Generic *copy = Generic_copy(res);
     if (res->refCount == 0) Generic_free(res);
     return copy;
@@ -44,9 +53,9 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
     AstNode *p_curr = p_head->p_headChild;
     while (p_curr != NULL) {
       // if return found, return value out of statement, else just eval
-      if (p_curr->opcode == OP_RETURN) return eval(p_curr, p_scope);
+      if (p_curr->opcode == OP_RETURN) return eval(p_curr, p_scope, depth + 1);
       else {
-        Generic *res = eval(p_curr, p_scope);
+        Generic *res = eval(p_curr, p_scope, depth + 1);
         if (res->refCount == 0) Generic_free(res);
       }
 
@@ -62,7 +71,7 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
 
   } else if (p_head->opcode == OP_ASSIGNMENT) {
     // assignment case
-    Generic *p_val = eval(p_head->p_headChild->p_next, p_scope);
+    Generic *p_val = eval(p_head->p_headChild->p_next, p_scope, depth + 1);
     Scope_set(p_scope, p_head->p_headChild->val, p_val);
     
     return Generic_new(TYPE_VOID, NULL, 0);
@@ -75,7 +84,7 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
   } else if (p_head->opcode == OP_APPLICATION) {
     // application case
     // get function
-    Generic *func = eval(p_head->p_headChild, p_scope);
+    Generic *func = eval(p_head->p_headChild, p_scope, depth + 1);
 
     if (func->type == TYPE_FUNCTION) {
       // if function found, create new scope, with current scope as parent
@@ -87,7 +96,7 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
 
       // set vars in local scope
       while (p_currApplyArg != NULL && p_currFuncArg->opcode != OP_STATEMENT) {
-        Generic *p_val = eval(p_currApplyArg, p_scope);
+        Generic *p_val = eval(p_currApplyArg, p_scope, depth + 1);
         Scope_set(p_local, p_currFuncArg->val, p_val);
         p_currApplyArg = p_currApplyArg->p_next;
         p_currFuncArg = p_currFuncArg->p_next;
@@ -111,7 +120,7 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
       }
 
       // now p_currFuncArg points to the statement, so we eval it on the local scope, and return the result
-      Generic *res = eval(p_currFuncArg, p_local);
+      Generic *res = eval(p_currFuncArg, p_local, depth + 1);
 
       // free local scope
       Scope_free(p_local);
@@ -144,7 +153,7 @@ Generic *eval(AstNode *p_head, Scope *p_scope) {
       p_curr = p_head->p_headChild->p_next;
 
       while (i < count) {
-        args[i] = eval(p_curr, p_scope);
+        args[i] = eval(p_curr, p_scope, depth + 1);
         args[i]->refCount++;
 
         i++;

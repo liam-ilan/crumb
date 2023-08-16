@@ -1,0 +1,32 @@
+vowels = (list "a" "e" "i" "o" "u")
+
+// checks if a letter is a vowel
+is_vowel = {letter ->
+  return (reduce (map vowels {vowel i ->
+    return (is letter vowel)
+  }) {acc item i ->
+    return (or acc item)
+  })
+}
+
+// translate a word to pig latin
+translate = {word ->
+  return (if (is_vowel (get word 0)) {
+
+    // if a word starts with a vowel, simply add "way"
+    return (insert word "way")
+  } {
+    
+    // find first vowel
+    first_vowel = (loop (length word) {i ->
+      return (if (is_vowel (get word i)) {
+        return i
+      })
+    })
+
+    // return translated name
+    return (join (delete word 0 first_vowel) (get word 0 first_vowel) "ay")
+  })
+}
+
+(print (translate (get arguments 2)))
