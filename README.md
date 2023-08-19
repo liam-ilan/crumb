@@ -111,10 +111,17 @@ end
   - Returns -`a`.
   - `a`: `integer` or `float`
 
+- `(random)` ✅
+  - Returns a random number from 0 to 1.
+
 ### Control
 - `(loop count fn)` ✅
   - Applys `fn`, `count` times. If `fn` returns, the loop breaks, and `loop` returns whatever `fn` returned, else repeats until loop is completed.
   - `count`: `integer`, which is greater than or equal to `0`
+  - `fn`: `function`, which is in the form `{n -> ...}`, where n is the current loop index (starting at `0`).
+
+- `(until fn)` ✅
+  - Applys `fn`, and repeats until `fn` returns. `until` returns whatever `fn` returned.
   - `fn`: `function`, which is in the form `{n -> ...}`, where n is the current loop index (starting at `0`).
 
 - `(if condition fn1)` or `(if condition fn1 fn2)` ✅
@@ -124,6 +131,13 @@ end
   - `condition`: `integer`, which is `1` or `0`
   - `fn1`: `function`, which takes no arguments
   - `fn2`: `function`, which takes no arguments
+
+- `(wait time)` ✅
+  - Blocks execution for `time` amount of seconds.
+  - `time`: `integer` or `float`.
+
+- `(event)` ✅
+  - Returns the ANSI string corresponding with the current event. This may block for up to 0.1 seconds.
 
 ### File
 - `(read_file path)` ✅

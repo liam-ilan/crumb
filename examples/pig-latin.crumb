@@ -12,7 +12,6 @@ is_vowel = {letter ->
 // translate a word to pig latin
 translate = {word ->
   return (if (is_vowel (get word 0)) {
-
     // if a word starts with a vowel, simply add "way"
     return (insert word "way")
   } {
@@ -28,6 +27,5 @@ translate = {word ->
     return (join (delete word 0 first_vowel) (get word 0 first_vowel) "ay")
   })
 }
-
 
 (print (translate (get arguments 2)))

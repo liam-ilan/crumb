@@ -20,6 +20,7 @@ char *parseString(char *in) {
       else if (in[i + 1] == 'r') res[i - lost] = '\r';
       else if (in[i + 1] == 't') res[i - lost] = '\t';
       else if (in[i + 1] == 'v') res[i - lost] = '\v';
+      else if (in[i + 1] == 'e') res[i - lost] = '\e';
       else if (in[i + 1] == '\\') res[i - lost] = '\\';
       else if (in[i + 1] == '\"') res[i - lost] = '\"';
       else res[i - lost] = in[i + 1];

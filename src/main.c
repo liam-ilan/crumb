@@ -1,7 +1,6 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <signal.h>
 #include "tokens.h"
 #include "lex.h"
 #include "ast.h"
@@ -10,9 +9,13 @@
 #include "scope.h"
 #include "eval.h"
 #include "stdlib.h"
+#include "events.h"
+
+void exitHandler() {
+  exit(0);
+}
 
 int main(int argc, char *argv[]) {
-
   if (argc < 2) {
     printf("Error: Supply file path to read from.\n");
     return 0;
@@ -77,6 +80,13 @@ int main(int argc, char *argv[]) {
 
   /* evaluate */
   printf("\nEVAL\n");
+  initEvents();
+
+  // cleanly handle exit events
+  atexit(exitEvents);
+  signal(SIGTERM, exitHandler);
+  signal(SIGINT, exitHandler);
+
   Scope *p_global = newGlobal(argc, argv);
   Generic *res = eval(p_headAstNode, p_global, 0);
 

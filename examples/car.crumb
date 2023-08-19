@@ -1,0 +1,24 @@
+// returns a single frame of teh animation
+frame = {n ->
+  message = "                HELLO WORLD                "
+  return (join 
+    (reduce 
+      (map (range n) {item i -> return (get message i)})
+      {acc item i -> return (join acc item)}
+    ) 
+    "ō͡≡o"
+  )
+}
+
+// initialize
+(print "\e[H\e[2J\e[?25l")
+
+// render loop
+(until {n ->
+  (wait 0.1)
+  frame_number = (add (remainder n 40) 1)
+  (if (is frame_number 1) {(print "\e[H\e[J")})
+  (print (join "\e[HFrame: " (string frame_number) "\e[0m"))
+  (print (join "\e[" (string (add 31 (remainder frame_number 7))) "m" (frame frame_number) "\e[0m"))
+  (print "|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|")
+})

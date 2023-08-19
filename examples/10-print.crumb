@@ -1,0 +1,20 @@
+// loop forever
+(until {n ->
+
+  // print row
+  (print (reduce 
+    (map (range 50) {item i ->
+      return (if (integer (add (random) 0.5)) {
+        return "╱"
+      } {
+        return "╲"
+      })
+    })
+    {acc item i ->
+      return (join acc item)
+    }
+  ))
+
+  // wait for animation
+  (wait 0.1)
+})

@@ -1,0 +1,57 @@
+// split a string on a single char seperator
+split = {in sep ->
+  // convert to list of chars
+  arr = (map (range (length in)) {index _ -> return (get in index)})
+
+  // add an empty list to the start for reduction
+  arr = (insert arr (list "") 0)
+
+  // reduce list of chars to list of words
+  return (reduce arr {acc char _ ->
+    last_index = (subtract (length acc) 1)
+
+    return (if (is char sep) {
+      // add new item to result if we come across a seperator
+      return (insert acc "") 
+    } {
+      // else, add char to the last item
+      return (set acc (insert (get acc last_index) char) last_index)
+    })
+  })
+}
+
+// init
+(print "\e[H\e[2J\e[?25l")
+
+// render loop
+(until {n ->
+
+  // get current event
+  curr = (event)
+
+  // if it is a mouse event
+  coords = (if (greater_than (length curr) 6) {
+    return (if (is (get curr 0 5) "\e[<35") {
+      
+      // take the rest of the curr, and split on ; to obtain the coordinates
+      return (map 
+        (split (get curr 6 (subtract (length curr) 1)) ";") 
+        {item i -> return (integer item)
+      })
+    } {
+      return "no change"
+    })
+  } {
+    return "no change"
+  })
+
+  // if there was a change, rerender
+  (if (not (is coords "no change")) {
+
+    // clear
+    (print "\e[2J")
+    escape_code = (join "\e[" (string (get coords 1)) ";" (string (get coords 0)) "H")
+    (print escape_code "🐟 NOM NOM NOM")
+  })
+})
+

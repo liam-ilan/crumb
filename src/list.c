@@ -118,6 +118,8 @@ List *List_insert(List *p_target, Generic *p_val, int index) {
 
     // set new head
     res->p_head = p_new;
+
+    return res;
   }
 
   // loop to 1 before the index

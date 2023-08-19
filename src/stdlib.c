@@ -3,12 +3,15 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
+
 #include "stdlib.h"
 #include "generic.h"
 #include "ast.h"
 #include "scope.h"
 #include "eval.h"
 #include "list.h"
+#include "events.h"
 
 /* tools, used later in stdlib */
 // validate number of arguments
@@ -512,6 +515,17 @@ Generic *StdLib_negative(Scope *p_scope, Generic *args[], int length, int lineNu
   }
 }
 
+// (random)
+// returns random number from 0 to 1
+Generic *StdLib_random(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(0, 0, length, lineNumber);
+
+  double *p_res = (double *) malloc(sizeof(double));
+  *p_res = (double) rand() / (double) RAND_MAX;
+  
+  return Generic_new(TYPE_FLOAT, p_res, 0);
+}
+
 /* control */
 // (loop n f)
 // applys f, n times, passing the current index to f
@@ -545,6 +559,36 @@ Generic *StdLib_loop(Scope *p_scope, Generic *args[], int length, int lineNumber
   return Generic_new(TYPE_VOID, NULL, 0);
 }
 
+// (until f)
+// runs until f returns
+Generic *StdLib_until(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(1, 1, length, lineNumber);
+
+  enum Type allowedTypes[] = {TYPE_NATIVEFUNCTION, TYPE_FUNCTION};
+  validateType(allowedTypes, 2, args[0]->type, 1, lineNumber, "while");
+
+  // flags and index
+  int i = 0;
+
+  // loop
+  while (true) {
+
+    // get index
+    int *p_i = (int *) malloc(sizeof(int));
+    *p_i = i;
+    Generic *newArgs[1] = {Generic_new(TYPE_INT, p_i, 0)};
+
+    // callback
+    Generic *res = applyFunc(args[0], p_scope, newArgs, 1, lineNumber);
+
+    // if returned something, stop, else continue
+    if (res->type != TYPE_VOID) return res;
+    else Generic_free(res);
+    
+    i++;
+  }
+}
+
 // (if c f g*)
 // applys f if c == 1
 // applys g or nothing if c == 0
@@ -565,6 +609,33 @@ Generic *StdLib_if(Scope *p_scope, Generic *args[], int length, int lineNumber) 
   else if (length == 3 && *((int *) args[0]->p_val) == 0) return applyFunc(args[2], p_scope, NULL, 0, lineNumber);
 
   return Generic_new(TYPE_VOID, NULL, 0);
+}
+
+// (wait t)
+// waits t seconds
+Generic *StdLib_wait(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(1, 1, length, lineNumber);
+  enum Type allowedTypes[] = {TYPE_INT, TYPE_FLOAT};
+  validateType(allowedTypes, 2, args[0]->type, 1, lineNumber, "wait");
+
+  int initialTime = clock();
+  while (
+    (((double) clock()) - ((double) initialTime)) / ((double) CLOCKS_PER_SEC)
+    < (args[0]->type == TYPE_INT ? *((int *) args[0]->p_val) : *((double *) args[0]->p_val))
+  ) {}
+  
+  return Generic_new(TYPE_VOID, NULL, 0);
+}
+
+// (event)
+// returns a string containing the current event
+Generic *StdLib_event(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(0, 0, length, lineNumber);
+
+  char **p_res = (char **) malloc(sizeof(char *));
+  *p_res = event();
+  
+  return Generic_new(TYPE_STRING, p_res, 0);
 }
 
 /* file */
@@ -867,20 +938,20 @@ Generic *StdLib_insert(Scope *p_scope, Generic *args[], int length, int lineNumb
   validateArgCount(2, 3, length, lineNumber);
 
   enum Type allowedTypes1[] = {TYPE_LIST, TYPE_STRING};
-  validateType(allowedTypes1, 2, args[0]->type, 1, lineNumber, "put");
+  validateType(allowedTypes1, 2, args[0]->type, 1, lineNumber, "insert");
 
   enum Type allowedTypes2[] = {TYPE_STRING};
   if (args[0]->type == TYPE_STRING) 
-    validateType(allowedTypes2, 1, args[1]->type, 2, lineNumber, "put");
+    validateType(allowedTypes2, 1, args[1]->type, 2, lineNumber, "insert");
 
   if (length == 3) {
     enum Type allowedTypes3[] = {TYPE_INT};
-    validateType(allowedTypes3, 1, args[2]->type, 3, lineNumber, "put");
+    validateType(allowedTypes3, 1, args[2]->type, 3, lineNumber, "insert");
 
     int inputLength = args[0]->type == TYPE_LIST 
       ? List_length((List *) args[0]->p_val)
       : strlen(*((char **) args[0]->p_val));
-    validateRange(args[2]->p_val, 0, inputLength, 3, lineNumber, "put");
+    validateRange(args[2]->p_val, 0, inputLength, 3, lineNumber, "insert");
   }
 
   if (args[0]->type == TYPE_LIST) {
@@ -1177,6 +1248,10 @@ Generic *StdLib_range(Scope *p_scope, Generic *args[], int length, int lineNumbe
 
 // creates a new global scope
 Scope *newGlobal(int argc, char *argv[]) {
+
+  // initialize random number generator for (random)
+  srand(time(NULL) + clock());
+
   // create global scope
   Scope *p_global = Scope_new(NULL);
 
@@ -1225,10 +1300,14 @@ Scope *newGlobal(int argc, char *argv[]) {
   Scope_set(p_global, "multiply", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_multiply, 0));
   Scope_set(p_global, "remainder", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_remainder, 0));
   Scope_set(p_global, "negative", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_negative, 0));
+  Scope_set(p_global, "random", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_random, 0));
 
   /* control */
   Scope_set(p_global, "loop", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_loop, 0));
+  Scope_set(p_global, "until", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_until, 0));
   Scope_set(p_global, "if", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_if, 0));
+  Scope_set(p_global, "wait", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_wait, 0));
+  Scope_set(p_global, "event", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_event, 0));
 
   /* file */
   Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_read_file, 0));
@@ -1250,6 +1329,5 @@ Scope *newGlobal(int argc, char *argv[]) {
   Scope_set(p_global, "map", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_map, 0));
   Scope_set(p_global, "reduce", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_reduce, 0));
   Scope_set(p_global, "range", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_range, 0));
-
   return p_global;
 }
