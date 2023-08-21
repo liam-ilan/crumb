@@ -80,13 +80,13 @@ void validateRange(int *p_val, int min, int max, int argNum, int lineNumber, cha
         "Runtime Error @ Line %i: %s function expected a minimum value of %i for argument #%i, %i supplied instead.\n", 
         lineNumber, funcName, min, argNum, *p_val
       );
-      exit(0);
+    } else {
+      printf(
+        "Runtime Error @ Line %i: %s function expected a value in the range [%i, %i] for argument #%i, %i supplied instead.\n", 
+        lineNumber, funcName, min, max, argNum, *p_val
+      );
     }
 
-    printf(
-      "Runtime Error @ Line %i: %s function expected a value from %i to %i for argument #%i, %i supplied instead.\n", 
-      lineNumber, funcName, min, max, argNum, *p_val
-    );
     exit(0);
   }
 }
@@ -151,8 +151,12 @@ Generic *applyFunc(Generic *func, Scope *p_scope, Generic *args[], int length, i
     // run statement with local scope
     Generic *res = eval(p_curr, p_local, 0);
 
-    // free scope and return
+    // free scope
     Scope_free(p_local);
+
+    // free function if no references
+    if (func->refCount == 0) Generic_free(func);
+    
     return res;
 
   } else {
@@ -172,8 +176,6 @@ Generic *StdLib_print(Scope *p_scope, Generic *args[], int length, int lineNumbe
     Generic_print(args[i]);
     if (i < length - 1) printf(" ");
   }
-
-  printf("\n");
 
   return Generic_new(TYPE_VOID, NULL, 0);
 }
@@ -494,27 +496,6 @@ Generic *StdLib_remainder(Scope *p_scope, Generic *args[], int length, int lineN
   return Generic_new(TYPE_INT, p_res, 0);
 }
 
-// (negative a)
-// returns -a
-Generic *StdLib_negative(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(1, 1, length, lineNumber);
-  
-  enum Type allowedTypes[] = {TYPE_INT, TYPE_FLOAT};
-  validateType(allowedTypes, 2, args[0]->type, 1, lineNumber, "negative");
-  
-  if (args[0]->type == TYPE_INT) {
-    // int case
-    int *p_res = (int *) malloc(sizeof(int));
-    *p_res = -(*((int *) args[0]->p_val));
-    return Generic_new(TYPE_INT, p_res, 0);
-  } else {
-    // float case
-    double *p_res = (double *) malloc(sizeof(double));
-    *p_res = -(*((double *) args[0]->p_val));
-    return Generic_new(TYPE_FLOAT, p_res, 0);
-  }
-}
-
 // (random)
 // returns random number from 0 to 1
 Generic *StdLib_random(Scope *p_scope, Generic *args[], int length, int lineNumber) {
@@ -559,13 +540,25 @@ Generic *StdLib_loop(Scope *p_scope, Generic *args[], int length, int lineNumber
   return Generic_new(TYPE_VOID, NULL, 0);
 }
 
-// (until f)
-// runs until f returns
+// (until stop f initial)
+// runs until f returns stop
+// passes the last returned value to f, as well as the current index
+// intial acts like the first "state", unless another state supplied
 Generic *StdLib_until(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(1, 1, length, lineNumber);
+  validateArgCount(2, 3, length, lineNumber);
 
+  // verify 2nd arg is a function
   enum Type allowedTypes[] = {TYPE_NATIVEFUNCTION, TYPE_FUNCTION};
-  validateType(allowedTypes, 2, args[0]->type, 1, lineNumber, "while");
+  validateType(allowedTypes, 2, args[1]->type, 2, lineNumber, "until");
+
+  // set up state
+  Generic *state;
+
+  if (length == 3) {
+    state = Generic_copy(args[2]);
+  } else {
+    state = Generic_new(TYPE_VOID, NULL, 0);
+  }
 
   // flags and index
   int i = 0;
@@ -576,15 +569,23 @@ Generic *StdLib_until(Scope *p_scope, Generic *args[], int length, int lineNumbe
     // get index
     int *p_i = (int *) malloc(sizeof(int));
     *p_i = i;
-    Generic *newArgs[1] = {Generic_new(TYPE_INT, p_i, 0)};
+    Generic *newArgs[2] = {Generic_copy(state), Generic_new(TYPE_INT, p_i, 0)};
 
     // callback
-    Generic *res = applyFunc(args[0], p_scope, newArgs, 1, lineNumber);
+    Generic *res = applyFunc(args[1], p_scope, newArgs, 2, lineNumber);
 
-    // if returned something, stop, else continue
-    if (res->type != TYPE_VOID) return res;
-    else Generic_free(res);
-    
+    // handle state
+    int *p_comp = Generic_is(res, args[0]);
+    if (*p_comp) {
+      Generic_free(res);
+      free(p_comp);
+      return state;
+    } else {
+      Generic_free(state);
+      state = res;
+      free(p_comp);
+    }
+
     i++;
   }
 }
@@ -785,6 +786,27 @@ Generic *StdLib_float(Scope *p_scope, Generic *args[], int length, int lineNumbe
   }
 
   return Generic_new(TYPE_FLOAT, p_res, 0);
+}
+
+// (type arg)
+// returns a string with the type of arg
+Generic *StdLib_type(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(1, 1, length, lineNumber);
+  
+  // get type
+  char *type = getTypeString(args[0]->type);
+  
+  // malloc memory for result and write
+  char *res = malloc(sizeof(char) * (strlen(type) + 1));
+  strcpy(res, type);
+  res[strlen(type)] = '\0';
+
+  // pointer to string
+  char **p_res = (char **) malloc(sizeof(char *));
+  *p_res = res;
+
+  // return new generic
+  return Generic_new(TYPE_STRING, p_res, 0);
 }
 
 /* list and string */
@@ -1176,10 +1198,11 @@ Generic *StdLib_map(Scope *p_scope, Generic *args[], int length, int lineNumber)
   return res;
 }
 
-// (reduce list fn)
+// (reduce list fn acc)
 // applys fn to every item in list, returns single reduced item
+// acc is initial accumulator (assumed to be void if not supplied)
 Generic *StdLib_reduce(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, 2, length, lineNumber);
+  validateArgCount(2, 3, length, lineNumber);
 
   enum Type allowedTypes1[] = {TYPE_LIST};
   validateType(allowedTypes1, 1, args[0]->type, 1, lineNumber, "reduce");
@@ -1193,11 +1216,15 @@ Generic *StdLib_reduce(Scope *p_scope, Generic *args[], int length, int lineNumb
   }
   
   // create accumulator
-  Generic *p_acc = Generic_copy(p_curr->p_val);
-
+  Generic *p_acc;
+  if (length == 3) {
+    p_acc = Generic_copy(args[2]);
+  } else {
+    p_acc = Generic_new(TYPE_VOID, NULL, 0);
+  }
+ 
   // loop on every item from 2nd item on list
-  p_curr = p_curr->p_next;
-  int i = 1;
+  int i = 0;
   while (p_curr != NULL) {
     
     // create pointer for index, to create generic for args
@@ -1299,9 +1326,8 @@ Scope *newGlobal(int argc, char *argv[]) {
   Scope_set(p_global, "divide", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_divide, 0));
   Scope_set(p_global, "multiply", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_multiply, 0));
   Scope_set(p_global, "remainder", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_remainder, 0));
-  Scope_set(p_global, "negative", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_negative, 0));
   Scope_set(p_global, "random", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_random, 0));
-
+  
   /* control */
   Scope_set(p_global, "loop", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_loop, 0));
   Scope_set(p_global, "until", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_until, 0));
@@ -1317,6 +1343,7 @@ Scope *newGlobal(int argc, char *argv[]) {
   Scope_set(p_global, "integer", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_integer, 0));
   Scope_set(p_global, "string", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_string, 0));
   Scope_set(p_global, "float", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_float, 0));
+  Scope_set(p_global, "type", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_type, 0));
 
   /* list and string */
   Scope_set(p_global, "list", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_list, 0));

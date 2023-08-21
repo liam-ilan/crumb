@@ -20,7 +20,7 @@ gcc src/* -g -Wall -o crumb && valgrind --leak-check=full -s ./crumb _test.crumb
 ```ebnf
 program = start, statement, end;
 statement = {return | assignment | value};
-return = "return", value;
+return = "<-", value;
 assignment = identifier, "=", value;
 value = application | function | int | float | string | identifier;
 application = "(", {value}, ")";
@@ -35,7 +35,7 @@ function = "{", [{identifier}, "->"], statement, "}";
 "{"
 "}"
 "->"
-"return"
+"<-"
 identifier
 int
 float
@@ -107,10 +107,6 @@ end
   - `a`: `integer`
   - `b`: `integer`
 
-- `(negative a)` ✅
-  - Returns -`a`.
-  - `a`: `integer` or `float`
-
 - `(random)` ✅
   - Returns a random number from 0 to 1.
 
@@ -120,9 +116,10 @@ end
   - `count`: `integer`, which is greater than or equal to `0`
   - `fn`: `function`, which is in the form `{n -> ...}`, where n is the current loop index (starting at `0`).
 
-- `(until fn)` ✅
-  - Applys `fn`, and repeats until `fn` returns. `until` returns whatever `fn` returned.
-  - `fn`: `function`, which is in the form `{n -> ...}`, where n is the current loop index (starting at `0`).
+- `(until stop fn initial_state)` or `(until stop fn)` ✅
+  - Applys `fn`, and repeats until `fn` returns `stop`. `until` returns whatever `fn` returned, before `stop`.
+  - The return value of every past itteration is passed on to the next. The initial itteration uses `initial_state` if supplied, or returns `void` if not.
+  - `fn`: `function`, which is in the form `{state n -> ...}`, where n is the current loop index (starting at `0`), and `state` is the current state.
 
 - `(if condition fn1)` or `(if condition fn1 fn2)` ✅
   - If `condition` is `1`, applys `fn1`. (like the "then" part in an if statement).
@@ -161,6 +158,9 @@ end
 - `(float a)` ✅
   - Returns `a` as a `float`.
   - `a`: `string`, `float`, or `integer`.
+
+- `(type a)` ✅
+  - Returns the type of `a` as a `string`.
 
 ### List and String
 - `(list arg1 arg2 arg3 ...)` ✅
@@ -205,10 +205,10 @@ end
   - `arr`: `list`
   - `fn`: `function`, which is in the form `{item i -> ...}`, where `item` is the current item, and `i` is the current index.
 
-- `(reduce arr fn)` ✅
-  - Returns a value, computed via running `fn` on every item in `arr`
+- `(reduce arr fn initial_acc)` or `(reduce arr fn)` ✅
+  - Returns a value, computed via running `fn` on every item in `arr`. With every iteration, the last return from `fn` is passed to the next application of `fn`. The final returned value from `fn` is the value returned from `reduce`.
   - `arr`: `list`.
-  - `fn`: `function`, which is in the form `{item acc item i -> ...}`, where `item` is the current item, `acc` is the accumulator (the result of `fn` from the last item), and `i` is the current index. `acc` is assumed to be the first item for the first iteration.
+  - `fn`: `function`, which is in the form `{item acc item i -> ...}`, where `item` is the current item, `acc` is the accumulator (the result of `fn` from the last item), and `i` is the current index. `acc` is `initial_acc` if supplied, or `void` if not.
 
 - `(range n)` ✅
   - Returns a list with the integers from `0` to `n`, not including `n`.

@@ -10,7 +10,6 @@ char* getTokenTypeString(enum TokenType type) {
     case TOK_APPLYCLOSE: return "applyclose";
     case TOK_FUNCOPEN: return "funcopen";
     case TOK_FUNCCLOSE: return "funcclose";
-    case TOK_COMMA: return "comma";
     case TOK_ARROW: return "arrow";
     case TOK_RETURN: return "return";
     case TOK_IDENTIFIER: return "identifier";

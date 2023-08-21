@@ -125,7 +125,6 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       && !(code[i] == '/' && code[i + 1] == '/')
     ) {
       // case of identifier
-      
       int identifierStart = i;
 
       // while valid identifier char
@@ -140,7 +139,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       strncpy(val, &code[identifierStart], i - identifierStart);
       val[i - identifierStart] = '\0';
 
-      if (strcmp(val, "return") == 0) {
+      if (strcmp(val, "<-") == 0) {
         Token_push(p_headToken, NULL, TOK_RETURN, lineNumber);
         free(val);
       } else {

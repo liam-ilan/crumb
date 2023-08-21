@@ -12,6 +12,12 @@ void disableRaw() {
 }
 
 void enableRaw() {
+  // enable mouse
+  printf("\e[?1003h\e[?1006h");
+
+  // flush stdout
+  fflush(stdout);
+
   // get current settings
   struct termios raw = orig_termios;
 
@@ -24,7 +30,6 @@ void enableRaw() {
 
   // write settings back into terminal
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-  printf("\e[?1003h\e[?1006h");
 }
 
 // reads a single char from stdin, assuming that raw is enabled
@@ -32,6 +37,7 @@ char readChar() {
   char c = '\0';
   read(STDIN_FILENO, &c, 1);
 
+  // printf("%c\r\n", c);
   // handle exit
   if (iscntrl(c) && (c == 26 || c == 3)) exit(0);
   return c;
@@ -40,7 +46,8 @@ char readChar() {
 // returns the current event as a string, where the result is malloc
 char *event() {
   // enable mouse events
-  printf("\e[?1003h\e[?1006h\n\e[A\r");
+  
+
   enableRaw();
 
   // string to return
@@ -94,8 +101,8 @@ void exitEvents() {
 
 void initEvents() {
   // \e[?1003h, \e[?1006h annd \n start mouse events
-  // \e[A]\r undos last \n
-  // printf("\e[?1003h\e[?1006h\n\e[A\r");
+  // \e[A] and \r undos last \n
+  printf("\n\e[A\r");
   tcgetattr(STDIN_FILENO, &orig_termios);
   atexit(disableRaw);
 }

@@ -11,7 +11,7 @@
 #include "stdlib.h"
 #include "events.h"
 
-void exitHandler() {
+void exitHandler() {  
   exit(0);
 }
 
