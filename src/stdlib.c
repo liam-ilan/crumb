@@ -521,6 +521,8 @@ Generic *StdLib_loop(Scope *p_scope, Generic *args[], int length, int lineNumber
   validateType(allowedTypes1, 1, args[0]->type, 1, lineNumber, "loop");
   validateType(allowedTypes2, 2, args[1]->type, 2, lineNumber, "loop");
 
+  validateRange(args[0]->p_val, 0, (int) INFINITY, 1, lineNumber, "loop");
+  
   // loop
   for (int i = 0; i < *((int *) args[0]->p_val); i++) {
 
