@@ -47,6 +47,10 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       Token_push(p_headToken, NULL, TOK_ARROW, lineNumber);
       i++;
       tokenCount++;
+    } else if (c == '<' && code[i + 1] == '-') {
+      Token_push(p_headToken, NULL, TOK_RETURN, lineNumber);
+      i++;
+      tokenCount++;
     } else if (c == '"') {
       
       // record first char in string
@@ -122,7 +126,8 @@ int lex(Token *p_headToken, char *code, int fileLength) {
     } else if (
       strchr(" \n\r\t\f\v{}()\"=", c) == NULL 
       && !(c == '-' && code[i + 1] == '>')
-      && !(code[i] == '/' && code[i + 1] == '/')
+      && !(c == '<' && code[i + 1] == '-')
+      && !(c == '/' && code[i + 1] == '/')
     ) {
       // case of identifier
       int identifierStart = i;
@@ -131,6 +136,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       while (
         strchr(" \n\r\t\f\v{}()\"=", code[i]) == NULL 
         && !(code[i] == '-' && code[i + 1] == '>') 
+        && !(code[i] == '<' && code[i + 1] == '-')
         && !(code[i] == '/' && code[i + 1] == '/')
       ) i++;
 
@@ -139,12 +145,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       strncpy(val, &code[identifierStart], i - identifierStart);
       val[i - identifierStart] = '\0';
 
-      if (strcmp(val, "<-") == 0) {
-        Token_push(p_headToken, NULL, TOK_RETURN, lineNumber);
-        free(val);
-      } else {
-        Token_push(p_headToken, val, TOK_IDENTIFIER, lineNumber);
-      }
+      Token_push(p_headToken, val, TOK_IDENTIFIER, lineNumber);
 
       tokenCount++;
       
