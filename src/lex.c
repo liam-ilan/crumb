@@ -21,7 +21,6 @@ int lex(Token *p_headToken, char *code, int fileLength) {
   while (i < fileLength) {
     char c = code[i];
 
-
     if (c == '\n') lineNumber++;
 
     if (c == '/' && code[i + 1] == '/') {

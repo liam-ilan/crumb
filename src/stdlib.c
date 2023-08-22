@@ -12,6 +12,10 @@
 #include "eval.h"
 #include "list.h"
 #include "events.h"
+#include "file.h"
+#include "lex.h"
+#include "tokens.h"
+#include "parse.h"
 
 /* tools, used later in stdlib */
 // validate number of arguments
@@ -178,6 +182,108 @@ Generic *StdLib_print(Scope *p_scope, Generic *args[], int length, int lineNumbe
   }
 
   return Generic_new(TYPE_VOID, NULL, 0);
+}
+
+// (read_file filepath)
+// reads text at filepath and returns
+Generic *StdLib_read_file(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(1, 1, length, lineNumber);
+  
+  enum Type allowedTypes[] = {TYPE_STRING};
+  validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "read_file");
+
+  char **p_res = (char **) malloc(sizeof(char *));
+  *p_res = readFile(*((char **) args[0]->p_val), lineNumber);;
+
+  // return
+  return Generic_new(TYPE_STRING, p_res, 0);
+}
+
+// (write_file filepath string)
+// writes string to filepath
+Generic *StdLib_write_file(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(2, 2, length, lineNumber);
+  
+  // check that type of args is string
+  enum Type allowedTypes[] = {TYPE_STRING};
+  validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "write_file");
+  validateType(allowedTypes, 1, args[1]->type, 2, lineNumber, "write_file");
+
+  writeFile(*((char **) args[0]->p_val), *((char **) args[1]->p_val), lineNumber);
+  return Generic_new(TYPE_VOID, NULL, 0);
+}
+
+// (event)
+// returns a string containing the current event
+Generic *StdLib_event(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(0, 0, length, lineNumber);
+
+  char **p_res = (char **) malloc(sizeof(char *));
+  *p_res = event();
+  
+  return Generic_new(TYPE_STRING, p_res, 0);
+}
+
+// (use path1 path2 path3 ... fn)
+// creates a new scope, evaluates the code in path1, path2, and path3, and then uses said scope to evaluate fn
+Generic *StdLib_use(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(2, (int) INFINITY, length, lineNumber);
+
+  // validate that all arguments with exception of last one are strings
+  for (int i = 0; i < length - 1; i++) {
+    enum Type allowedTypes[] = {TYPE_STRING};
+    validateType(allowedTypes, 1, args[i]->type, i + 1, lineNumber, "use");
+  }
+
+  // validate that last argument is a function
+  enum Type allowedTypes[] = {TYPE_FUNCTION, TYPE_NATIVEFUNCTION};
+  validateType(allowedTypes, 2, args[length - 1]->type, length, lineNumber, "use");
+
+  // create a new scope for all paths and fn to run in
+  Scope *p_newScope = Scope_new(p_scope);
+
+  // for each path
+  for (int i = 0; i < length - 1; i++) {
+
+    // read file
+    char *code = readFile(*((char **) args[i]->p_val), lineNumber);
+
+    // create initial token
+    Token *p_headToken = (Token *) malloc(sizeof(Token));
+    p_headToken->lineNumber = 1;
+    p_headToken->type = TOK_START;
+    p_headToken->val = NULL;
+    p_headToken->p_next = NULL;
+
+    // lex
+    int tokenCount = lex(p_headToken, code, strlen(code));
+
+    // parse
+    AstNode *p_headAstNode = parseProgram(p_headToken, tokenCount);
+
+    // eval and free
+    Generic_free(eval(p_headAstNode, p_newScope, 0));
+
+    // free memory
+    // code
+    free(code);
+    code = NULL;
+
+    // tokens
+    Token_free(p_headToken);
+    p_headToken = NULL;
+
+    // ast
+    AstNode_free(p_headAstNode);
+    p_headAstNode = NULL;
+  }
+
+  // apply callback with new scope
+  Generic *res = applyFunc(args[length - 1], p_newScope, NULL, 0, lineNumber);
+
+  // free new scope and return
+  Scope_free(p_newScope);
+  return res;
 }
 
 /* comparissions */
@@ -630,88 +736,7 @@ Generic *StdLib_wait(Scope *p_scope, Generic *args[], int length, int lineNumber
   return Generic_new(TYPE_VOID, NULL, 0);
 }
 
-// (event)
-// returns a string containing the current event
-Generic *StdLib_event(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(0, 0, length, lineNumber);
-
-  char **p_res = (char **) malloc(sizeof(char *));
-  *p_res = event();
-  
-  return Generic_new(TYPE_STRING, p_res, 0);
-}
-
-/* file */
-// (read_file filepath)
-// reads text at filepath and returns
-Generic *StdLib_read_file(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(1, 1, length, lineNumber);
-  
-  enum Type allowedTypes[] = {TYPE_STRING};
-  validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "read_file");
-
-  FILE *p_file = fopen(*((char ** )args[0]->p_val), "r");
-
-  // check the file succesfully opened
-  if (p_file == NULL) {
-    printf(
-      "Runtime Error @ Line %i: Cannot read file %s.\n", 
-      lineNumber, *((char ** )args[0]->p_val)
-    );
-    exit(0); 
-  }
-
-  // go to end, and record position (this will be the length of the file)
-  fseek(p_file, 0, SEEK_END);
-  long fileLength = ftell(p_file);
-
-  // rewind to start
-  rewind(p_file);
-
-  // allocate memory (+1 for 0 terminated string)
-  char *res = malloc(fileLength + 1);
-
-  // read file and close
-  fread(res, fileLength, 1, p_file);
-  fclose(p_file);
-
-  // set terminator to 0
-  res[fileLength] = 0;
-
-  char **p_res = (char **) malloc(sizeof(char *));
-  *p_res = res;
-
-  // return
-  return Generic_new(TYPE_STRING, p_res, 0);
-}
-
-// (write_file filepath string)
-// writes string to filepath
-Generic *StdLib_write_file(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, 2, length, lineNumber);
-  
-  // check that type of args is string
-  enum Type allowedTypes[] = {TYPE_STRING};
-  validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "write_file");
-  validateType(allowedTypes, 1, args[1]->type, 2, lineNumber, "write_file");
-
-  FILE *p_file = fopen(*((char ** )args[0]->p_val), "w+");
-
-  // check the file succesfully opened
-  if (p_file == NULL) {
-    printf(
-      "Runtime Error @ Line %i: Cannot write file %s.\n", 
-      lineNumber, *((char ** )args[0]->p_val)
-    );
-    exit(0); 
-  }
-
-  fprintf(p_file, "%s\n", *((char ** )args[1]->p_val));
-  fclose(p_file);
-  return Generic_new(TYPE_VOID, NULL, 0);
-}
-
-/* typecasting */
+/* types */
 // (int x)
 // returns x as an integer, if string, float, or int passed
 Generic *StdLib_integer(Scope *p_scope, Generic *args[], int length, int lineNumber) {
@@ -1308,9 +1333,16 @@ Scope *newGlobal(int argc, char *argv[]) {
     args[i] = NULL;
   }
 
-  // populate global scope with stdlib  
+  // add void
+  Scope_set(p_global, "void", Generic_new(TYPE_VOID, NULL, 0));
+
+  // populate global scope with stdlib functions
   /* IO */
   Scope_set(p_global, "print", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_print, 0));
+  Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_read_file, 0));
+  Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_write_file, 0));
+  Scope_set(p_global, "event", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_event, 0));
+  Scope_set(p_global, "use", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_use, 0));
 
   /* comparisions */
   Scope_set(p_global, "is", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_is, 0));
@@ -1335,13 +1367,8 @@ Scope *newGlobal(int argc, char *argv[]) {
   Scope_set(p_global, "until", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_until, 0));
   Scope_set(p_global, "if", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_if, 0));
   Scope_set(p_global, "wait", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_wait, 0));
-  Scope_set(p_global, "event", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_event, 0));
 
-  /* file */
-  Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_read_file, 0));
-  Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_write_file, 0));
-
-  /* typecasting */
+  /* types */
   Scope_set(p_global, "integer", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_integer, 0));
   Scope_set(p_global, "string", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_string, 0));
   Scope_set(p_global, "float", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_float, 0));

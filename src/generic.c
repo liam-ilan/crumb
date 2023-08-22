@@ -38,13 +38,15 @@ void Generic_free(Generic *target) {
   // if string, free contents as well
   if (target->type == TYPE_STRING) free(*((char **) target->p_val));
 
-  // use list's own free function
   if (target->type == TYPE_LIST) {
-    List_free((List *) (target->p_val));
+    List_free((List *) (target->p_val)); // use list's own free function
+  } else if (target->type == TYPE_FUNCTION) {
+    AstNode_free(target->p_val); // functions are in reality ast nodes, so free them with the appropriate function
+  } else if (target->type != TYPE_NATIVEFUNCTION) {
+    // dont free native functions, as their void pointers are not allocated to heap
+    free(target->p_val);
   }
-
-  // dont free functions and native functions, as they are either not allocated to heap (native), or belong to the ast (non native)
-  else if (target->type != TYPE_FUNCTION && target->type != TYPE_NATIVEFUNCTION) free(target->p_val);
+  
   target->p_val = NULL;
 
   // free generic itself
@@ -74,7 +76,9 @@ Generic *Generic_copy(Generic *target) {
     res->p_val = (char **) malloc(sizeof(char *));
     *((char **) res->p_val) = malloc(sizeof(char) * (strlen(*((char **) target->p_val)) + 1));
     strcpy(*((char **) res->p_val), *((char **) target->p_val));
-  } else if (res->type == TYPE_FUNCTION || res->type == TYPE_NATIVEFUNCTION) {
+  } else if (res->type == TYPE_FUNCTION) {
+    res->p_val = AstNode_copy(target->p_val, 0);
+  } else if (res->type == TYPE_NATIVEFUNCTION) {
     res->p_val = target->p_val;
   } else if (res->type == TYPE_VOID) {
     res->p_val = NULL;

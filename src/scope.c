@@ -44,13 +44,16 @@ void Scope_print(Scope *p_in) {
 void Scope_set(Scope *p_target, char *key, Generic *p_val) {
   p_val->refCount++;
 
+  char *keyCopy = (char *) malloc(sizeof(char) * (strlen(key) + 1));
+  strcpy(keyCopy, key);
+
   // set p_p_curr to the ScopeItem with the correct key, or NULL if not found
   ScopeItem **p_p_curr = &(p_target->p_head);
-  while (*(p_p_curr) != NULL && strcmp((*p_p_curr)->key, key) != 0) p_p_curr = &((*p_p_curr)->p_next);
+  while (*(p_p_curr) != NULL && strcmp((*p_p_curr)->key, keyCopy) != 0) p_p_curr = &((*p_p_curr)->p_next);
 
   if (*p_p_curr == NULL) {
     // case where variable was previously undefined, create new item
-    *p_p_curr = ScopeItem_new(key, p_val);
+    *p_p_curr = ScopeItem_new(keyCopy, p_val);
   } else {
 
     // case where variable was previosuly defined, simply overwrite value, and decrease ref count of old value (if 0, free)
@@ -65,6 +68,7 @@ void Scope_set(Scope *p_target, char *key, Generic *p_val) {
 // returns the generic in the requested key of the target scope
 // if the generic cannot be found, attempts to search parent recursively
 Generic *Scope_get(Scope *p_target, char *key, int lineNumber) {
+
   // set p_curr to the item with correct key, or NULL
   ScopeItem *p_curr = p_target->p_head;
   while (p_curr != NULL && strcmp(p_curr->key, key) != 0) p_curr = p_curr->p_next;
@@ -101,6 +105,8 @@ void Scope_free(Scope *p_target) {
 
     p_tmp->p_val->refCount--;
     if (p_tmp->p_val->refCount == 0) Generic_free(p_tmp->p_val);
+    
+    free(p_tmp->key);
     free(p_tmp);
   }
 

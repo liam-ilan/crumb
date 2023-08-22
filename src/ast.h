@@ -32,5 +32,6 @@ char* getOpcodeString(enum Opcodes);
 void AstNode_print(AstNode *, int);
 void AstNode_appendChild(AstNode *, AstNode **, AstNode *);
 AstNode* AstNode_new(char*, enum Opcodes, int);
+AstNode* AstNode_copy(AstNode *, int);
 
 #endif

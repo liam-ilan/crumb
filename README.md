@@ -52,6 +52,23 @@ end
 - `(print arg1 arg2 arg3 ...)` ✅
   - Prints all arguments to stdout, returns nothing.
 
+- `(read_file path)` ✅
+  - Returns the contents of the file designated by `path`, in a string
+  - `path`: `string`
+
+- `(write_file path contents)` ✅
+  - Writes the string `contents` into the file designated by `path`, returns nothing.
+  - `path`: `string`
+  - `contents`: `string`
+
+- `(event)` ✅
+  - Returns the ANSI string corresponding with the current event. This may block for up to 0.1 seconds.
+
+- `(use path1 path2 path3 ... fn)` ✅
+  - Crumb's code splitting method. Runs code in file paths, in order, on a new scope. Then uses said scope to apply `fn`.
+  - `path1`, `path2`, `path3`, ...: `string`
+  - `fn`: `function`
+  
 ### Comparisons
 - `(is a b)` ✅
   - Checks if `a` and `b` are equal, returns `1` if so, else returns `0`.
@@ -133,20 +150,10 @@ end
   - Blocks execution for `time` amount of seconds.
   - `time`: `integer` or `float`.
 
-- `(event)` ✅
-  - Returns the ANSI string corresponding with the current event. This may block for up to 0.1 seconds.
+### Types
+- `void` ✅
+  - A value of type `void`
 
-### File
-- `(read_file path)` ✅
-  - Returns the contents of the file designated by `path`, in a string
-  - `path`: `string`
-
-- `(write_file path contents)` ✅
-  - Writes the string `contents` into the file designated by `path`, returns nothing.
-  - `path`: `string`
-  - `contents`: `string`
-
-### Typecasting
 - `(integer a)` ✅
   - Returns `a` as an `integer`.
   - `a`: `string`, `float`, or `integer`.

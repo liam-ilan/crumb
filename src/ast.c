@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 
 // frees ast
@@ -15,6 +16,7 @@ void AstNode_free(AstNode *p_head) {
   }
 
   // free self
+  free(p_head->val);
   free(p_head);
 }
 
@@ -73,7 +75,27 @@ AstNode* AstNode_new(char* val, enum Opcodes opcode, int lineNumber) {
   res->opcode = opcode;
   res->p_headChild = NULL;
   res->p_next = NULL;
-  res->val = val;
+  res->val = NULL;
+
+  if (val != NULL) {
+    res->val = (char *) malloc(sizeof(char) * (strlen(val) + 1));
+    strcpy(res->val, val);
+  }
+
+
   res->lineNumber = lineNumber;
   return res;
+}
+
+// creats a copy of the astnode, recursively traversing through its children/siblings, and returns it
+// depth is the current depth of the copy (start at 0), if 0, do not copy siblings
+AstNode* AstNode_copy(AstNode *p_head, int depth) {
+  if (p_head == NULL) return NULL;
+  AstNode* p_res = AstNode_new(p_head->val, p_head->opcode, p_head->lineNumber);
+  p_res->p_headChild = AstNode_copy(p_head->p_headChild, depth + 1);
+  
+  if (depth != 0) p_res->p_next = AstNode_copy(p_head->p_next, depth + 1);
+  else p_res->p_next = NULL;
+
+  return p_res;
 }

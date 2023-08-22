@@ -72,14 +72,15 @@ Generic *eval(AstNode *p_head, Scope *p_scope, int depth) {
   } else if (p_head->opcode == OP_ASSIGNMENT) {
     // assignment case
     Generic *p_val = eval(p_head->p_headChild->p_next, p_scope, depth + 1);
+
+    // set scope and return void
     Scope_set(p_scope, p_head->p_headChild->val, p_val);
-    
     return Generic_new(TYPE_VOID, NULL, 0);
 
   } else if (p_head->opcode == OP_FUNCTION) {
     // function case
     // returns a function generic, whose value is a pointer to the functions ast node
-    return Generic_new(TYPE_FUNCTION, p_head, 0);
+    return Generic_new(TYPE_FUNCTION, AstNode_copy(p_head, 0), 0);
 
   } else if (p_head->opcode == OP_APPLICATION) {
     // application case
