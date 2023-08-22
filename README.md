@@ -193,11 +193,13 @@ end
   - Returns a `list` or `string`, in which `item` was inserted into `x` at `index`. Does not overwrite any data.
   - If `index` not supplied, `item` is assumed to be put at the end of `x`.
   - `x`: `string` or `list`.
+  - `item`: `string` if `x` is `string`, else any
   - `index`: `int`.
   
 - `(set x item index)` ✅
   - Returns a `list` or `string`, in which the item located at `index` in `x`, was replaced by `item`.Overwrites data.
   - `x`: `string` or `list`.
+  - `item`: `string` if `x` is `string`, else any
   - `index`: `int`.
 
 - `(delete x index1)` or `(delete x index1 index2)` ✅
@@ -220,3 +222,8 @@ end
 - `(range n)` ✅
   - Returns a list with the integers from `0` to `n`, not including `n`.
   - `n`: `integer`, which is greater than or equal to 0.
+
+- `(find x item)` ✅
+  - Returns the index of `item` in `x`. Returns `void` if not found.
+  - `x`: `string` or `list`
+  - `item`: `string` if `x` is `string`, else any

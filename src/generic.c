@@ -95,38 +95,46 @@ Generic *Generic_copy(Generic *target) {
   return res;
 }
 
-// returns a pointer to 1 if a and b are the same, else returns a pointer to 0
-// the result is malloced to the heap, and later needs to be freed
-int *Generic_is(Generic *a, Generic *b) {
-  // create res
-  int *p_res = (int *) malloc(sizeof(int));
-  *p_res = 0;
+// returns 1 if a and b are the same, else returns 0
+int Generic_is(Generic *a, Generic *b) {
+  int res = 0;
 
-  // check types
+  // case where we want numerical equality (is 1.0 1) -> 1
+  if (
+    (a->type == TYPE_INT || a->type == TYPE_FLOAT)
+    && (b->type == TYPE_INT || b->type == TYPE_FLOAT)
+  ) {
+    return (
+      (a->type == TYPE_FLOAT ? *((double *) a->p_val) : *((int *) a->p_val))
+      == (b->type == TYPE_FLOAT ? *((double *) b->p_val) : *((int *) b->p_val))
+    );
+  }
+
+  // else check types
   if (a->type == b->type) {
 
     // do type conversions and check data
     switch (a->type) {
       case TYPE_FLOAT:
-        if (*((double *) a->p_val) == *((double *) b->p_val)) *p_res = 1;
+        if (*((double *) a->p_val) == *((double *) b->p_val)) res = 1;
         break;
       case TYPE_INT:
-        if (*((int *) a->p_val) == *((int *) b->p_val)) *p_res = 1;
+        if (*((int *) a->p_val) == *((int *) b->p_val)) res = 1;
         break;
       case TYPE_STRING:
-        if (strcmp(*((char **) a->p_val), *((char **) b->p_val)) == 0) *p_res = 1;
+        if (strcmp(*((char **) a->p_val), *((char **) b->p_val)) == 0) res = 1;
         break;
       case TYPE_VOID:
-        *p_res = 1;
+        res = 1;
         break;
       case TYPE_NATIVEFUNCTION:
-        if (a->p_val == b->p_val) *p_res = 1;
+        if (a->p_val == b->p_val) res = 1;
         break;
       case TYPE_FUNCTION:
-        if (a->p_val == b->p_val) *p_res = 1;
+        if (a->p_val == b->p_val) res = 1;
         break;
       case TYPE_LIST:
-        *p_res = 1;
+        res = 1;
 
         // get list nodes
         ListNode *p_aCurr = ((List *) (a->p_val))->p_head;
@@ -134,9 +142,8 @@ int *Generic_is(Generic *a, Generic *b) {
 
         // for each item
         while (p_aCurr != NULL && p_bCurr != NULL) {
-          int *p_comp = Generic_is(p_aCurr->p_val, p_bCurr->p_val);
-          *p_res = *p_res * *(p_comp);
-          free(p_comp);
+          int comp = Generic_is(p_aCurr->p_val, p_bCurr->p_val);
+          res = res * comp;
 
           p_aCurr = p_aCurr->p_next;
           p_bCurr = p_bCurr->p_next;
@@ -144,10 +151,10 @@ int *Generic_is(Generic *a, Generic *b) {
 
         // if not the same length
         if (p_aCurr != NULL || p_bCurr != NULL) {
-          *p_res = 0;
+          res = 0;
         }
     }
   }
 
-  return p_res;
+  return res;
 }

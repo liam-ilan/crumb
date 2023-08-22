@@ -294,7 +294,9 @@ Generic *StdLib_is(Scope *p_scope, Generic *args[], int length, int lineNumber) 
   validateArgCount(2, 2, length, lineNumber);
 
   // return
-  return Generic_new(TYPE_INT, Generic_is(args[0], args[1]), 0);
+  int *res = (int *) malloc(sizeof(int));
+  *res = Generic_is(args[0], args[1]);
+  return Generic_new(TYPE_INT, res, 0);
 }
 
 // (less_than a b)
@@ -308,19 +310,13 @@ Generic *StdLib_less_than(Scope *p_scope, Generic *args[], int length, int lineN
   validateType(allowedTypes, 2, args[1]->type, 2, lineNumber, "less_than");
 
   // do comparision and return
+  Generic *a = args[0];
+  Generic *b = args[1];
   int *p_res = (int *) malloc(sizeof(int));
-  *p_res = 0;
-
-  // handle all type cases
-  if (args[0]->type == TYPE_INT && args[1]->type == TYPE_INT) {
-    if (*((int *) args[0]->p_val) < *((int *) args[1]->p_val)) *p_res = 1;
-  } else if (args[0]->type == TYPE_INT && args[1]->type == TYPE_FLOAT) {
-    if (*((int *) args[0]->p_val) < *((double *) args[1]->p_val)) *p_res = 1;
-  } else if (args[0]->type == TYPE_FLOAT && args[1]->type == TYPE_INT) {
-    if (*((double *) args[0]->p_val) < *((int *) args[1]->p_val)) *p_res = 1;
-  } else if (args[0]->type == TYPE_FLOAT && args[1]->type == TYPE_FLOAT) {
-    if (*((double *) args[0]->p_val) < *((double *) args[1]->p_val)) *p_res = 1;
-  }
+  *p_res = (
+    (a->type == TYPE_FLOAT ? *((double *) a->p_val) : *((int *) a->p_val))
+    < (b->type == TYPE_FLOAT ? *((double *) b->p_val) : *((int *) b->p_val))
+  );
 
   return Generic_new(TYPE_INT, p_res, 0); 
 }
@@ -336,19 +332,13 @@ Generic *StdLib_greater_than(Scope *p_scope, Generic *args[], int length, int li
   validateType(allowedTypes, 2, args[1]->type, 2, lineNumber, "greater_than");
 
   // do comparision and return
+  Generic *a = args[0];
+  Generic *b = args[1];
   int *p_res = (int *) malloc(sizeof(int));
-  *p_res = 0;
-
-  // handle all type cases
-  if (args[0]->type == TYPE_INT && args[1]->type == TYPE_INT) {
-    if (*((int *) args[0]->p_val) > *((int *) args[1]->p_val)) *p_res = 1;
-  } else if (args[0]->type == TYPE_INT && args[1]->type == TYPE_FLOAT) {
-    if (*((int *) args[0]->p_val) > *((double *) args[1]->p_val)) *p_res = 1;
-  } else if (args[0]->type == TYPE_FLOAT && args[1]->type == TYPE_INT) {
-    if (*((double *) args[0]->p_val) > *((int *) args[1]->p_val)) *p_res = 1;
-  } else if (args[0]->type == TYPE_FLOAT && args[1]->type == TYPE_FLOAT) {
-    if (*((double *) args[0]->p_val) > *((double *) args[1]->p_val)) *p_res = 1;
-  }
+  *p_res = (
+    (a->type == TYPE_FLOAT ? *((double *) a->p_val) : *((int *) a->p_val))
+    > (b->type == TYPE_FLOAT ? *((double *) b->p_val) : *((int *) b->p_val))
+  );
 
   return Generic_new(TYPE_INT, p_res, 0); 
 }
@@ -683,15 +673,13 @@ Generic *StdLib_until(Scope *p_scope, Generic *args[], int length, int lineNumbe
     Generic *res = applyFunc(args[1], p_scope, newArgs, 2, lineNumber);
 
     // handle state
-    int *p_comp = Generic_is(res, args[0]);
-    if (*p_comp) {
+    int comp = Generic_is(res, args[0]);
+    if (comp) {
       Generic_free(res);
-      free(p_comp);
       return state;
     } else {
       Generic_free(state);
       state = res;
-      free(p_comp);
     }
 
     i++;
@@ -1300,6 +1288,55 @@ Generic *StdLib_range(Scope *p_scope, Generic *args[], int length, int lineNumbe
   return res;
 }
 
+// (find x item)
+// returns index of item
+Generic *StdLib_find(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(2, 2, length, lineNumber);
+
+  enum Type allowedTypes1[] = {TYPE_STRING, TYPE_LIST};
+  validateType(allowedTypes1, 2, args[0]->type, 1, lineNumber, "find");
+
+  if (args[0]->type == TYPE_STRING) {
+
+    // string case
+    enum Type allowedTypes2[] = {TYPE_STRING};
+    validateType(allowedTypes2, 1, args[1]->type, 2, lineNumber, "find");
+
+    // find pointer to substring
+    char *p_sub = strstr(*((char **) args[0]->p_val), *((char **) args[1]->p_val));
+
+    // return void if not found
+    if (p_sub == NULL) return Generic_new(TYPE_VOID, NULL, 0);
+
+    // get index and return
+    int *p_index = malloc(sizeof(int)); 
+    *p_index = p_sub - *((char **) args[0]->p_val);
+
+    return Generic_new(TYPE_INT, p_index, 0);
+  } else {
+    // list case
+    // for each item
+    ListNode *p_curr = ((List *) args[0]->p_val)->p_head;
+    int i = 0;
+
+    while (p_curr != NULL) {
+      if (Generic_is(p_curr->p_val, args[1])) {
+        // if found, return index
+        int *p_index = (int *) malloc(sizeof(int));
+        *p_index = i;
+
+        return Generic_new(TYPE_INT, p_index, 0);
+      }
+
+      p_curr = p_curr->p_next;
+      i++;
+    }
+
+    // if not found return void
+    return Generic_new(TYPE_VOID, NULL, 0);
+  }
+}
+
 // creates a new global scope
 Scope *newGlobal(int argc, char *argv[]) {
 
@@ -1308,7 +1345,6 @@ Scope *newGlobal(int argc, char *argv[]) {
 
   // create global scope
   Scope *p_global = Scope_new(NULL);
-
   Generic *args[argc];
 
   // for each arg
@@ -1385,5 +1421,7 @@ Scope *newGlobal(int argc, char *argv[]) {
   Scope_set(p_global, "map", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_map, 0));
   Scope_set(p_global, "reduce", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_reduce, 0));
   Scope_set(p_global, "range", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_range, 0));
+  Scope_set(p_global, "find", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_find, 0));
+
   return p_global;
 }
