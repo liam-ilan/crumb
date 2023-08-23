@@ -4,7 +4,7 @@
 #include "scope.h"
 
 // prototypes
-Scope *newGlobal();
+Scope *newGlobal(int, char **, int);
 Generic *applyFunc(Generic *, Scope *, Generic *[], int, int);
 
 #endif

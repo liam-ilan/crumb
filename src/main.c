@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <signal.h>
+#include <string.h>
 #include "tokens.h"
 #include "lex.h"
 #include "ast.h"
@@ -16,16 +18,37 @@ void exitHandler() {
 }
 
 int main(int argc, char *argv[]) {
+
+  char *codePath;
+
   if (argc < 2) {
     printf("Error: Supply file path to read from.\n");
     return 0;
   }
 
+  codePath = argv[1];
+
+  // handle debug mode
+  bool debug = false;
+  if (strcmp(argv[1], "-d") == 0) {
+    debug = true;
+
+    if (argc < 3) {
+      printf("Error: Supply file path to read from.\n");
+      return 0;
+    }
+    
+    codePath = argv[2];
+  }
+
+  /* read file */
+  if (debug) printf("\nCODE\n");
+
   // open file
-  FILE *p_file = fopen(argv[1], "r");
+  FILE *p_file = fopen(codePath, "r");
 
   if (p_file == NULL) {
-    printf("Error: Could not read %s.\n", argv[1]);
+    printf("Error: Could not read %s.\n", codePath);
     return 0;
   }
 
@@ -45,16 +68,13 @@ int main(int argc, char *argv[]) {
 
   // set terminator to 0
   code[fileLength] = 0;
-
-  /* code */
-  printf("\nCODE\n");
-
-  // print code
-  printf("%s\n", code);
+  
+  if (debug) {
+    printf("%s\n", code);
+    printf("\nTOKENS\n");
+  }
 
   /* lex */
-  printf("\nTOKENS\n");
-
   // create initial token
   Token *p_headToken = (Token *) malloc(sizeof(Token));
   p_headToken->lineNumber = 1;
@@ -65,21 +85,25 @@ int main(int argc, char *argv[]) {
   // lex
   int tokenCount = lex(p_headToken, code, fileLength);
 
-  // print tokens
-  Token_print(p_headToken, tokenCount);
-  printf("Token Count: %i\n", tokenCount);
-
-  /* parse */
-  printf("\nAST\n");
+  if (debug) {
+    // print tokens
+    Token_print(p_headToken, tokenCount);
+    printf("Token Count: %i\n", tokenCount);
+    /* parse */
+    printf("\nAST\n");
+  }
 
   // parse
   AstNode *p_headAstNode = parseProgram(p_headToken, tokenCount);
 
-  // print AST
-  AstNode_print(p_headAstNode, 0);
+  
+  if (debug) {
+    // print AST
+    AstNode_print(p_headAstNode, 0);
+    printf("\nEVAL\n");
+  };
 
   /* evaluate */
-  printf("\nEVAL\n");
   initEvents();
 
   // cleanly handle exit events
@@ -87,7 +111,7 @@ int main(int argc, char *argv[]) {
   signal(SIGTERM, exitHandler);
   signal(SIGINT, exitHandler);
 
-  Scope *p_global = newGlobal(argc, argv);
+  Scope *p_global = newGlobal(argc, argv, 1 + debug);
   Generic *res = eval(p_headAstNode, p_global, 0);
 
   // get exit code
@@ -99,32 +123,32 @@ int main(int argc, char *argv[]) {
   res->refCount = 0;
 
   /* free */
-  printf("\nFREE\n");
+  if (debug) printf("\nFREE\n");
 
   // free code
   free(code);
   code = NULL;
-  printf("Code Freed\n");
+  if (debug) printf("Code Freed\n");
 
   // free tokens
   Token_free(p_headToken);
   p_headToken = NULL;
-  printf("Tokens Freed\n");
+  if (debug) printf("Tokens Freed\n");
 
   // free ast
   AstNode_free(p_headAstNode);
   p_headAstNode = NULL;
-  printf("AST Freed\n");
+  if (debug) printf("AST Freed\n");
   
   // free global scope
   Scope_free(p_global);
   p_global = NULL;
-  printf("Global Scope Freed\n");
+  if (debug) printf("Global Scope Freed\n");
 
   // free generic for exit code
   Generic_free(res);
   res = NULL;
-  printf("Exit Code Generic Freed\n");
+  if (debug) printf("Exit Code Generic Freed\n");
 
   return exitCode;
 }
