@@ -4,6 +4,8 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 #include "stdlib.h"
 #include "generic.h"
@@ -182,6 +184,33 @@ Generic *StdLib_print(Scope *p_scope, Generic *args[], int length, int lineNumbe
   }
 
   return Generic_new(TYPE_VOID, NULL, 0);
+}
+
+// (input)
+// gets input from stdin
+Generic *StdLib_input(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(0, 0, length, lineNumber);
+
+  // initial allocation of empty string
+  char *res = (char *) malloc(sizeof(char));
+  res[0] = '\0';
+
+  // loop through every char
+  char c = getchar();
+  while (c != '\n') {
+
+    // reallocate and add char
+    res = realloc(res, sizeof(char) * (strlen(res) + 1 + 1));
+    strncat(res, &c, 1);
+
+    c = getchar();
+  }
+
+  // create pointer
+  char **p_res = (char **) malloc(sizeof(char *));
+  *p_res = res;
+
+  return Generic_new(TYPE_STRING, p_res, 0);
 }
 
 // (read_file filepath)
@@ -1413,12 +1442,27 @@ Scope *newGlobal(int argc, char *argv[]) {
     args[i] = NULL;
   }
 
+  // get terminal dimensions
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+  int *rows = (int *) malloc(sizeof(int));
+  *rows = w.ws_row;
+
+  int *columns = (int *) malloc(sizeof(int));
+  *columns = w.ws_col;
+
+  // add dimensions to scope
+  Scope_set(p_global, "rows", Generic_new(TYPE_INT, rows, 0));
+  Scope_set(p_global, "columns", Generic_new(TYPE_INT, columns, 0));
+
   // add void
   Scope_set(p_global, "void", Generic_new(TYPE_VOID, NULL, 0));
 
   // populate global scope with stdlib functions
   /* IO */
   Scope_set(p_global, "print", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_print, 0));
+  Scope_set(p_global, "input", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_input, 0));
   Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_read_file, 0));
   Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_write_file, 0));
   Scope_set(p_global, "event", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_event, 0));

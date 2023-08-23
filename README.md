@@ -2,7 +2,7 @@
 ## Development
 ### Compile
 ```bash
-gcc src/* -Wall -o crumb
+gcc src/* -Wall -lm -o crumb
 ```
 
 ### run
@@ -12,7 +12,7 @@ gcc src/* -Wall -o crumb
 
 ### Debug with Valgrind
 ```bash
-gcc src/* -g -Wall -o crumb && valgrind --leak-check=full -s ./crumb _test.crumb
+gcc src/* -g -Wall -lm -o crumb && valgrind --leak-check=full -s ./crumb _test.crumb
 ```
 
 ## Syntax
@@ -47,10 +47,19 @@ end
 ## Standard Libary
 ### IO
 - `arguments` ✅
-  - A list of arguments passed into the terminal
+  - A list command line arguments, like argv in C.
+
+- `width` ✅
+  - The width of the terminal.
+
+- `height` ✅
+  - The height of the terminal.
 
 - `(print arg1 arg2 arg3 ...)` ✅
   - Prints all arguments to stdout, returns nothing.
+
+- `(input)` ✅
+  - Gets a line of input from stdin.
 
 - `(read_file path)` ✅
   - Returns the contents of the file designated by `path`, in a string
