@@ -573,11 +573,11 @@ Generic *StdLib_multiply(Scope *p_scope, Generic *args[], int length, int lineNu
 Generic *StdLib_remainder(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(2, 2, length, lineNumber);
   
-  enum Type allowedTypes[] = {TYPE_INT};
-  validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "remainder");
-  validateType(allowedTypes, 1, args[1]->type, 2, lineNumber, "remainder");
+  enum Type allowedTypes[] = {TYPE_INT, TYPE_FLOAT};
+  validateType(allowedTypes, 2, args[0]->type, 1, lineNumber, "remainder");
+  validateType(allowedTypes, 2, args[1]->type, 2, lineNumber, "remainder");
 
-  if (*((int *) args[1]->p_val) == 0) {
+  if ((args[1]->type == TYPE_FLOAT ? *((double *) args[1]->p_val) : *((int *) args[1]->p_val)) == 0) {
     // throw error for division by 0
     printf(
       "Runtime Error @ Line %i: Remainder of division by 0.\n", 
@@ -586,10 +586,22 @@ Generic *StdLib_remainder(Scope *p_scope, Generic *args[], int length, int lineN
     exit(0);
   };
 
-  // do modulus and return
-  int *p_res = (int *) malloc(sizeof(int));
-  *p_res = *((int *) args[0]->p_val) % *((int *) args[1]->p_val);
-  return Generic_new(TYPE_INT, p_res, 0);
+  if (args[0]->type == TYPE_INT && args[1]->type == TYPE_INT) {
+    // if we can return integer
+    int *p_res = (int *) malloc(sizeof(int));
+    *p_res = *((int *) args[0]->p_val) % *((int *) args[1]->p_val);
+    return Generic_new(TYPE_INT, p_res, 0);
+  } else {
+    // if we must return float
+    double *p_res = (double *) malloc(sizeof(double));
+
+    *p_res = fmod(
+      (args[0]->type == TYPE_FLOAT ? *((double *) args[0]->p_val) : *((int *) args[0]->p_val)),
+      (args[1]->type == TYPE_FLOAT ? *((double *) args[1]->p_val) : *((int *) args[1]->p_val))
+    );
+
+    return Generic_new(TYPE_FLOAT, p_res, 0);
+  }
 }
 
 // (power a b)
@@ -612,6 +624,7 @@ Generic *StdLib_power(Scope *p_scope, Generic *args[], int length, int lineNumbe
 
     return Generic_new(TYPE_INT, p_res, 0);
   } else {
+    // if we must return float
     double *p_res = (double *) malloc(sizeof(double));
 
     *p_res = pow(

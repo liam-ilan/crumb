@@ -121,8 +121,8 @@ end
 
 - `(remainder a b)` ✅
   - Returns the remainder of `a` and `b`.
-  - `a`: `integer`
-  - `b`: `integer`
+  - `a`: `integer` or `float`
+  - `b`: `integer` or `float`
   
 - `(power a b)` ✅
   - Returns `a` to the power of `b`.
