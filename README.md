@@ -123,6 +123,11 @@ end
   - Returns the remainder of `a` and `b`.
   - `a`: `integer`
   - `b`: `integer`
+  
+- `(power a b)` ✅
+  - Returns `a` to the power of `b`.
+  - `a`: `integer` or `float`
+  - `b`: `integer` or `float`
 
 - `(random)` ✅
   - Returns a random number from 0 to 1.
