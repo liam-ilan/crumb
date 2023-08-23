@@ -592,6 +592,37 @@ Generic *StdLib_remainder(Scope *p_scope, Generic *args[], int length, int lineN
   return Generic_new(TYPE_INT, p_res, 0);
 }
 
+// (power a b)
+// returns the a to the power of b
+Generic *StdLib_power(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  validateArgCount(2, 2, length, lineNumber);
+  
+  enum Type allowedTypes[] = {TYPE_INT, TYPE_FLOAT};
+  validateType(allowedTypes, 2, args[0]->type, 1, lineNumber, "power");
+  validateType(allowedTypes, 2, args[1]->type, 2, lineNumber, "power");
+
+  if (args[0]->type == TYPE_INT && args[1]->type == TYPE_INT) {
+    // if we can return integer
+    int *p_res = (int *) malloc(sizeof(int));
+
+    *p_res = pow(
+      *((int *) args[0]->p_val),
+      *((int *) args[1]->p_val)
+    );
+
+    return Generic_new(TYPE_INT, p_res, 0);
+  } else {
+    double *p_res = (double *) malloc(sizeof(double));
+
+    *p_res = pow(
+      (args[0]->type == TYPE_FLOAT ? *((double *) args[0]->p_val) : *((int *) args[0]->p_val)),
+      (args[1]->type == TYPE_FLOAT ? *((double *) args[1]->p_val) : *((int *) args[1]->p_val))
+    );
+
+    return Generic_new(TYPE_FLOAT, p_res, 0);
+  }
+}
+
 // (random)
 // returns random number from 0 to 1
 Generic *StdLib_random(Scope *p_scope, Generic *args[], int length, int lineNumber) {
@@ -1396,6 +1427,7 @@ Scope *newGlobal(int argc, char *argv[]) {
   Scope_set(p_global, "divide", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_divide, 0));
   Scope_set(p_global, "multiply", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_multiply, 0));
   Scope_set(p_global, "remainder", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_remainder, 0));
+  Scope_set(p_global, "power", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_power, 0));
   Scope_set(p_global, "random", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_random, 0));
   
   /* control */
