@@ -331,6 +331,7 @@ function = "{", [{identifier}, "->"], statement, "}";
 ```
 
 ![Syntax Diagram](./syntax-diagram.png)
+
 Crumb syntax diagram, generated with [DrawGrammar](https://jacquev6.github.io/DrawGrammar/).
 
 ### Tokens
