@@ -46,8 +46,6 @@ char readChar() {
 // returns the current event as a string, where the result is malloc
 char *event() {
   // enable mouse events
-  
-
   enableRaw();
 
   // string to return

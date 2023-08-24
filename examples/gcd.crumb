@@ -1,13 +1,15 @@
 gcd = {a b ->
-  return (if (is a 0) {
-    return b
-  } {
-    return (gcd (remainder b a) a)
+  <- (if (is a 0) {<- b} {
+    <- (gcd (remainder b a) a)
   })
 }
 
-(loop 20 {x ->
-  (loop 20 {y ->
-    (print "The gcd of" x "and" y "is" (gcd x y))
-  })
-})
+(print "Input two numbers to find the gcd.\n")
+
+(print "Number 1: ")
+a = (integer (input))
+
+(print "Number 2: ")
+b = (integer (input))
+
+(print "The result is:" (gcd a b) "\n")

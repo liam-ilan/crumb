@@ -22,6 +22,7 @@ void Generic_print(Generic *in) {
   } else if (in->type == TYPE_LIST) {
     List_print((List *) (in->p_val));
   }
+  fflush(stdout);
 }
 
 // create a new generic and return

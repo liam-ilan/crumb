@@ -1,55 +1,78 @@
-// split a string on a single char seperator
-split = {in sep ->
-  // convert to list of chars
-  arr = (map (range (length in)) {index _ -> <- (get in index)})
-
-  // add an empty list to the start for reduction
-
-  // reduce list of chars to list of words
-  <- (reduce arr {acc char _ ->
-    last_index = (subtract (length acc) 1)
-
-    <- (if (is char sep) {
-      // add new item to result if we come across a seperator
-      <- (insert acc "") 
-    } {
-      // else, add char to the last item
-      <- (set acc (insert (get acc last_index) char) last_index)
-    })
-  } (list ""))
-}
-
 // init
+// \e[H goes to top left
+// \e[2J clears screen
+// \e[?25l disables cursor
 (print "\e[H\e[2J\e[?25l")
 
 // render loop
-(until "" {state n ->
+// state is a list containing: 1. the coordinates, 2. the color
+(until "stop" {state n ->
 
   // get current event
   curr = (event)
 
-  // if it is a mouse event
+  // if event is a mouse event, get coords, else use old coords
   coords = (if (greater_than (length curr) 6) {
     <- (if (is (get curr 0 5) "\e[<35") {
       
-      // take the rest of the curr, and split on ; to obtain the coordinates
-      <- (map 
-        (split (get curr 6 (subtract (length curr) 1)) ";") 
-        {item i -> <- (integer item)
-      })
-    } {
-      <- "no change"
-    })
-  } {
-    <- "no change"
-  })
+      // get coords part of ansi code
+      coords = (get curr 6 (subtract (length curr) 1))
+      
+      // get index of seperator
+      split_index = (find coords ";")
+
+      // split coords into list
+      coords = (list 
+        (get coords 0 split_index)
+        (get coords (add 1 split_index) (length coords))
+      )
+
+      <- coords
+    } {<- (get state 0)})
+  } {<- (get state 0)})
+
+  // handle color
+  color = (if (is curr " ") {
+    <- (add 1 (get state 1))
+  } {<- (get state 1)})
+
+  // construct new state
+  newState = (list coords color)
 
   // if there was a change, rerender
-  (if (not (is coords "no change")) {
+  (if (not (is state newState)) {
+    
+    // clear and print information
+    (print "\e[2;0H\e[0J\e[H")
+    instructions = "The Fish will follow the mouse, press space to change the fish."
 
-    // clear
-    (print "\e[2J")
-    escape_code = (join "\e[" (string (get coords 1)) ";" (string (get coords 0)) "H")
-    (print escape_code "🐟 NOM NOM NOM")
+    // make blank buffer at end of instructions
+    blank = (range (subtract (multiply (rows) (columns)) (length instructions)))
+    blank = (reduce 
+      (map blank {item i -> <- " "}) 
+      {acc item i -> <- (join acc item)} 
+    "")
+    
+    // print instructions
+    (print (join instructions blank))
+
+    // get escape code to move cursor to coordinate
+    coords_code = (join "\e[" (get coords 1) ";" (get coords 0) "H")
+
+    // get color code
+    color_code = (join 
+      "\e[" 
+      (string (add 31 (remainder (get newState 1) 7))) 
+      "m"
+    )
+
+    // get fish emoji
+    fish_list = (list "🐠" "🐟" "🐡" "🐕")
+    fish = (get fish_list (remainder (get newState 1) (length fish_list)))
+
+    // print fish
+    (print coords_code color_code fish "NOM NOM NOM" "\e[0m")
   })
-})
+
+  <- newState
+} (list (list "1" "1") 1))

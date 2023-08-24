@@ -1,20 +1,9 @@
 // loop forever
-(until {n ->
+(until "stop" {state n ->
 
-  // print row
-  (print (reduce 
-    (map (range 50) {item i ->
-      return (if (integer (add (random) 0.5)) {
-        return "╱"
-      } {
-        return "╲"
-      })
-    })
-    {acc item i ->
-      return (join acc item)
-    }
-  ))
+  // print random slash
+  (print (if (integer (add (random) 0.5)) {<- "╱"} {<- "╲"}))
 
-  // wait for animation
-  (wait 0.1)
+  // wait to slow down animation
+  (wait 0.001)
 })

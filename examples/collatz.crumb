@@ -1,23 +1,28 @@
-// divides 2 if divisible by 2
-// multiplies by 3 and adds 1 if not
-f = {n ->
-  return (if (is (remainder n 2) 0) {
-    return (integer (divide n 2))
+// prints the collatz path for a given input
+(print "Input a number to print the collatz sequence for: ")
+in = (integer (input))
+
+// recursively applys the collatz conjecture function
+// returns the stopping time
+collatz = {n ->
+
+  // divides 2 if divisible by 2
+  // multiplies by 3 and adds 1 if not
+  // applys f again on the new number
+  res = (if (is (remainder n 2) 0) {
+    <- (integer (divide n 2))
   } {
-    return (add (multiply n 3) 1)
+    <- (add (multiply n 3) 1)
+  })
+
+  <- (if (is res 1) {
+    (print 1 "\n")
+    <- 1
+  } {
+    // recursively apply collatz
+    (print res "\n")
+    <- (add (collatz res) 1)
   })
 }
 
-// returns stopping_time of n
-stopping_time = {n ->
-  return (if (is n 1) {
-    return 0
-  } {
-    return (add 1 (stopping_time (f n)))
-  })
-}
-
-// run for first 10000 positive integers
-(loop 10000 {n ->
-  (print "Stopping time for" (add n 1) "-" (stopping_time (add n 1)))
-})
+(print "stopping time:" (collatz in) "\n")

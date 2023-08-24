@@ -213,6 +213,36 @@ Generic *StdLib_input(Scope *p_scope, Generic *args[], int length, int lineNumbe
   return Generic_new(TYPE_STRING, p_res, 0);
 }
 
+// (columns)
+// returns number of columns in terminal
+Generic *StdLib_columns(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  // get current dimensions
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+  // create pointer to rows
+  int *rows = (int *) malloc(sizeof(int));
+  *rows = w.ws_col;
+
+  // return generic
+  return Generic_new(TYPE_INT, rows, 0);
+}
+
+// (rows)
+// returns number of rows in terminal
+Generic *StdLib_rows(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+  // get current dimensions
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+  // create pointer to rows
+  int *rows = (int *) malloc(sizeof(int));
+  *rows = w.ws_row;
+
+  // return generic
+  return Generic_new(TYPE_INT, rows, 0);
+}
+
 // (read_file filepath)
 // reads text at filepath and returns
 Generic *StdLib_read_file(Scope *p_scope, Generic *args[], int length, int lineNumber) {
@@ -787,7 +817,6 @@ Generic *StdLib_wait(Scope *p_scope, Generic *args[], int length, int lineNumber
   validateArgCount(1, 1, length, lineNumber);
   enum Type allowedTypes[] = {TYPE_INT, TYPE_FLOAT};
   validateType(allowedTypes, 2, args[0]->type, 1, lineNumber, "wait");
-
   int initialTime = clock();
   while (
     (((double) clock()) - ((double) initialTime)) / ((double) CLOCKS_PER_SEC)
@@ -1443,20 +1472,6 @@ Scope *newGlobal(int argc, char *argv[], int skipArgs) {
     args[i - skipArgs] = NULL;
   }
 
-  // get terminal dimensions
-  struct winsize w;
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-
-  int *rows = (int *) malloc(sizeof(int));
-  *rows = w.ws_row;
-
-  int *columns = (int *) malloc(sizeof(int));
-  *columns = w.ws_col;
-
-  // add dimensions to scope
-  Scope_set(p_global, "rows", Generic_new(TYPE_INT, rows, 0));
-  Scope_set(p_global, "columns", Generic_new(TYPE_INT, columns, 0));
-
   // add void
   Scope_set(p_global, "void", Generic_new(TYPE_VOID, NULL, 0));
 
@@ -1464,6 +1479,8 @@ Scope *newGlobal(int argc, char *argv[], int skipArgs) {
   /* IO */
   Scope_set(p_global, "print", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_print, 0));
   Scope_set(p_global, "input", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_input, 0));
+  Scope_set(p_global, "rows", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_rows, 0));
+  Scope_set(p_global, "columns", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_columns, 0));
   Scope_set(p_global, "read_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_read_file, 0));
   Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_write_file, 0));
   Scope_set(p_global, "event", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_event, 0));

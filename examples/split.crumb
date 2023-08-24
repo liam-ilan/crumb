@@ -1,23 +1,23 @@
 // split a string on a single char seperator
 split = {in sep ->
   // convert to list of chars
-  arr = (map (range (length in)) {index _ -> return (get in index)})
+  arr = (map (range (length in)) {index _ -> <- (get in index)})
 
   // add an empty list to the start for reduction
-  arr = (insert arr (list "") 0)
 
   // reduce list of chars to list of words
-  return (reduce arr {acc char _ ->
+  <- (reduce arr {acc char _ ->
     last_index = (subtract (length acc) 1)
 
-    return (if (is char sep) {
+    <- (if (is char sep) {
       // add new item to result if we come across a seperator
-      return (insert acc "") 
+      <- (insert acc "") 
     } {
       // else, add char to the last item
-      return (set acc (insert (get acc last_index) char) last_index)
+      <- (set acc (insert (get acc last_index) char) last_index)
     })
-  })
+  } (list ""))
 }
 
-(print (split (get arguments 2) ","))
+(print "Insert an input to be split on commas: ")
+(print (split (input) ",") "\n")

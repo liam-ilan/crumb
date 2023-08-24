@@ -1,13 +1,15 @@
-fib = {n ->
-  return (if (is n 0) {
-    return 0
-  } {
-    return (if (is n 1) {
-      return 1
-    } {
-      return (add (fib (subtract n 1)) (fib (subtract n 2)))
+// use a simple recursive function to calculate the nth fibonacci number
+fibonacci = {n ->
+  <- (if (is n 0) {<- 0} {
+    <- (if (is n 1) {<- 1} {
+      <- (add 
+        (fibonacci (subtract n 1)) 
+        (fibonacci (subtract n 2))
+      )
     })
   })
 }
 
-(print (fib 26))
+(until "stop" {state n ->
+  (print (add n 1) "-" (fibonacci (add n 1)) "\n")
+})

@@ -1,24 +1,47 @@
-// returns a single frame of teh animation
+// returns a single frame of the animation
 frame = {n ->
+
+  // message to display
   message = "                HELLO WORLD                "
-  return (join 
-    (reduce 
-      (map (range n) {item i -> return (get message i)})
-      {acc item i -> return (join acc item)}
-    ) 
-    "ō͡≡o"
-  )
+
+  // the visible part of the message, as a list
+  message = (map (range n) {item i -> <- (get message i)})
+
+  // convert back to string
+  message = (reduce message {acc item i -> <- (join acc item)} "")
+
+  // add car
+  <- (join message "ō͡≡o")
 }
 
-// initialize
+// init
+// \e[H goes to top left
+// \e[2J clears screen
+// \e[?25l disables cursor
 (print "\e[H\e[2J\e[?25l")
 
 // render loop
-(until {n ->
-  (wait 0.1)
+(until "" {state n ->
+
+  // calculate frame number
   frame_number = (add (remainder n 40) 1)
+
+  // clear when animation loop
   (if (is frame_number 1) {(print "\e[H\e[J")})
-  (print (join "\e[HFrame: " (string frame_number) "\e[0m"))
-  (print (join "\e[" (string (add 31 (remainder frame_number 7))) "m" (frame frame_number) "\e[0m"))
-  (print "|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|")
+
+  // \e[H goes to top left
+  (print (join "\e[H" "Frame: " (string frame_number) "\n"))
+
+  // get color escape code
+  color_code = (join "\e[" (string (add 31 (remainder frame_number 7))) "m")
+
+  // print frame
+  (print (join color_code (frame frame_number) "\n"))
+
+  // print floor
+  // \e[0m resets color
+  (print "\e[0m|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|\n")
+
+  // wait to slow down animation
+  (wait 0.1)
 })

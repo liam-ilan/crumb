@@ -49,17 +49,17 @@ end
 - `arguments` ✅
   - A list command line arguments, like argv in C.
 
-- `width` ✅
-  - The width of the terminal.
-
-- `height` ✅
-  - The height of the terminal.
-
 - `(print arg1 arg2 arg3 ...)` ✅
   - Prints all arguments to stdout, returns nothing.
 
 - `(input)` ✅
   - Gets a line of input from stdin.
+
+- `(rows)` ✅
+  - Returns the number of rows in the terminal.
+
+- `(columns)` ✅
+  - Returns the number of columns in the terminal.
 
 - `(read_file path)` ✅
   - Returns the contents of the file designated by `path`, in a string

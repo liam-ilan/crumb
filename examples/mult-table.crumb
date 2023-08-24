@@ -1,11 +1,15 @@
-(print (reduce (map (map (range 10) {row y ->
-  return (map (range 10) {item x ->
-    return (multiply (add y 1) (add x 1))
+table = (map (range 10) {_ y ->
+  <- (map (range 10) {item x ->
+    <- (multiply (add x 1) (add y 1))
   })
-}) {row y ->
-  return (reduce row {acc item i -> 
-    return (join (string acc) " " (string item))
+})
+
+print_table = {table ->
+  (map table {row y ->
+    (print (reduce (get row 1 (length row)) {acc item i -> 
+      <- (join (string acc) " " (string item))
+    } (get row 0)) "\n")
   })
-}) {acc row y ->
-  return (join acc "\n" row)
-}))
+}
+
+(print_table table)

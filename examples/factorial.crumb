@@ -1,9 +1,10 @@
 factorial = {n ->
-  return (if (is n 0) {
-    return 1
+  <- (if (is n 0) {
+    <- 1
   } {
-    return (multiply n (factorial (subtract n 1)))
+    <- (multiply n (factorial (subtract n 1)))
   })
 }
 
-(print (factorial 7))
+(print "Calculate the factorial for: ")
+(print (factorial (integer (input))) "\n")
