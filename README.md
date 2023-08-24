@@ -1,4 +1,6 @@
-# Crumb <img src="./icon.svg" alt="crumb icon" height="20"/>
+<p align=center><img src="./icon.svg" alt="crumb icon" width="200"/></p>
+
+# Crumb 
 Crumb is a high level, functional, interpreted, dynmaically typed, general-purpose programming language, with a terse syntax, and a verbose standard library.
 
 It features:
