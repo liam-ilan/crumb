@@ -1,6 +1,6 @@
 <p align=center><img src="./icons/color-rounded-text.svg" alt="crumb icon" height="150"/></p>
 
-# Crumb
+# The Crumb Programming Language
 Crumb is a high level, functional, interpreted, dynmaically typed, general-purpose programming language, with a terse syntax, and a verbose standard library.
 
 It features:
@@ -133,7 +133,7 @@ Functions operate in a few important ways:
 
 Most of the features you may expect in a programming language are implemented in the form of functions. For example, here is a fuzzbuzz program using the `add`, `loop`, `if`, `remainder`, `is`, and `print` functions,
 
-```clojure
+```
 (loop 100 {i -> 
   i = (add i 1)
   

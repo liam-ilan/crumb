@@ -6,6 +6,9 @@
 #include <string.h>
 #include "events.h"
 
+// stores original terminal settings
+struct termios orig_termios;
+
 void disableRaw() {
   // reset
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
