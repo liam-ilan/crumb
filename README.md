@@ -2,10 +2,10 @@
 Crumb is a high level, functional, interpreted, dynmaically typed, general-purpose programming language, with a terse syntax, and a verbose standard library.
 
 It features:
-- Strictly no side effects to help you write functional code.
-- The ability to localize the effects of imported Crumb files.
-- Dyanmic typing and garbage collection.
-- 0 keywords, everything is a function.
+- Strictly __no side effects__ to help you write functional code.
+- The ability to __localize the effects of imported Crumb files__.
+- __Dyanmic typing__ and __garbage collection__.
+- 0 keywords, __everything is a function__.
 
 ```
 table = (map (range 10) {_ y ->
@@ -16,9 +16,43 @@ table = (map (range 10) {_ y ->
 ```
 *From `examples/mult-table.crumb`*
 
-## Install
-> Note: Due to reliance on `ioctl.h` and `unistd.h`, Crumb currently can only be build for POSIX compliant systems (Linux, Unix, etc.).
+## Syntax
+Crumb utilizes a notably terse syntax defenition. The whole syntax can described in 6 lines of EBNF. Additionally, there are no reserved words, and only 7 reserved symbols.
 
+### EBNF
+```ebnf
+program = start, statement, end;
+statement = {return | assignment | value};
+return = "<-", value;
+assignment = identifier, "=", value;
+value = application | function | int | float | string | identifier;
+application = "(", {value}, ")";
+function = "{", [{identifier}, "->"], statement, "}";
+```
+
+![Syntax Diagram](./syntax-diagram.png)
+
+*Crumb syntax diagram, generated with [DrawGrammar](https://jacquev6.github.io/DrawGrammar/).*
+
+### Tokens
+```
+"="
+"("
+")"
+"{"
+"}"
+"->"
+"<-"
+identifier
+int
+float
+string
+start
+end
+```
+
+## Getting Started
+### Install
 First, clone this repo,
 ```bash
 git clone https://github.com/liam-ilan/crumb.git
@@ -39,7 +73,9 @@ Or run your own code,
 ./crumb YOURCODE.crumb
 ```
 
-## How To
+> Note: The Crumb interpreter is built for POSIX compilant systems, and utlizes `ioctl.h` and `unistd.h`. To use Crumb on windows, either use WSL, or use a Linux container.
+
+### First Time with Crumb
 All function calls are done with s-expressions (think lisp). For example,
 ```
 (print "hello world")
@@ -93,9 +129,9 @@ Functions operate in a few important ways:
 2. Functions *cannot create side effects*.
 3. Like in JavaScript and Python, *functions can be passed into other functions as arguments*.
 
-Most of the features you make expect in a programming language are implemented in the form of functions. For example, here is a fuzzbuzz program using the `add`, `loop`, `if`, `remainder`, `is`, and `print` functions,
+Most of the features you may expect in a programming language are implemented in the form of functions. For example, here is a fuzzbuzz program using the `add`, `loop`, `if`, `remainder`, `is`, and `print` functions,
 
-```
+```clojure
 (loop 100 {i -> 
   i = (add i 1)
   
@@ -315,41 +351,6 @@ You should now be ready to write your own Crumb programs! More info on how to bu
   - Returns the index of `item` in `x`. Returns `void` if not found.
   - `x`: `string` or `list`
   - `item`: `string` if `x` is `string`, else any
-
-## Syntax
-Crumb utilizes a notably terse syntax defenition. The whole syntax can described in 6 lines of EBNF. Additionally, there are no reserved words, and only 7 reserved symbols.
-
-### EBNF
-```ebnf
-program = start, statement, end;
-statement = {return | assignment | value};
-return = "<-", value;
-assignment = identifier, "=", value;
-value = application | function | int | float | string | identifier;
-application = "(", {value}, ")";
-function = "{", [{identifier}, "->"], statement, "}";
-```
-
-![Syntax Diagram](./syntax-diagram.png)
-
-Crumb syntax diagram, generated with [DrawGrammar](https://jacquev6.github.io/DrawGrammar/).
-
-### Tokens
-```
-"="
-"("
-")"
-"{"
-"}"
-"->"
-"<-"
-identifier
-int
-float
-string
-start
-end
-```
 
 ## Development
 When debugging the interpreter, it may be useful to compile with the `-g` flag.
