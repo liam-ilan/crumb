@@ -1,7 +1,5 @@
 factorial = {n ->
-  <- (if (is n 0) {
-    <- 1
-  } {
+  <- (if (is n 0) {<- 1} {
     <- (multiply n (factorial (subtract n 1)))
   })
 }

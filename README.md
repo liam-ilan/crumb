@@ -1,7 +1,24 @@
-# Crumb Programming Language
+# <img src="./icon.svg" alt="crumb icon" width="50"/> Crumb
+Crumb is a high level, functional, interpreted, dynmaically typed, general-purpose programming language, with a terse syntax, and a verbose standard library.
+
+It features:
+- Strictly no side effects to help you write functional code.
+- The ability to localize the effects of imported crumb files.
+- Dyanmic typing and garbage collection.
+- 0 keywords, everything is a function.
+
+```
+table = (map (range 10) {_ y ->
+  <- (map (range 10) {item x ->
+    <- (multiply (add x 1) (add y 1))
+  })
+})
+```
+From `examples/mult-table.crumb`
+
 ## Development
 ### Compile
-```bash
+```bash 
 gcc src/* -Wall -lm -o crumb
 ```
 
