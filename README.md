@@ -110,6 +110,8 @@ We can encapsulate code in functions using curly braces,
 f = {
   (print "Funky!")
 }
+
+(f) // prints "Funky"
 ```
 
 Functions can get arguments, denoted using the "->" symbol. For example,
@@ -117,6 +119,8 @@ Functions can get arguments, denoted using the "->" symbol. For example,
 add_two_things = {a b ->
   (print (add a b))
 }
+
+(add_two_things 3 5) // prints 8
 ```
 
 They can also return values using the "<-" symbol,
@@ -124,6 +128,8 @@ They can also return values using the "<-" symbol,
 geometric_mean = {a b ->
   <- (power (multiply a b) 0.5)
 }
+
+(print (geometric_mean 3 5)) // prints 5.83...
 ```
 
 Functions operate in a few important ways:
