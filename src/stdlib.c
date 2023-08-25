@@ -39,6 +39,18 @@ void validateArgCount(int min, int max, int length, int lineNumber) {
   }
 }
 
+// verify that a bare minimum amount of args are passed
+void validateMinArgCount(int min, int length, int lineNumber) {
+  if (length < min) {
+    // supplied too little args, throw error
+    printf(
+      "Runtime Error @ Line %i: Supplied less arguments than required to function.\n", 
+      lineNumber
+    );
+    exit(0);
+  }
+}
+
 // validate type of argument
 void validateType(enum Type allowedTypes[], int typeCount, enum Type type, int argNum, int lineNumber, char* funcName) {
   bool valid = false;
@@ -80,18 +92,22 @@ void validateBinary(int *p_val, int argNum, int lineNumber, char* funcName) {
 // validate that argument is within a range
 void validateRange(int *p_val, int min, int max, int argNum, int lineNumber, char* funcName) {
   if (*p_val > max || *p_val < min) {
-    // handle infinity case
-    if (max == (int) INFINITY) {
-      printf(
-        "Runtime Error @ Line %i: %s function expected a minimum value of %i for argument #%i, %i supplied instead.\n", 
-        lineNumber, funcName, min, argNum, *p_val
-      );
-    } else {
-      printf(
-        "Runtime Error @ Line %i: %s function expected a value in the range [%i, %i] for argument #%i, %i supplied instead.\n", 
-        lineNumber, funcName, min, max, argNum, *p_val
-      );
-    }
+    printf(
+      "Runtime Error @ Line %i: %s function expected a value in the range [%i, %i] for argument #%i, %i supplied instead.\n", 
+      lineNumber, funcName, min, max, argNum, *p_val
+    );
+
+    exit(0);
+  }
+}
+
+// validate that value is at least a minimum
+void validateMin(int *p_val, int min, int argNum, int lineNumber, char* funcName) {
+  if (*p_val < min) {
+    printf(
+      "Runtime Error @ Line %i: %s function expected a minimum value of %i for argument #%i, %i supplied instead.\n", 
+      lineNumber, funcName, min, argNum, *p_val
+    );
 
     exit(0);
   }
@@ -286,7 +302,7 @@ Generic *StdLib_event(Scope *p_scope, Generic *args[], int length, int lineNumbe
 // (use path1 path2 path3 ... fn)
 // creates a new scope, evaluates the code in path1, path2, and path3, and then uses said scope to evaluate fn
 Generic *StdLib_use(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, (int) INFINITY, length, lineNumber);
+  validateMinArgCount(2, length, lineNumber);
 
   // validate that all arguments with exception of last one are strings
   for (int i = 0; i < length - 1; i++) {
@@ -459,7 +475,7 @@ Generic *StdLib_or(Scope *p_scope, Generic *args[], int length, int lineNumber) 
 // (add arg1 arg2 arg3 ...)
 // sums all args
 Generic *StdLib_add(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, (int) INFINITY, length, lineNumber);
+  validateMinArgCount(2, length, lineNumber);
 
   // flag if we can return integer, or if we must return float
   bool resIsInt = true;
@@ -502,7 +518,7 @@ Generic *StdLib_add(Scope *p_scope, Generic *args[], int length, int lineNumber)
 // (subtract arg1 arg2 arg3 ...)
 // returns arg1 - arg2 - arg3 - ...
 Generic *StdLib_subtract(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, (int) INFINITY, length, lineNumber);
+  validateMinArgCount(2, length, lineNumber);
 
   // flag if we can return integer, or if we must return float
   bool resIsInt = true;
@@ -547,7 +563,7 @@ Generic *StdLib_subtract(Scope *p_scope, Generic *args[], int length, int lineNu
 // (divide arg1 arg2 arg3 ...)
 // returns arg1 / arg2 / arg3 / ...
 Generic *StdLib_divide(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, (int) INFINITY, length, lineNumber);
+  validateMinArgCount(2, length, lineNumber);
 
   // type check
   enum Type allowedTypes[] = {TYPE_INT, TYPE_FLOAT};
@@ -585,7 +601,7 @@ Generic *StdLib_divide(Scope *p_scope, Generic *args[], int length, int lineNumb
 // (multiply arg1 arg2 arg3 ...)
 // returns arg1 * arg2 * arg3 * ...
 Generic *StdLib_multiply(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, (int) INFINITY, length, lineNumber);
+  validateMinArgCount(2, length, lineNumber);
 
   // flag if we can return integer, or if we must return float
   bool resIsInt = true;
@@ -720,7 +736,7 @@ Generic *StdLib_loop(Scope *p_scope, Generic *args[], int length, int lineNumber
   validateType(allowedTypes1, 1, args[0]->type, 1, lineNumber, "loop");
   validateType(allowedTypes2, 2, args[1]->type, 2, lineNumber, "loop");
 
-  validateRange(args[0]->p_val, 0, (int) INFINITY, 1, lineNumber, "loop");
+  validateMin(args[0]->p_val, 0, 1, lineNumber, "loop");
   
   // loop
   for (int i = 0; i < *((int *) args[0]->p_val); i++) {
@@ -953,7 +969,7 @@ Generic *StdLib_length(Scope *p_scope, Generic *args[], int length, int lineNumb
 // (join arg1 arg2 arg3 ...)
 // returns args joined together
 Generic *StdLib_join(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(1, (int) INFINITY, length, lineNumber);
+  validateMinArgCount(2, length, lineNumber);
 
   // validate first type
   enum Type allowedTypes[] = {TYPE_LIST, TYPE_STRING};
@@ -1368,7 +1384,7 @@ Generic *StdLib_range(Scope *p_scope, Generic *args[], int length, int lineNumbe
 
   enum Type allowedTypes[] = {TYPE_INT};
   validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "range");
-  validateRange(args[0]->p_val, 0, (int) INFINITY, 1, lineNumber, "range");
+  validateMin(args[0]->p_val, 0, 1, lineNumber, "range");
 
   // make list of arguments to pass to List_new
   int count = *((int *) args[0]->p_val);
