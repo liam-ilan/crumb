@@ -368,7 +368,7 @@ You should now be ready to write your own Crumb programs! More info on how to bu
 ## Development
 When debugging the interpreter, it may be useful to compile with the `-g` flag.
 ```bash 
-gcc src/* -g -Wall -lm -o crumb
+gcc src/*.c -g -Wall -lm -o crumb
 ```
 
 This will allow valgrind to provide extra information,
