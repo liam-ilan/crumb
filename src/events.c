@@ -9,30 +9,37 @@
 // stores original terminal settings
 struct termios orig_termios;
 
+// stores terminal settings for while the program is running (echo off)
+struct termios run_termios;
+
 void disableRaw() {
   // reset
-  tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+  printf("\e[?1000l");
+  fflush(stdout);
+
+  tcsetattr(STDIN_FILENO, TCSAFLUSH, &run_termios);
 }
 
 void enableRaw() {
-  // enable mouse
-  printf("\e[?1003h\e[?1006h");
 
-  // flush stdout
-  fflush(stdout);
-
-  // get current settings
+  // get standard settings
   struct termios raw = orig_termios;
 
-  // turn off flags
+  // set flags
   raw.c_iflag &= ~(IXON);
-  raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG );
+  raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
   raw.c_oflag &= ~(OPOST);
   raw.c_cc[VMIN] = 0;
   raw.c_cc[VTIME] = 1;
 
   // write settings back into terminal
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+
+  // enable mouse
+  printf("\e[?1003h\e[?1006h");
+
+  // flush stdout
+  fflush(stdout);
 }
 
 // reads a single char from stdin, assuming that raw is enabled
@@ -87,13 +94,12 @@ char *event() {
   }
   
   // disable mouse events
-  printf("\e[?1000l");
   disableRaw();
   return res;
 }
 
 void exitEvents() {
-  disableRaw();
+  tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
   // \e[?1000l disables mouse events
   // \e[?25h shows cursor
   // \e[m resets color
@@ -101,9 +107,8 @@ void exitEvents() {
 }
 
 void initEvents() {
-  // \e[?1003h, \e[?1006h annd \n start mouse events
-  // \e[A] and \r undos last \n
-  printf("\n\e[A\r");
   tcgetattr(STDIN_FILENO, &orig_termios);
-  atexit(disableRaw);
+  run_termios = orig_termios;
+  run_termios.c_lflag &= ~(ECHO);
+  atexit(exitEvents);
 }

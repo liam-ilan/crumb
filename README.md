@@ -62,7 +62,12 @@ git clone https://github.com/liam-ilan/crumb.git
 
 Then compile with gcc,
 ```bash
-gcc src/* -Wall -lm -o crumb
+gcc src/*.c -Wall -lm -o crumb
+```
+
+Or with clang,
+```bash
+clang src/*.c -Wall -lm -o crumb
 ```
 
 From there, run a quick example,

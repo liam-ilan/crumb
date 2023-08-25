@@ -207,6 +207,15 @@ Generic *StdLib_print(Scope *p_scope, Generic *args[], int length, int lineNumbe
 Generic *StdLib_input(Scope *p_scope, Generic *args[], int length, int lineNumber) {
   validateArgCount(0, 0, length, lineNumber);
 
+  // eat through anything in the input buffer
+  enableRaw();
+  char eat = readChar();
+  while (eat != '\0') eat = readChar();
+  disableRaw();
+
+  // enable echo
+  tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+
   // initial allocation of empty string
   char *res = (char *) malloc(sizeof(char));
   res[0] = '\0';
@@ -214,13 +223,15 @@ Generic *StdLib_input(Scope *p_scope, Generic *args[], int length, int lineNumbe
   // loop through every char
   char c = getchar();
   while (c != '\n') {
-
     // reallocate and add char
     res = realloc(res, sizeof(char) * (strlen(res) + 1 + 1));
     strncat(res, &c, 1);
 
     c = getchar();
   }
+
+  // enable events again (turn off echo)
+  tcsetattr(STDIN_FILENO, TCSAFLUSH, &run_termios);
 
   // create pointer
   char **p_res = (char **) malloc(sizeof(char *));

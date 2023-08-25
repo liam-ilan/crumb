@@ -95,7 +95,6 @@ int main(int argc, char *argv[]) {
 
   // parse
   AstNode *p_headAstNode = parseProgram(p_headToken, tokenCount);
-
   
   if (debug) {
     // print AST
