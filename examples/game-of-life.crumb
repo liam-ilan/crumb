@@ -1,0 +1,75 @@
+w = (integer (divide (columns) 2))
+h = (subtract (rows) 1)
+
+world = (map (range h) {_ y -> 
+  <- (map (range w) {item x -> 
+    <- (integer (add (random) 0.5))
+  })
+})
+
+get_block = {n ->
+  <- (if (is n 1) {<- "██"} {<- "  "})
+}
+
+render = {world n ->
+  <- (join "\e[H\e[?25l" (reduce world {acc row y ->
+    <- (join acc
+      (reduce row {acc item x -> <- (join acc (get_block item))} "")
+    "\n")
+  } "") "Frame: " (string n))
+}
+
+get_cell = {world x y -> 
+  out_of_bounds = (or 
+    (or 
+      (or 
+        (greater_than x (subtract w 1)) 
+        (less_than x 0)
+      ) 
+      (greater_than y (subtract h 1))
+    ) 
+    (less_than y 0)
+  )
+
+  <- (if out_of_bounds {<- 0} {<- (get (get world y) x)})
+}
+
+count_neighbors = {world x y ->
+  <- (add
+    (get_cell world (add x 1) (add y 1))
+    (get_cell world (add x 1) y)
+    (get_cell world (add x 1) (subtract y 1))
+
+    (get_cell world x (add y 1))
+    (get_cell world x (subtract y 1))
+
+    (get_cell world (subtract x 1) (add y 1))
+    (get_cell world (subtract x 1) y)
+    (get_cell world (subtract x 1) (subtract y 1))
+  )
+}
+
+update_cell = {world x y ->
+  neighbors = (count_neighbors world x y)
+  state = (get_cell world x y)
+
+  <- (if (is neighbors 3) {<- 1} {
+    <- (if (is neighbors 2) {
+      <- state
+    } {<- 0})
+  })
+}
+
+update_world = {world ->
+  <- (map world {row y ->
+    <- (map row {item x ->
+      <- (update_cell world x y)
+    })
+  })
+}
+
+(until "stop" {curr_world n ->
+  (print (render curr_world n))
+  res = (update_world curr_world)
+  <- res
+} world)
