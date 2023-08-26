@@ -1,4 +1,4 @@
-// split a string on a single char seperator
+// split a string on a single char separator
 split = {in sep ->
   // convert to list of chars
   arr = (map (range (length in)) {index _ -> <- (get in index)})
@@ -6,17 +6,19 @@ split = {in sep ->
   // add an empty list to the start for reduction
 
   // reduce list of chars to list of words
-  <- (reduce arr {acc char _ ->
-    last_index = (subtract (length acc) 1)
+  <- (if (is sep "") {<- arr} {
+    <- (reduce arr {acc char _ ->
+      last_index = (subtract (length acc) 1)
 
-    <- (if (is char sep) {
-      // add new item to result if we come across a seperator
-      <- (insert acc "") 
-    } {
-      // else, add char to the last item
-      <- (set acc (insert (get acc last_index) char) last_index)
-    })
-  } (list ""))
+      <- (if (is char sep) {
+        // add new item to result if we come across a separator
+        <- (insert acc "") 
+      } {
+        // else, add char to the last item
+        <- (set acc (insert (get acc last_index) char) last_index)
+      })
+    } (list ""))
+  })
 }
 
 (print "Insert an input to be split on commas: ")

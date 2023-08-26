@@ -354,7 +354,7 @@ You should now be ready to write your own Crumb programs! More info on how to bu
 - `(reduce arr fn initial_acc)` or `(reduce arr fn)`
   - Returns a value, computed via running `fn` on every item in `arr`. With every iteration, the last return from `fn` is passed to the next application of `fn`. The final returned value from `fn` is the value returned from `reduce`.
   - `arr`: `list`.
-  - `fn`: `function`, which is in the form `{item acc item i -> ...}`, where `item` is the current item, `acc` is the accumulator (the result of `fn` from the last item), and `i` is the current index. `acc` is `initial_acc` if supplied, or `void` if not.
+  - `fn`: `function`, which is in the form `{acc item i -> ...}`, where `item` is the current item, `acc` is the accumulator (the result of `fn` from the last item), and `i` is the current index. `acc` is `initial_acc` if supplied, or `void` if not.
 
 - `(range n)`
   - Returns a list with the integers from `0` to `n`, not including `n`.

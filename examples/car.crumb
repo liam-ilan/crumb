@@ -30,7 +30,7 @@ frame = {n ->
   (if (is frame_number 1) {(print "\e[H\e[J")})
 
   // \e[H goes to top left
-  (print (join "\e[H" "Frame: " (string frame_number) "\n"))
+  (print (join "\e[H" "Frame: " (string frame_number) "\n\n"))
 
   // get color escape code
   color_code = (join "\e[" (string (add 31 (remainder frame_number 7))) "m")
@@ -40,7 +40,7 @@ frame = {n ->
 
   // print floor
   // \e[0m resets color
-  (print "\e[0m|‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|\n")
+  (print "\e[0m‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n")
 
   // wait to slow down animation
   (wait 0.1)
