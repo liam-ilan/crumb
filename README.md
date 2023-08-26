@@ -1,4 +1,4 @@
-<p align=center><img src="./icons/color-rounded-text.svg" alt="crumb icon" height="150"/></p>
+<p align=center><img src="./media/color-rounded-text.svg" alt="crumb icon" height="150"/></p>
 
 # The Crumb Programming Language
 Crumb is a high level, functional, interpreted, dynmaically typed, general-purpose programming language, with a terse syntax, and a verbose standard library.
@@ -220,7 +220,7 @@ Most of the features you may expect in a programming language are implemented in
   })
 })
 ```
-*From `examples/fizzbuzz.crumb`*
+*From [`examples/fizzbuzz.crumb`](./examples/fizzbuzz.crumb)*
 
 You should now be ready to write your own Crumb programs! More info on how to build applications with events, files, code-splitting, and more, is found in the standard library documentation below.
 
