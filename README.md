@@ -1,7 +1,7 @@
 <p align=center><img src="./media/color-rounded-text.svg" alt="crumb icon" height="150"/></p>
 
 # The Crumb Programming Language
-Crumb is a high level, functional, interpreted, dynmaically typed, general-purpose programming language, with a terse syntax, and a verbose standard library.
+Crumb is a high level, functional, interpreted, dynamically typed, general-purpose programming language, with a terse syntax, and a verbose standard library.
 
 It features:
 - Strictly __no side effects__ to help you write functional code.
@@ -112,6 +112,8 @@ symbol1
 
 ## Getting Started
 ### Install
+> For a quick start, you can use Replit, by forking [this repl](https://replit.com/@snowboardsheep/Crumb-on-Replit).
+
 First, clone this repo,
 ```bash
 git clone https://github.com/liam-ilan/crumb.git
