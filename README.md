@@ -16,7 +16,10 @@ table = (map (range 10) {_ y ->
   })
 })
 ```
-*From `examples/mult-table.crumb`*
+*From [`examples/mult-table.crumb`](./examples/mult-table.crumb)*
+
+![Game of Life in Crumb](./media/game-of-life.gif)
+*From [`examples/game-of-life.crumb`](./examples/game-of-life.crumb)*
 
 ## Syntax
 Crumb utilizes a notably terse syntax defenition. The whole syntax can described in 6 lines of EBNF. Additionally, there are no reserved words, and only 7 reserved symbols.
@@ -32,7 +35,7 @@ application = "(", {value}, ")";
 function = "{", [{identifier}, "->"], statement, "}";
 ```
 
-![Syntax Diagram](./syntax-diagram.png)
+![Syntax Diagram](./media/syntax-diagram.png)
 
 *Crumb syntax diagram, generated with [DrawGrammar](https://jacquev6.github.io/DrawGrammar/).*
 
@@ -82,7 +85,7 @@ Or run your own code,
 
 > Note: The Crumb interpreter is built for POSIX compilant systems, and utlizes `ioctl.h` and `unistd.h`. To use Crumb on windows, either use WSL, or use a Linux container.
 
-### First Time with Crumb
+### Basics
 All function calls are done with s-expressions (think lisp). For example,
 ```
 (print "hello world")
