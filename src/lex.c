@@ -59,7 +59,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       i++;
 
       // count to last char in string (last quote)
-      while (code[i] != '"') {
+      while (code[i] != '"' || (code[i] == '"' && code[i - 1] == '\\')) {
         i++;
 
         // error handling

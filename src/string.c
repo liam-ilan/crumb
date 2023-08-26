@@ -12,8 +12,7 @@ char *parseString(char *in) {
 
   for (int i = 0; i < strlen(in); i++) {
     if (in[i] == '\\') {
-      if (in[i] == 'n') res[i - lost] = '\n';
-      else if (in[i + 1] == 'a') res[i - lost] = '\a';
+      if (in[i + 1] == 'a') res[i - lost] = '\a';
       else if (in[i + 1] == 'b') res[i - lost] = '\b';
       else if (in[i + 1] == 'f') res[i - lost] = '\f';
       else if (in[i + 1] == 'n') res[i - lost] = '\n';

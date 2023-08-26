@@ -9,6 +9,10 @@ It features:
 - __Dyanmic typing__ and __garbage collection__.
 - 0 keywords, __everything is a function__.
 
+Click here to [Get Started](#getting-started).
+
+---
+
 ```
 table = (map (range 10) {_ y ->
   <- (map (range 10) {item x ->
@@ -18,8 +22,14 @@ table = (map (range 10) {_ y ->
 ```
 *From [`examples/mult-table.crumb`](./examples/mult-table.crumb)*
 
+---
+
 ![Game of Life in Crumb](./media/game-of-life.gif)
 *From [`examples/game-of-life.crumb`](./examples/game-of-life.crumb)*
+
+---
+
+Find more examples under the `examples` directory.
 
 ## Syntax
 Crumb utilizes a notably terse syntax defenition. The whole syntax can described in 6 lines of EBNF. Additionally, there are no reserved words, and only 7 reserved symbols.
@@ -54,6 +64,50 @@ float
 string
 start
 end
+```
+
+### Specifics
+Strings are characters surrounded by quotes, for example:
+```
+"hello world"
+"this is\nsplit between new lines"
+"\e[31mthis text is in red\e[0m"
+```
+
+Escape codes in crumb are equivalent to their respective C escape codes. The list of supported escape codes is:
+```
+"\a"
+"\b"
+"\f"
+"\n" 
+"\r"
+"\t"
+"\v"
+"\e"
+"\\"
+"\""
+```
+
+Integers are groups of number charechters, that may be preceded by `-` for example:
+```
+1234
+-14
+345
+```
+
+Floats are like integers, but have a decimal in them, for example:
+```
+13.45
+-2.3
+745.0
+```
+
+Identifiers are any collection of characters, that are not seperated by whitespace, don't begin with quotes or numbers, and are not any reserved symbols, for example:
+```
+hello
+x₂
+symbol1
++
 ```
 
 ## Getting Started
