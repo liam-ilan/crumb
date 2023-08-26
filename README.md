@@ -110,6 +110,12 @@ symbol1
 +
 ```
 
+Comments start with "//", and end with the end of a line, for example:
+```
+// this is a program that prints hi
+(print "hi") // this prints hi
+```
+
 ## Getting Started
 ### Install
 *For a quick start, you can use Replit, by forking [this repl](https://replit.com/@snowboardsheep/Crumb-on-Replit).*
