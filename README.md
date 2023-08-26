@@ -6,7 +6,7 @@ Crumb is a high level, functional, interpreted, dynamically typed, general-purpo
 It features:
 - Strictly __no side effects__ to help you write functional code.
 - The ability to __localize the effects of imported Crumb files__.
-- __Dyanmic typing__ and __garbage collection__.
+- __Dynamic typing__ and __garbage collection__.
 - 0 keywords, __everything is a function__.
 
 Click here to [Get Started](#getting-started).
@@ -32,7 +32,7 @@ table = (map (range 10) {_ y ->
 Find more examples under the `examples` directory.
 
 ## Syntax
-Crumb utilizes a notably terse syntax defenition. The whole syntax can described in 6 lines of EBNF. Additionally, there are no reserved words, and only 7 reserved symbols.
+Crumb utilizes a notably terse syntax definition. The whole syntax can described in 6 lines of EBNF. Additionally, there are no reserved words, and only 7 reserved symbols.
 
 ### EBNF
 ```ebnf
@@ -88,7 +88,7 @@ Escape codes in crumb are equivalent to their respective C escape codes. The lis
 "\""
 ```
 
-Integers are groups of number charechters, that may be preceded by `-` for example:
+Integers are groups of number characters, that may be preceded by `-` for example:
 ```
 1234
 -14
@@ -102,7 +102,7 @@ Floats are like integers, but have a decimal in them, for example:
 745.0
 ```
 
-Identifiers are any collection of characters, that are not seperated by whitespace, don't begin with quotes or numbers, and are not any reserved symbols, for example:
+Identifiers are any collection of characters, that are not separated by whitespace, don't begin with quotes or numbers, and are not any reserved symbols, for example:
 ```
 hello
 x₂
@@ -112,7 +112,7 @@ symbol1
 
 ## Getting Started
 ### Install
-> For a quick start, you can use Replit, by forking [this repl](https://replit.com/@snowboardsheep/Crumb-on-Replit).
+*For a quick start, you can use Replit, by forking [this repl](https://replit.com/@snowboardsheep/Crumb-on-Replit).*
 
 First, clone this repo,
 ```bash
@@ -139,7 +139,7 @@ Or run your own code,
 ./crumb YOURCODE.crumb
 ```
 
-> Note: The Crumb interpreter is built for POSIX compilant systems, and utlizes `ioctl.h` and `unistd.h`. To use Crumb on windows, either use WSL, or use a Linux container.
+> The Crumb interpreter is built for POSIX compliant systems, and utilizes `ioctl.h` and `unistd.h`. To use Crumb on windows, either use WSL, or use a Linux container.
 
 ### Basics
 All function calls are done with s-expressions (think lisp). For example,
@@ -201,7 +201,7 @@ Functions operate in a few important ways:
 2. Functions *cannot create side effects*.
 3. Like in JavaScript and Python, *functions can be passed into other functions as arguments*.
 
-Most of the features you may expect in a programming language are implemented in the form of functions. For example, here is a fuzzbuzz program using the `add`, `loop`, `if`, `remainder`, `is`, and `print` functions,
+Most of the features you may expect in a programming language are implemented in the form of functions. For example, here is a Fizzbuzz program using the `add`, `loop`, `if`, `remainder`, `is`, and `print` functions,
 
 ```
 (loop 100 {i -> 
@@ -226,7 +226,7 @@ Most of the features you may expect in a programming language are implemented in
 
 You should now be ready to write your own Crumb programs! More info on how to build applications with events, files, code-splitting, and more, is found in the standard library documentation below.
 
-## Standard Libary
+## Standard Library
 ### IO
 - `arguments`
   - A list command line arguments, like argv in C.
@@ -325,17 +325,17 @@ You should now be ready to write your own Crumb programs! More info on how to bu
 
 ### Control
 - `(loop count fn)`
-  - Applys `fn`, `count` times. If `fn` returns, the loop breaks, and `loop` returns whatever `fn` returned, else repeats until loop is completed.
+  - Applies `fn`, `count` times. If `fn` returns, the loop breaks, and `loop` returns whatever `fn` returned, else repeats until loop is completed.
   - `count`: `integer`, which is greater than or equal to `0`
   - `fn`: `function`, which is in the form `{n -> ...}`, where n is the current loop index (starting at `0`).
 
 - `(until stop fn initial_state)` or `(until stop fn)`
-  - Applys `fn`, and repeats until `fn` returns `stop`. `until` returns whatever `fn` returned, before `stop`.
-  - The return value of every past itteration is passed on to the next. The initial itteration uses `initial_state` if supplied, or returns `void` if not.
+  - Applies `fn`, and repeats until `fn` returns `stop`. `until` returns whatever `fn` returned, before `stop`.
+  - The return value of every past iteration is passed on to the next. The initial iteration uses `initial_state` if supplied, or returns `void` if not.
   - `fn`: `function`, which is in the form `{state n -> ...}`, where n is the current loop index (starting at `0`), and `state` is the current state.
 
 - `(if condition fn1)` or `(if condition fn1 fn2)`
-  - If `condition` is `1`, applys `fn1`. (like the "then" part in an if statement).
+  - If `condition` is `1`, applies `fn1`. (like the "then" part in an if statement).
   - If `condition` is `0`, and `fn2` was supplied, apply `fn2`. (the "else" part in an if statement).
   - Returns whatever `fn1` or `fn2` return
   - `condition`: `integer`, which is `1` or `0`
@@ -380,7 +380,7 @@ You should now be ready to write your own Crumb programs! More info on how to bu
 
 - `(get x index1)` or `(get x index1 index2)`
   - Returns the item in `x` at `index1`. If x is a `string`, this is a single char.
-  - If `index2` is supplied, returns a subarray or substring from `index1` to `index2`, not including `index2`.
+  - If `index2` is supplied, returns a sub-array or substring from `index1` to `index2`, not including `index2`.
   - `x`: `string` or `list`.
   - `index1`: `int`.
   - `index2`: `int`.
@@ -430,7 +430,7 @@ When debugging the interpreter, it may be useful to compile with the `-g` flag.
 gcc src/*.c -g -Wall -lm -o crumb
 ```
 
-This will allow valgrind to provide extra information,
+This will allow Valgrind to provide extra information,
 ```bash
 valgrind --leak-check=full -s ./crumb YOURCODE.crumb
 ```
