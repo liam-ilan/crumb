@@ -18,6 +18,15 @@ void skipClosure(int *p_index, Token **p_p_curr, enum TokenType open, enum Token
     *p_p_curr = (*p_p_curr)->p_next;
     (*p_index)++;
 
+    // throw bug if we reach the end of a file
+    if ((*p_p_curr)->type == TOK_END) {
+      printf(
+        "Syntax Error @ Line %i: Unexpected %s token.\n", 
+        (*p_p_curr)->lineNumber, getTokenTypeString((*p_p_curr)->type)
+      );
+      exit(0);
+    }
+
     if ((*p_p_curr)->type == close) depth--;
     else if ((*p_p_curr)->type == open) depth++;
   }

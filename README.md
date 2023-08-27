@@ -4,10 +4,11 @@
 Crumb is a high level, functional, interpreted, dynamically typed, general-purpose programming language, with a terse syntax, and a verbose standard library.
 
 It features:
-- Strictly __no side effects__ to help you write functional code.
+- Strictly __no side effects__* to help you write functional code
 - The ability to __localize the effects of imported Crumb files__.
 - __Dynamic typing__ and __garbage collection__.
 - 0 keywords, __everything is a function__.
+> *With the exception of IO
 
 Click here to [Get Started](#getting-started).
 
@@ -438,7 +439,7 @@ gcc src/*.c -g -Wall -lm -o crumb
 
 This will allow Valgrind to provide extra information,
 ```bash
-valgrind --leak-check=full -s ./crumb YOURCODE.crumb
+valgrind --leak-check=full -s ./crumb -d YOURCODE.crumb
 ```
 
 To obtain debug information about how your code is interpreted (Tokens, AST, etc.), add the `-d` flag.

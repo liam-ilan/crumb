@@ -128,7 +128,9 @@ Generic *eval(AstNode *p_head, Scope *p_scope, int depth) {
       p_local = NULL;
 
       // free function if no references
-      if (func->refCount == 0) Generic_free(func);
+      if (func->refCount == 0) {
+        Generic_free(func);
+      }
 
       // return 
       return res;
@@ -176,6 +178,8 @@ Generic *eval(AstNode *p_head, Scope *p_scope, int depth) {
       Scope_free(p_local);
       p_local = NULL;
 
+      if (func->refCount == 0) Generic_free(func);
+      
       return res;
 
     } else {

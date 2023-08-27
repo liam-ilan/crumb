@@ -61,7 +61,11 @@ void Scope_set(Scope *p_target, char *key, Generic *p_val) {
     if ((*p_p_curr)->p_val->refCount == 0) {
       Generic_free((*p_p_curr)->p_val);
     } 
+
+    free((*p_p_curr)->key);
+
     (*p_p_curr)->p_val = p_val;
+    (*p_p_curr)->key = keyCopy;
   }
 }
 

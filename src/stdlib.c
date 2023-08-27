@@ -133,6 +133,8 @@ Generic *applyFunc(Generic *func, Scope *p_scope, Generic *args[], int length, i
       if (args[i]->refCount == 0) Generic_free(args[i]);
     }
 
+    if (func->refCount == 0) Generic_free(func);
+
     return res;
 
   } else if (func->type == TYPE_FUNCTION) {
