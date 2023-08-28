@@ -7,6 +7,19 @@
 #include "tokens.h"
 #include "string.h"
 
+// handles errors while scanning chars in a string
+void handleStringError(char c, int lineNumber) {
+  if (c == '\n') {
+    printf("Syntax Error @ Line %i: Unexpected new line before string closed.\n", lineNumber);
+    exit(0);
+  }
+
+  if (c == '\0') {
+    printf("Syntax Error @ Line %i: Unexpected end of file before string closed.\n", lineNumber);
+    exit(0);
+  }
+}
+
 // lex code with length fileLength into tokens
 int lex(Token *p_headToken, char *code, int fileLength) {
 
@@ -62,18 +75,14 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       while (code[i] != '"') {
 
         // error handling
-        if (code[i] == '\n') {
-          printf("Syntax Error @ Line %i: Unexpected new line before string closed.\n", lineNumber);
-          exit(0);
-        }
-
-        if (code[i] == '\0') {
-          printf("Syntax Error @ Line %i: Unexpected end of file before string closed.\n", lineNumber);
-          exit(0);
-        }
+        handleStringError(code[i], lineNumber);
         
         // skip escape codes
-        if (code[i] == '\\') i++;
+        if (code[i] == '\\') {
+          i++;
+          handleStringError(code[i], lineNumber);
+        }
+        
         i++;
       }
 
