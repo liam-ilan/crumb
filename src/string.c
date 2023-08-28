@@ -6,11 +6,12 @@
 // handle escape codes
 char *parseString(char *in) {
   char *res = (char *) malloc(sizeof(char) * (strlen(in) + 1));
+  int length = strlen(in);
 
   // the number of charechters lost due to escape codes
   int lost = 0;
 
-  for (int i = 0; i < strlen(in); i++) {
+  for (int i = 0; i < length; i++) {
     if (in[i] == '\\') {
       if (in[i + 1] == 'a') res[i - lost] = '\a';
       else if (in[i + 1] == 'b') res[i - lost] = '\b';
