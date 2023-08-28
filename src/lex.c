@@ -82,7 +82,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
           i++;
           handleStringError(code[i], lineNumber);
         }
-        
+
         i++;
       }
 
@@ -96,7 +96,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       free(val);
       tokenCount++;
 
-    } else if (isdigit(c) > 0 || (c == '-' && isdigit(code[i + 1]) > 0)) {
+    } else if (isdigit((unsigned char) c) > 0 || (c == '-' && isdigit((unsigned char) code[i + 1]) > 0)) {
       
       // record first char in int
       int numStart = i;
@@ -108,7 +108,7 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       i++;
 
       // increment until char is not a valid number char
-      while (isdigit(code[i]) > 0 || code[i] == '.') {
+      while (isdigit((unsigned char) code[i]) > 0 || code[i] == '.') {
         
         // handle float flag and protect against multiple points
         if (code[i] == '.') {
