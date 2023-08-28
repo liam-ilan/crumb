@@ -12,17 +12,41 @@ char *parseString(char *in) {
 
   for (int i = 0; i < strlen(in); i++) {
     if (in[i] == '\\') {
-      if (in[i + 1] == 'a') res[i - lost] = '\a';
-      else if (in[i + 1] == 'b') res[i - lost] = '\b';
-      else if (in[i + 1] == 'f') res[i - lost] = '\f';
-      else if (in[i + 1] == 'n') res[i - lost] = '\n';
-      else if (in[i + 1] == 'r') res[i - lost] = '\r';
-      else if (in[i + 1] == 't') res[i - lost] = '\t';
-      else if (in[i + 1] == 'v') res[i - lost] = '\v';
-      else if (in[i + 1] == 'e') res[i - lost] = '\e';
-      else if (in[i + 1] == '\\') res[i - lost] = '\\';
-      else if (in[i + 1] == '\"') res[i - lost] = '\"';
-      else res[i - lost] = in[i + 1];
+      switch (in[i + 1]) {
+      case 'a' :
+        res[i - lost] = '\a';
+        break;
+      case 'b' :
+        res[i - lost] = '\b';
+        break;
+      case'f' :
+        res[i - lost] = '\f';
+        break;
+      case 'n' :
+        res[i - lost] = '\n';
+        break;
+      case 'r' :
+        res[i - lost] = '\r';
+        break;
+      case 't' :
+        res[i - lost] = '\t';
+        break;
+      case 'v' :
+        res[i - lost] = '\v';
+        break;
+      case 'e' :
+        res[i - lost] = '\e';
+        break;
+      case '\\' :
+        res[i - lost] = '\\';
+        break;
+      case '\"':
+        res[i - lost] = '\"';
+        break;
+      default :
+        res[i - lost] = in[i + 1];
+        break;
+      }
       lost++;
       i++;
     } else res[i - lost] = in[i];
