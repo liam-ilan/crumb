@@ -26,7 +26,6 @@ char *parseString(char *in) {
       lost++;
       i++;
     } else res[i - lost] = in[i];
-
   }
 
   res = (char *) realloc(res, strlen(in) + 1 - lost);

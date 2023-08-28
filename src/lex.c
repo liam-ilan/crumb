@@ -61,10 +61,6 @@ int lex(Token *p_headToken, char *code, int fileLength) {
       // count to last char in string (last quote)
       while (code[i] != '"') {
 
-        // skip escape codes
-        if (code[i] == '\\') i++;
-        i++;
-
         // error handling
         if (code[i] == '\n') {
           printf("Syntax Error @ Line %i: Unexpected new line before string closed.\n", lineNumber);
@@ -75,6 +71,10 @@ int lex(Token *p_headToken, char *code, int fileLength) {
           printf("Syntax Error @ Line %i: Unexpected end of file before string closed.\n", lineNumber);
           exit(0);
         }
+        
+        // skip escape codes
+        if (code[i] == '\\') i++;
+        i++;
       }
 
       // get substring and add token
