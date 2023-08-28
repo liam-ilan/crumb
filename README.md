@@ -200,7 +200,7 @@ geometric_mean = {a b ->
   <- (power (multiply a b) 0.5)
 }
 
-(print (geometric_mean 3 5)) // prints 5.83...
+(print (geometric_mean 3 5) "\n") // prints 3.87...
 ```
 
 Functions operate in a few important ways:

@@ -1,0 +1,11 @@
+geometric_mean = {a b ->
+  <- (power (multiply a b) 0.5)
+}
+
+(print "Input two numbers to find the geometric mean of:\n")
+(print "Number 1: ")
+a = (float (input))
+(print "Number 2: ")
+b = (float (input))
+
+(print (geometric_mean a b) "\n")
