@@ -82,6 +82,16 @@ Generic *eval(AstNode *p_head, Scope *p_scope, int depth) {
     return Generic_new(TYPE_FUNCTION, AstNode_copy(p_head, 0), 0);
 
   } else if (p_head->opcode == OP_APPLICATION) {
+    // throw error for empty application
+    if (p_head->p_headChild == NULL) {
+      printf(
+        "Runtime Error @ Line %i: Empty Application.\n", 
+        p_head->lineNumber
+      );
+
+      exit(0);
+    }
+
     // application case
     // get function
     Generic *func = eval(p_head->p_headChild, p_scope, depth + 1);
