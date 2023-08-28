@@ -101,9 +101,7 @@ char *event() {
 void exitEvents() {
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
   // \e[?1000l disables mouse events
-  // \e[?25h shows cursor
-  // \e[m resets color
-  printf("\e[?1000l\e[?25h\e[m");
+  printf("\e[?1000l");
 }
 
 void initEvents() {

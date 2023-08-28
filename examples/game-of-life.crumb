@@ -12,7 +12,7 @@ get_block = {n ->
 }
 
 render = {world n ->
-  <- (join "\e[H\e[?25l" (reduce world {acc row y ->
+  <- (join "\e[H" (reduce world {acc row y ->
     <- (join acc
       (reduce row {acc item x -> <- (join acc (get_block item))} "")
     "\n")

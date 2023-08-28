@@ -1,8 +1,7 @@
 // init
 // \e[H goes to top left
 // \e[2J clears screen
-// \e[?25l disables cursor
-(print "\e[H\e[2J\e[?25l")
+(print "\e[H\e[2J")
 
 // render loop
 // state is a list containing: 1. the coordinates, 2. the color
@@ -71,7 +70,7 @@
     fish = (get fish_list (remainder (get newState 1) (length fish_list)))
 
     // print fish
-    (print coords_code color_code fish "NOM NOM NOM" "\e[0m")
+    (print (join coords_code color_code "   " fish " NOM NOM NOM" " \e[0m"))
   })
 
   <- newState

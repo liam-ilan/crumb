@@ -17,8 +17,7 @@ frame = {n ->
 // init
 // \e[H goes to top left
 // \e[2J clears screen
-// \e[?25l disables cursor
-(print "\e[H\e[2J\e[?25l")
+(print "\e[H\e[2J")
 
 // render loop
 (until "" {state n ->
@@ -36,11 +35,11 @@ frame = {n ->
   color_code = (join "\e[" (string (add 31 (remainder frame_number 7))) "m")
 
   // print frame
-  (print (join color_code (frame frame_number) "\n"))
+  // \e[0m resets color
+  (print (join color_code (frame frame_number) "\e[0m\n"))
 
   // print floor
-  // \e[0m resets color
-  (print "\e[0m‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n")
+  (print "‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n")
 
   // wait to slow down animation
   (wait 0.1)
