@@ -269,7 +269,7 @@ You should now be ready to write your own Crumb programs! More info on how to bu
   
 ### Comparisons
 - `(is a b)`
-  - Checks if `a` and `b` are equal, returns `1` if so, else returns `0`.
+  - Checks if `a` and `b` are equal, returns `1` if so, else returns `0`. If `a` and `b` are lists, a deep comparison is made.
 
 - `(less_than a b)`
   - Checks if `a` is less than `b`, returns `1` if so, else returns `0`.
