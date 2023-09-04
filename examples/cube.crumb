@@ -1,0 +1,134 @@
+// utilities
+pi = 3.1415926
+
+clear = {(print "\e[2J")}
+
+absolute = {x -> <- (if (less_than x 0) {<- (multiply x -1)} {<- x})}
+max = {a b -> <- (if (greater_than a b) {<- a} {<- b})}
+
+sine = {x ->
+  in = (subtract pi (remainder x (multiply pi 2)))
+  <- (add
+    in
+    (divide (power in 3) -6)
+    (divide (power in 5) 120)
+    (divide (power in 7) -5040)
+    (divide (power in 7) 362880)
+  )
+}
+cosine = {x -> <- (sine (add x (divide pi 2)))}
+
+// DDA algorithim
+line = {x1 y1 x2 y2 fill color -> 
+  dx = (subtract (float x2) (float x1))
+  dy = (subtract (float y2) (float y1))
+
+  step = (max (absolute dx) (absolute dy))
+
+  dx = (divide dx step)
+  dy = (divide dy step)
+
+  (map (range (add (integer step) 1)) {_ i ->
+    x = (integer (add (multiply i dx) x1))
+    y = (integer (add (multiply i dy) y1))
+
+    move_code = (join "\e[" (string y) ";" (string x) "H")
+    color_start_code = (join "\e[0;" (string (add color 30)) ";40m")
+    color_reset_code = "\e[0;0m"
+
+    (print (join move_code color_start_code fill color_reset_code))
+  })
+}
+
+// draw cube frame
+cube = {theta char ->
+
+  // center of cube
+  center_x = (divide (columns) 2)
+  center_y = (divide (rows) 2)
+
+  // squish factor of base / top
+  squish = 4
+
+  // distance from base to ceiling
+  height = (divide (rows) 2.5)
+
+  // "radius" (half of the diagonal of the base)
+  radius = (multiply height 1.41)
+
+  // find all base coordinates
+  base = (map (range 4) {_ i ->
+    <- (list
+      (add 
+        (multiply (cosine (add theta (multiply i (divide pi 2)))) radius) 
+        center_x
+      )
+      
+      (add 
+        (multiply (sine (add theta (multiply i (divide pi 2)))) (divide radius squish)) 
+        center_y 
+        (divide height 2)
+      )
+    )
+  })
+
+  // transalate upwards to find all ceiling coordinates
+  roof = (map base {coords _ -> <- (list (get coords 0) (subtract (get coords 1) height))})
+
+  // draw base
+  (map base {coords i ->
+    (line 
+      (get coords 0) 
+      (get coords 1) 
+      (get (get base (remainder (add i 1) 4)) 0) 
+      (get (get base (remainder (add i 1) 4)) 1) 
+      char (add i 1)
+    )
+  })
+
+  // draw base
+  (map roof {coords i ->
+    (line 
+      (get coords 0) 
+      (get coords 1) 
+      (get (get roof (remainder (add i 1) 4)) 0) 
+      (get (get roof (remainder (add i 1) 4)) 1) 
+      char (add i 1)
+    )
+  })
+
+  // connect base and roof
+  (map base {coords i ->
+    (line 
+      (get coords 0) 
+      (get coords 1) 
+      (get (get roof i) 0) 
+      (get (get roof i) 1) 
+      char (add i 1)
+    )
+  })
+
+}
+
+// clears a given cube
+clear_cube = {theta -> (cube theta "\e[0;0m ")}
+
+// animation loop
+(clear)
+(until "stop" {state i ->
+
+  // calculate angle
+  theta = (divide i 10)
+
+  // draw cube, and then clear
+  (cube theta "█")
+  (wait 0.05)
+  (clear_cube theta)
+
+  // clear screen if width / height changed
+  <- (if (or (not (is (columns) (get state 0))) (not (is (rows) (get state 1)))) {
+    (clear)
+    <- (list (columns) (rows))
+  } {<- state})
+
+} (list (columns) (rows)))
