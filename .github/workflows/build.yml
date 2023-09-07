@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs: 
-  build: 
+  linux-build: 
     runs-on: ubuntu-latest
 
     steps: 
@@ -30,7 +30,7 @@ jobs:
           path: artifacts
         
 
-  build: 
+  macos-intel-build: 
     runs-on: macos-latest
 
     steps: 
