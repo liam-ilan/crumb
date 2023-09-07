@@ -8,14 +8,11 @@ on:
 
 jobs: 
   linux-build: 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps: 
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Install GLIBC
-        run: sudo apt install libc6
 
       - name: Build for Ubuntu via gcc
         run: gcc src/*.c -Wall -lm -o crumb
