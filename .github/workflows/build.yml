@@ -1,0 +1,54 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs: 
+  build: 
+    runs-on: ubuntu-latest
+
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build for Ubuntu via gcc
+        run: gcc src/*.c -Wall -lm -o crumb
+
+      - name: Move artifact to dedicated directory
+        run: |
+          mkdir artifacts
+          touch ./artifacts/crumb
+          cp ./crumb ./artifacts/crumb
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: linux-build
+          path: artifacts
+        
+
+  build: 
+    runs-on: macos-latest
+
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build for MacOS via Clang
+        run: clang src/*.c -Wall -lm -o crumb
+
+      - name: Move artifact to dedicated directory
+        run: |
+          mkdir artifacts
+          touch ./artifacts/crumb
+          cp ./crumb ./artifacts/crumb
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: macos-intel-build
+          path: artifacts
+        

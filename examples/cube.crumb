@@ -86,7 +86,7 @@ cube = {theta char ->
     )
   })
 
-  // draw base
+  // draw roof
   (map roof {coords i ->
     (line 
       (get coords 0) 
