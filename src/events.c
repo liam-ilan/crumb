@@ -86,7 +86,15 @@ char *event() {
         c = readChar();
         strncat(res, &c, 1);
       } while (!(64 <= c && c <= 126));
+
+    } else if (c == 'O') {
+      // \e O is used under certain cases to access function keys
+      // this escape code accepts the next char, thus this case is needed
+      res = realloc(res, sizeof(char) * (strlen(res) + 1 + 1));
+      c = readChar();
+      strncat(res, &c, 1);
     }
+
   } else if (c != '\0') {
     // case where just a key was pressed, add memory, insert, and return
     res = realloc(res, sizeof(char) * (strlen(res) + 1 + 1));
