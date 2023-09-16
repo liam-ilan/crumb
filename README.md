@@ -363,7 +363,7 @@ Strings are characters surrounded by quotes, for example:
 "\e[31mthis text is in red\e[0m"
 ```
 
-Escape codes in crumb are equivalent to their respective C escape codes. The list of supported escape codes is:
+Escape codes in Crumb are equivalent to their respective C escape codes. The list of supported escape codes is:
 ```
 "\a"
 "\b"
@@ -375,6 +375,7 @@ Escape codes in crumb are equivalent to their respective C escape codes. The lis
 "\e"
 "\\"
 "\""
+"\x4d" // for arbitrary ascii chars
 ```
 
 Integers are groups of number characters, that may be preceded by `-` for example:
