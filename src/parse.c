@@ -358,7 +358,7 @@ AstNode *parseProgram(Token *p_head, int length) {
   for (int i = 0; i < length - 1; i++) p_curr = p_curr->p_next;
   
   if(p_curr->type != TOK_END) {
-    printf("Syntax Error @ Line %i: Missing start token.\n", p_curr->lineNumber);
+    printf("Syntax Error @ Line %i: Missing end token.\n", p_curr->lineNumber);
     exit(0);
   }
 

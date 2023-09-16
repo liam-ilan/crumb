@@ -467,35 +467,47 @@ Generic *StdLib_not(Scope *p_scope, Generic *args[], int length, int lineNumber)
 // (and a b)
 // returns a and b
 Generic *StdLib_and(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, 2, length, lineNumber);
+  validateMinArgCount(2, length, lineNumber);
 
+  // type check
   enum Type allowedTypes[] = {TYPE_INT};
-  validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "and");
-  validateType(allowedTypes, 1, args[1]->type, 2, lineNumber, "and");
+  for (int i = 0; i < length; i++) {
+    validateType(allowedTypes, 1, args[i]->type, i + 1, lineNumber, "and");
+    validateBinary(args[i]->p_val, i + 1, lineNumber, "and");
+  };
 
-  validateBinary(args[0]->p_val, 1, lineNumber, "and");
-  validateBinary(args[1]->p_val, 2, lineNumber, "and");
-
+  // set up result
   int *p_res = (int *) malloc(sizeof(int));
-  *p_res = *((int *) args[0]->p_val) && *((int *) args[1]->p_val);
+  *p_res = 1;
+
+  // add each arg to *p_res
+  for (int i = 0; i < length; i++) {
+    *p_res = *p_res && *((int *) args[i]->p_val);
+  }
 
   return Generic_new(TYPE_INT, p_res, 0);
 }
 
-// (or a b)
+// (or a b ...)
 // returns a or b
 Generic *StdLib_or(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, 2, length, lineNumber);
+  validateMinArgCount(2, length, lineNumber);
 
+  // type check
   enum Type allowedTypes[] = {TYPE_INT};
-  validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "or");
-  validateType(allowedTypes, 1, args[1]->type, 2, lineNumber, "or");
+  for (int i = 0; i < length; i++) {
+    validateType(allowedTypes, 1, args[i]->type, i + 1, lineNumber, "or");
+    validateBinary(args[i]->p_val, i + 1, lineNumber, "or");
+  };
 
-  validateBinary(args[0]->p_val, 1, lineNumber, "or");
-  validateBinary(args[1]->p_val, 2, lineNumber, "or");
-
+  // set up result
   int *p_res = (int *) malloc(sizeof(int));
-  *p_res = *((int *) args[0]->p_val) || *((int *) args[1]->p_val);
+  *p_res = 0;
+
+  // add each arg to *p_res
+  for (int i = 0; i < length; i++) {
+    *p_res = *p_res || *((int *) args[i]->p_val);
+  }
 
   return Generic_new(TYPE_INT, p_res, 0);
 }

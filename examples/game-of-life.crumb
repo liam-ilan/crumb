@@ -21,13 +21,9 @@ render = {world n ->
 
 get_cell = {world x y -> 
   out_of_bounds = (or 
-    (or 
-      (or 
-        (greater_than x (subtract w 1)) 
-        (less_than x 0)
-      ) 
-      (greater_than y (subtract h 1))
-    ) 
+    (greater_than x (subtract w 1)) 
+    (less_than x 0)
+    (greater_than y (subtract h 1))
     (less_than y 0)
   )
 

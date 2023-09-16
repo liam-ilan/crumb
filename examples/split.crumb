@@ -3,8 +3,6 @@ split = {in sep ->
   // convert to list of chars
   arr = (map (range (length in)) {index _ -> <- (get in index)})
 
-  // add an empty list to the start for reduction
-
   // reduce list of chars to list of words
   <- (if (is sep "") {<- arr} {
     <- (reduce arr {acc char _ ->

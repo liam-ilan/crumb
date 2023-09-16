@@ -175,15 +175,13 @@ You should now be ready to write your own Crumb programs! More info on how to bu
   - Returns `0` if `a` is `1`, and `1` if `a` is `0`.
   - `a`: `integer`, which is `1` or `0`
 
-- `(and a b)`
-  - Returns `1` if `a` and `b` are both `1`, else returns `0`
-  - `a`: `integer`, which is `1` or `0`
-  - `b`: `integer`, which is `1` or `0`
+- `(and arg1 arg2 arg3 ...)`
+  - Returns `1` if all arguments are `1`, else returns `0`
+  - `arg1`, `arg2`, `arg3`, ...: `integer`, which is `1` or `0`
 
-- `(or a b)`
-  - Returns `1` if `a` or `b` are `1`, else returns `0`
-  - `a`: `integer`, which is `1` or `0`
-  - `b`: `integer`, which is `1` or `0`
+- `(or arg1 arg2 arg3 ...)`
+  - Returns `1` if at least one argument is `1`, else returns `0`
+  - `arg1`, `arg2`, `arg3`, ...: `integer`, which is `1` or `0`
 
 ### Arithmetic
 - `(add arg1 arg2 arg3 ...)`
