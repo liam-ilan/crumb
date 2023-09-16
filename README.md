@@ -119,34 +119,8 @@ Comments start with "//", and end with the end of a line, for example:
 
 ## Getting Started
 ### Install
-*For a quick start, you can use Replit, by forking [this repl](https://replit.com/@snowboardsheep/Crumb-on-Replit).*
+**You do not need to clone this repo.** Instead, follow the instructions in [this template repo](https://github.com/liam-ilan/crumb-template).
 
-First, clone this repo,
-```bash
-git clone https://github.com/liam-ilan/crumb.git
-```
-
-Then compile with gcc,
-```bash
-gcc src/*.c -Wall -lm -o crumb
-```
-
-Or with clang,
-```bash
-clang src/*.c -Wall -lm -o crumb
-```
-
-From there, run a quick example,
-```bash
-./crumb examples/car.crumb
-```
-
-Or run your own code,
-```bash
-./crumb YOURCODE.crumb
-```
-
-> The Crumb interpreter is built for POSIX compliant systems, and utilizes `ioctl.h` and `unistd.h`. To use Crumb on windows, either use WSL, or use a Linux container.
 
 ### Basics
 All function calls are done with s-expressions (think lisp). For example,
