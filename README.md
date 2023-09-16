@@ -32,91 +32,6 @@ table = (map (range 10) {_ y ->
 
 Find more examples under the `examples` directory.
 
-## Syntax
-Crumb utilizes a notably terse syntax definition. The whole syntax can described in 6 lines of EBNF. Additionally, there are no reserved words, and only 7 reserved symbols.
-
-### EBNF
-```ebnf
-program = start, statement, end;
-statement = {return | assignment | value};
-return = "<-", value;
-assignment = identifier, "=", value;
-value = application | function | int | float | string | identifier;
-application = "(", {value}, ")";
-function = "{", [{identifier}, "->"], statement, "}";
-```
-
-![Syntax Diagram](./media/syntax-diagram.png)
-
-*Crumb syntax diagram, generated with [DrawGrammar](https://jacquev6.github.io/DrawGrammar/).*
-
-### Tokens
-```
-"="
-"("
-")"
-"{"
-"}"
-"->"
-"<-"
-identifier
-int
-float
-string
-start
-end
-```
-
-### Specifics
-Strings are characters surrounded by quotes, for example:
-```
-"hello world"
-"this is\nsplit between new lines"
-"\e[31mthis text is in red\e[0m"
-```
-
-Escape codes in crumb are equivalent to their respective C escape codes. The list of supported escape codes is:
-```
-"\a"
-"\b"
-"\f"
-"\n" 
-"\r"
-"\t"
-"\v"
-"\e"
-"\\"
-"\""
-```
-
-Integers are groups of number characters, that may be preceded by `-` for example:
-```
-1234
--14
-345
-```
-
-Floats are like integers, but have a decimal in them, for example:
-```
-13.45
--2.3
-745.0
-```
-
-Identifiers are any collection of characters, that are not separated by whitespace, don't begin with quotes or numbers, and are not any reserved symbols, for example:
-```
-hello
-x₂
-symbol1
-+
-```
-
-Comments start with "//", and end with the end of a line, for example:
-```
-// this is a program that prints hi
-(print "hi") // this prints hi
-```
-
 ## Getting Started
 ### Install
 **You do not need to clone this repo.** Instead, follow the instructions in [this template repo](https://github.com/liam-ilan/crumb-template).
@@ -404,6 +319,91 @@ You should now be ready to write your own Crumb programs! More info on how to bu
   - Returns the index of `item` in `x`. Returns `void` if not found.
   - `x`: `string` or `list`
   - `item`: `string` if `x` is `string`, else any
+
+## Syntax
+Crumb utilizes a notably terse syntax definition. The whole syntax can described in 6 lines of EBNF. Additionally, there are no reserved words, and only 7 reserved symbols.
+
+### EBNF
+```ebnf
+program = start, statement, end;
+statement = {return | assignment | value};
+return = "<-", value;
+assignment = identifier, "=", value;
+value = application | function | int | float | string | identifier;
+application = "(", {value}, ")";
+function = "{", [{identifier}, "->"], statement, "}";
+```
+
+![Syntax Diagram](./media/syntax-diagram.png)
+
+*Crumb syntax diagram, generated with [DrawGrammar](https://jacquev6.github.io/DrawGrammar/).*
+
+### Tokens
+```
+"="
+"("
+")"
+"{"
+"}"
+"->"
+"<-"
+identifier
+int
+float
+string
+start
+end
+```
+
+### Specifics
+Strings are characters surrounded by quotes, for example:
+```
+"hello world"
+"this is\nsplit between new lines"
+"\e[31mthis text is in red\e[0m"
+```
+
+Escape codes in crumb are equivalent to their respective C escape codes. The list of supported escape codes is:
+```
+"\a"
+"\b"
+"\f"
+"\n" 
+"\r"
+"\t"
+"\v"
+"\e"
+"\\"
+"\""
+```
+
+Integers are groups of number characters, that may be preceded by `-` for example:
+```
+1234
+-14
+345
+```
+
+Floats are like integers, but have a decimal in them, for example:
+```
+13.45
+-2.3
+745.0
+```
+
+Identifiers are any collection of characters, that are not separated by whitespace, don't begin with quotes or numbers, and are not any reserved symbols, for example:
+```
+hello
+x₂
+symbol1
++
+```
+
+Comments start with "//", and end with the end of a line, for example:
+```
+// this is a program that prints hi
+(print "hi") // this prints hi
+```
 
 ## Development
 When debugging the interpreter, it may be useful to compile with the `-g` flag.
