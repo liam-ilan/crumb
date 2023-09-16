@@ -30,7 +30,7 @@ table = (map (range 10) {_ y ->
 
 ---
 
-Find more examples under the `examples` directory.
+Find more examples under the [`examples`](./examples/) directory.
 
 ## Getting Started
 ### Install
