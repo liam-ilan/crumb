@@ -2,15 +2,12 @@
 #include <stdio.h>
 #include "file.h"
 
-char *readFile(char *path, int lineNumber) {
+char *readFile(char *path) {
   FILE *p_file = fopen(path, "r");
 
   // error handling
   if (p_file == NULL) {
-    printf(
-      "Runtime Error @ Line %i: Cannot read file \"%s\".\n", 
-      lineNumber, path
-    );
+    return NULL;
     exit(0); 
   }
 

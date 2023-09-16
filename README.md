@@ -140,7 +140,7 @@ You should now be ready to write your own Crumb programs! More info on how to bu
   - Returns the number of columns in the terminal.
 
 - `(read_file path)`
-  - Returns the contents of the file designated by `path`, in a string
+  - Returns the contents of the file designated by `path`, in a string. If the file cannot be read, returns void.
   - `path`: `string`
 
 - `(write_file path contents)`

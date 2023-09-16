@@ -2,7 +2,7 @@
 #define FILE_H
 
 // prototypes
-char *readFile(char *, int);
+char *readFile(char *);
 void writeFile(char *, char *, int);
 
 #endif

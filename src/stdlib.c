@@ -280,8 +280,15 @@ Generic *StdLib_read_file(Scope *p_scope, Generic *args[], int length, int lineN
   enum Type allowedTypes[] = {TYPE_STRING};
   validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "read_file");
 
+  // read file
+  char *res = readFile(*((char **) args[0]->p_val));
+  
+  // if file couldn't be read, return void
+  if (res == NULL) return Generic_new(TYPE_VOID, NULL, 0);
+
+  // malloc pointer to string
   char **p_res = (char **) malloc(sizeof(char *));
-  *p_res = readFile(*((char **) args[0]->p_val), lineNumber);;
+  *p_res = res;
 
   // return
   return Generic_new(TYPE_STRING, p_res, 0);
@@ -334,7 +341,16 @@ Generic *StdLib_use(Scope *p_scope, Generic *args[], int length, int lineNumber)
   for (int i = 0; i < length - 1; i++) {
 
     // read file
-    char *code = readFile(*((char **) args[i]->p_val), lineNumber);
+    char *code = readFile(*((char **) args[i]->p_val));
+
+    // throw error if file could not be read
+    if (code == NULL) {
+      printf(
+        "Runtime Error @ Line %i: Cannot read file \"%s\".\n", 
+        lineNumber, *((char **) args[i]->p_val)
+      );
+      exit(0); 
+    }
 
     // create initial token
     Token *p_headToken = (Token *) malloc(sizeof(Token));
