@@ -24,21 +24,24 @@ char *parseString(char *in) {
       else if (in[i + 1] == '\\') res[i - lost] = '\\';
       else if (in[i + 1] == '\"') res[i - lost] = '\"';
       else if (in[i + 1] == 'x') {
+        
+        // if this escape codes leaks out of bounds, treat \x as just x
+        if (i + 3 > length - 1) res[i - lost] = 'x';
+        else {
+          // get char
+          char hexStr[3] = {in[i + 2], in[i + 3], '\0'};
+          char c = (char) strtol(hexStr, NULL, 16);
 
-        // get char
-        char hexStr[3] = {in[i + 2], in[i + 3], '\0'};
-        char c = (char) strtol(hexStr, NULL, 16);
+          // invalid inputs return 0 (the null char)
+          // we do not allow null chars in crumb, if we find one, simply ignore the full escape code
+          if (c != '\0') {
+            res[i - lost] = c;
+          } else {lost += 1;}
 
-        // invalid inputs return 0 (the null char)
-        // we do not allow null chars in crumb, if we find one, simply ignore the full escape code
-        if (c != '\0') {
-          res[i - lost] = c;
-        } else {lost += 1;}
-
-        // hexadecimal escape codes are two chars longer than other escape codes
-        lost += 2;
-        i += 2;
-
+          // hexadecimal escape codes are two chars longer than other escape codes
+          lost += 2;
+          i += 2;
+        }
       } else res[i - lost] = in[i + 1];
 
       lost++;
