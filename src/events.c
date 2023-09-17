@@ -109,7 +109,7 @@ char *event() {
 void exitEvents() {
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
   // \e[?1000l disables mouse events
-  printf("\e[?1000l");
+  printf("\e[?1000l\e[?25h");
 }
 
 void initEvents() {

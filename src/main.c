@@ -106,7 +106,6 @@ int main(int argc, char *argv[]) {
   initEvents();
 
   // cleanly handle exit events
-  atexit(exitEvents);
   signal(SIGTERM, exitHandler);
   signal(SIGINT, exitHandler);
 
