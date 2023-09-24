@@ -1,13 +1,10 @@
 // use a simple recursive function to calculate the nth fibonacci number
 fibonacci = {n ->
-  <- (if (is n 0) {<- 0} {
-    <- (if (is n 1) {<- 1} {
-      <- (add 
-        (fibonacci (subtract n 1)) 
-        (fibonacci (subtract n 2))
-      )
-    })
-  })
+  <- (if 
+    (is n 0) {<- 0} 
+    (is n 1) {<- 1} 
+    {<- (add (fibonacci (subtract n 1)) (fibonacci (subtract n 2)))}
+  )
 }
 
 (until "stop" {state n ->

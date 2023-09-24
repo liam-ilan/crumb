@@ -104,18 +104,13 @@ Most of the features you may expect in a programming language are implemented in
   i = (add i 1)
   
   (if (is (remainder i 15) 0) {
-    (print "fizzbuzz\n")
-  } {
-    (if (is (remainder i 3) 0) {
+      (print "fizzbuzz\n")
+    } (is (remainder i 3) 0) {
       (print "fizz\n")
-    } {
-      (if (is (remainder i 5) 0) {
-        (print "buzz\n")
-      } {
-        (print i "\n")
-      })
-    })
-  })
+    } (is (remainder i 5) 0) {
+      (print "buzz\n")
+    } {(print i "\n")}
+  )
 })
 ```
 *From [`examples/fizzbuzz.crumb`](./examples/fizzbuzz.crumb)*
@@ -228,14 +223,14 @@ You should now be ready to write your own Crumb programs! More info on how to bu
   - The return value of every past iteration is passed on to the next. The initial iteration uses `initial_state` if supplied, or returns `void` if not.
   - `fn`: `function`, which is in the form `{state n -> ...}`, where n is the current loop index (starting at `0`), and `state` is the current state.
 
-- `(if condition fn1)` or `(if condition fn1 fn2)`
-  - If `condition` is `1`, applies `fn1`. (like the "then" part in an if statement).
-  - If `condition` is `0`, and `fn2` was supplied, apply `fn2`. (the "else" part in an if statement).
-  - Returns whatever `fn1` or `fn2` return
-  - `condition`: `integer`, which is `1` or `0`
-  - `fn1`: `function`, which takes no arguments
-  - `fn2`: `function`, which takes no arguments
-
+- `(if condition1 fn1 condtion2 fn2 condtion3 fn3 ... fn_else)`
+  - If `condition1` is `1`, applies `fn1`.
+  - Else if `condition2` is `1`, applies `fn2`, else if ...
+  - If no condtions were `1`, applies `fn_else`.
+  - Return whatever the result of `fn1`, `fn2`, `fn3`, ..., or `fn_else` was.
+  - `condition1`, `condition2`, `condition3`, ...: `integer`, which is `1` or `0`
+  - `fn1`, `fn2`, `fn3`, ..., `fn_else`: `function`, which takes no arguments
+  
 - `(wait time)`
   - Blocks execution for `time` amount of seconds.
   - `time`: `integer` or `float`.

@@ -1,17 +1,10 @@
-(loop 100 {i -> 
-  i = (add i 1)
-  
-  (if (is (remainder i 15) 0) {
+i = (add i 1)
+
+(if (is (remainder i 15) 0) {
     (print "fizzbuzz\n")
-  } {
-    (if (is (remainder i 3) 0) {
-      (print "fizz\n")
-    } {
-      (if (is (remainder i 5) 0) {
-        (print "buzz\n")
-      } {
-        (print i "\n")
-      })
-    })
-  })
-})
+  } (is (remainder i 3) 0) {
+    (print "fizz\n")
+  } (is (remainder i 5) 0) {
+    (print "buzz\n")
+  } {(print i "\n")}
+)

@@ -49,11 +49,10 @@ update_cell = {world x y ->
   neighbors = (count_neighbors world x y)
   state = (get_cell world x y)
 
-  <- (if (is neighbors 3) {<- 1} {
-    <- (if (is neighbors 2) {
-      <- state
-    } {<- 0})
-  })
+  <- (if (is neighbors 3) {<- 1} 
+    (is neighbors 2) {<- state} 
+    {<- 0}
+  )
 }
 
 update_world = {world ->

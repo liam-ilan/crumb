@@ -846,24 +846,42 @@ Generic *StdLib_until(Scope *p_scope, Generic *args[], int length, int lineNumbe
   }
 }
 
-// (if c f g*)
-// applys f if c == 1
-// applys g or nothing if c == 0
+// (if c1 f1 c2 f2 c3 f3 ... else)
+// applys f1 if c1 == 1, etc.
+// otherwise run else
 Generic *StdLib_if(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(2, 3, length, lineNumber);
+  validateMinArgCount(2, length, lineNumber);
 
-  enum Type allowedTypes1[] = {TYPE_INT};
-  enum Type allowedTypes2[] = {TYPE_NATIVEFUNCTION, TYPE_FUNCTION};
-  enum Type allowedTypes3[] = {TYPE_NATIVEFUNCTION, TYPE_FUNCTION};
+  enum Type allowedTypesCond[] = {TYPE_INT};
+  enum Type allowedTypesCb[] = {TYPE_NATIVEFUNCTION, TYPE_FUNCTION};
 
-  validateType(allowedTypes1, 1, args[0]->type, 1, lineNumber, "if");
-  validateType(allowedTypes2, 2, args[1]->type, 2, lineNumber, "if");
-  if (length == 3) validateType(allowedTypes3, 2, args[2]->type, 3, lineNumber, "if");
-  
-  validateBinary(args[0]->p_val, 1, lineNumber, "if");
+  bool conditionPassed = false;
 
-  if (*((int *) args[0]->p_val) == 1) return applyFunc(args[1], p_scope, NULL, 0, lineNumber);
-  else if (length == 3 && *((int *) args[0]->p_val) == 0) return applyFunc(args[2], p_scope, NULL, 0, lineNumber);
+  for (int i = 0; i < length; i++) {
+    if (i % 2 == 0) {
+      if (i == length - 1) { 
+        // else case
+        validateType(allowedTypesCb, 2, args[i]->type, i + 1, lineNumber, "if");
+        return applyFunc(args[i], p_scope, NULL, 0, lineNumber);
+
+      } else {
+        // condition case
+        validateType(allowedTypesCond, 1, args[i]->type, i + 1, lineNumber, "if");
+        validateBinary(args[i]->p_val, i + 1, lineNumber, "if");
+
+        // find if condition is true
+        conditionPassed = *((int *) args[i]->p_val) == 1;
+      }
+    } else {
+      // callback case
+      validateType(allowedTypesCb, 2, args[i]->type, i + 1, lineNumber, "if");
+
+      // case where callback can be evaluated
+      if (conditionPassed) {
+        return applyFunc(args[i], p_scope, NULL, 0, lineNumber);
+      }
+    }
+  }
 
   return Generic_new(TYPE_VOID, NULL, 0);
 }
