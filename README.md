@@ -100,9 +100,9 @@ Functions operate in a few important ways:
 Most of the features you may expect in a programming language are implemented in the form of functions. For example, here is a Fizzbuzz program using the `add`, `loop`, `if`, `remainder`, `is`, and `print` functions,
 
 ```
-(loop 100 {i -> 
+(loop 100 {i ->
   i = (add i 1)
-  
+
   (if (is (remainder i 15) 0) {
       (print "fizzbuzz\n")
     } (is (remainder i 3) 0) {
