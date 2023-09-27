@@ -95,7 +95,7 @@ geometric_mean = {a b ->
 Functions operate in a few important ways:
 1. Function applications are *dynamically scoped*.
 2. Functions *cannot create side effects*.
-3. Like in JavaScript and Python, *functions can be passed into other functions as arguments*.
+3. Like in JavaScript and Python, *all functions are first-class*.
 
 Most of the features you may expect in a programming language are implemented in the form of functions. For example, here is a Fizzbuzz program using the `add`, `loop`, `if`, `remainder`, `is`, and `print` functions,
 
