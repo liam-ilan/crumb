@@ -390,6 +390,53 @@ Generic *StdLib_use(Scope *p_scope, Generic *args[], int length, int lineNumber)
   return res;
 }
 
+// (shell command)
+// runs command with popen, returns stdout
+Generic *StdLib_shell(Scope *p_scope, Generic *args[], int length, int lineNumber) {
+
+  // validation
+  validateArgCount(1, 1, length, lineNumber);
+
+  enum Type allowedTypes[] = {TYPE_STRING};
+  validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "shell");
+
+  // open process to run file
+  FILE *p_out = popen(*((char **) args[0]->p_val), "r");
+
+  // ensure process returned
+  if (p_out == NULL) {
+    printf(
+      "Runtime Error @ Line %i: Failed to run shell command.\n", 
+      lineNumber
+    );
+    exit(0);
+  }
+
+  char *res = malloc(sizeof(char));
+  res[0] = '\0';
+
+  // get stdout
+  char c;
+  while (true) {
+    // add char to res
+    res = realloc(res, sizeof(char) * (strlen(res) + 1 + 1));
+    c = fgetc(p_out);
+    if (feof(p_out)) break; // end of stdout
+    strncat(res, &c, 1);
+    
+  }
+
+  // close process
+  pclose(p_out);
+
+  // create pointer for generic to return
+  char **p_res = malloc(sizeof(char *));
+  *p_res = res;
+  
+
+  return Generic_new(TYPE_STRING, p_res, 0);
+}
+
 /* comparissions */
 // (is a b)
 // checks for equality between a and b
@@ -1560,6 +1607,7 @@ Scope *newGlobal(int argc, char *argv[], int skipArgs) {
   Scope_set(p_global, "write_file", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_write_file, 0));
   Scope_set(p_global, "event", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_event, 0));
   Scope_set(p_global, "use", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_use, 0));
+  Scope_set(p_global, "shell", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_shell, 0));
 
   /* comparisions */
   Scope_set(p_global, "is", Generic_new(TYPE_NATIVEFUNCTION, &StdLib_is, 0));

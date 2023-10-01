@@ -150,6 +150,10 @@ You should now be ready to write your own Crumb programs! More info on how to bu
   - Crumb's code splitting method. Runs code in file paths, in order, on a new scope. Then uses said scope to apply `fn`.
   - `path1`, `path2`, `path3`, ...: `string`
   - `fn`: `function`
+
+- `(shell command)`
+  - Runs `command` as an sh program in a seperate process, and returns stdout of the process as a `string`.
+  - `command`: `string`
   
 ### Comparisons
 - `(is a b)`
