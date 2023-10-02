@@ -404,6 +404,11 @@ Comments start with "//", and end with the end of a line, for example:
 ```
 
 ## Development
+To identify the current interpreter version, use the `-v` flag.
+```bash
+./crumb -v
+```
+
 When debugging the interpreter, it may be useful to compile with the `-g` flag.
 ```bash 
 gcc src/*.c -g -Wall -lm -o crumb

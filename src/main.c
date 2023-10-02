@@ -41,6 +41,12 @@ int main(int argc, char *argv[]) {
     codePath = argv[2];
   }
 
+  // version help
+  if (strcmp(argv[1], "-v") == 0) {
+    printf("v0.0.2\n");
+    return 0;
+  }
+
   /* read file */
   if (debug) printf("\nCODE\n");
 
