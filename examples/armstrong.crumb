@@ -1,0 +1,17 @@
+is_🧑‍🚀 = {n ->
+  digits = (map (range (length (string n))) {_ i ->
+    <- (integer (get (string n) i))
+  })
+
+  new_n = (reduce (map digits {x _ ->
+    <- (power x 3)
+  }) {a b _ ->
+    <- (add a b)
+  } 0)
+
+  <- (is n new_n)
+}
+
+(loop 1000 {n -> 
+  (if (is_🧑‍🚀 n) {(print n "\n")})
+})
