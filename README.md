@@ -36,6 +36,7 @@ Find more examples under the [`examples`](./examples/) directory.
 ### Install
 **You do not need to clone this repo.** Instead, follow the instructions in [this template repo](https://github.com/liam-ilan/crumb-template).
 
+If you are on VSCode, you can install the [Crumb syntax highlighter extension](https://marketplace.visualstudio.com/items?itemName=liamilan.crumb). The source for the extension can be found [here](https://github.com/liam-ilan/crumb-vscode).
 
 ### Basics
 All function calls are done with s-expressions (think lisp). For example,
