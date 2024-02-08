@@ -1,5 +1,5 @@
 (use "française.crumb" {
     (répéter 10 {_ ->
-        (afficher "Bonjour le monde!\n")
+        (afficher "Bonjour monde!\n")
     })
 })
