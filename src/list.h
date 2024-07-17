@@ -2,13 +2,6 @@
 #define LIST_H
 #include "generic.h"
 
-// node in a linked list
-// lists in crumb are singly linked lists
-typedef struct ListNode {
-  Generic *p_val;
-  struct ListNode *p_next;
-} ListNode;
-
 // list container
 typedef struct List {
   Generic **vals;
