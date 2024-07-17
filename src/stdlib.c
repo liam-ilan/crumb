@@ -1416,22 +1416,14 @@ Generic *StdLib_map(Scope *p_scope, Generic *args[], int length, int lineNumber)
 
   // create copy of list
   Generic *res = Generic_copy(args[0]);
-  ListNode *p_curr = ((List *) (res->p_val))->p_head;
+  List *p_list = (List *) (res->p_val);
 
-  int i = 0;
-  while (p_curr != NULL) {
-    
-    // create pointer for index, to create generic for args
+  for (int i = 0; i < p_list->len; i += 1) {
     int *p_i = (int *) malloc(sizeof(int));
     *p_i = i;
 
-    // apply function
-    Generic *newArgs[] = {p_curr->p_val, Generic_new(TYPE_INT, p_i, 0)};
-    p_curr->p_val = applyFunc(args[1], p_scope, newArgs, 2, lineNumber);
-
-    // increment
-    p_curr = p_curr->p_next;
-    i++;
+    Generic *newArgs[] = {p_list->vals[i], Generic_new(TYPE_INT, p_i, 0)};
+    p_list->vals[i] = applyFunc(args[1], p_scope, newArgs, 2, lineNumber);
   }
 
   return res;
@@ -1449,10 +1441,7 @@ Generic *StdLib_reduce(Scope *p_scope, Generic *args[], int length, int lineNumb
   enum Type allowedTypes2[] = {TYPE_FUNCTION, TYPE_NATIVEFUNCTION};
   validateType(allowedTypes2, 2, args[1]->type, 2, lineNumber, "reduce");
 
-  ListNode *p_curr = ((List *) (args[0]->p_val))->p_head;
-  if (p_curr == NULL) {
-    return Generic_new(TYPE_VOID, NULL, 0);
-  }
+  // TODO: check empty list case  
   
   // create accumulator
   Generic *p_acc;
@@ -1461,23 +1450,19 @@ Generic *StdLib_reduce(Scope *p_scope, Generic *args[], int length, int lineNumb
   } else {
     p_acc = Generic_new(TYPE_VOID, NULL, 0);
   }
+
+  // Get list
+  List *p_list = (List *) (args[0]->p_val);
  
-  // loop on every item from 2nd item on list
-  int i = 0;
-  while (p_curr != NULL) {
-    
+  // loop on every item
+  for (int i = 0; i < p_list->len; i += 1) {
     // create pointer for index, to create generic for args
     int *p_i = (int *) malloc(sizeof(int));
     *p_i = i;
     
     // apply function
-    p_curr->p_val->refCount++;
-    Generic *newArgs[] = {p_acc, Generic_copy(p_curr->p_val), Generic_new(TYPE_INT, p_i, 0)};
+    Generic *newArgs[] = {p_acc, Generic_copy(p_list->vals[i]), Generic_new(TYPE_INT, p_i, 0)};
     p_acc = applyFunc(args[1], p_scope, newArgs, 3, lineNumber);
-    
-    // increment
-    p_curr = p_curr->p_next;
-    i++;
   }
 
   return p_acc;
@@ -1539,21 +1524,17 @@ Generic *StdLib_find(Scope *p_scope, Generic *args[], int length, int lineNumber
     return Generic_new(TYPE_INT, p_index, 0);
   } else {
     // list case
-    // for each item
-    ListNode *p_curr = ((List *) args[0]->p_val)->p_head;
-    int i = 0;
+    List *p_list = ((List *) args[0]->p_val);
 
-    while (p_curr != NULL) {
-      if (Generic_is(p_curr->p_val, args[1])) {
-        // if found, return index
+    // for each item
+    for (int i = 0; i < p_list->len; i += 1) {
+
+      // if found, return index
+      if (Generic_is(p_list->vals[i], args[1])) {
         int *p_index = (int *) malloc(sizeof(int));
         *p_index = i;
-
         return Generic_new(TYPE_INT, p_index, 0);
       }
-
-      p_curr = p_curr->p_next;
-      i++;
     }
 
     // if not found return void

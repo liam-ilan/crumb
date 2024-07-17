@@ -135,25 +135,7 @@ int Generic_is(Generic *a, Generic *b) {
         if (a->p_val == b->p_val) res = 1;
         break;
       case TYPE_LIST:
-        res = 1;
-
-        // get list nodes
-        ListNode *p_aCurr = ((List *) (a->p_val))->p_head;
-        ListNode *p_bCurr = ((List *) (b->p_val))->p_head;
-
-        // for each item
-        while (p_aCurr != NULL && p_bCurr != NULL) {
-          int comp = Generic_is(p_aCurr->p_val, p_bCurr->p_val);
-          res = res * comp;
-
-          p_aCurr = p_aCurr->p_next;
-          p_bCurr = p_bCurr->p_next;
-        }
-
-        // if not the same length
-        if (p_aCurr != NULL || p_bCurr != NULL) {
-          res = 0;
-        }
+        res = List_compare((List *) a->p_val, (List *) b->p_val);
     }
   }
 

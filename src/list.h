@@ -11,7 +11,8 @@ typedef struct ListNode {
 
 // list container
 typedef struct List {
-  ListNode *p_head;
+  Generic **vals;
+  int len;
 } List;
 
 // prototypes
@@ -27,5 +28,6 @@ List *List_sublist(List *, int, int);
 int List_length(List *);
 List *List_set(List *, Generic *, int);
 List *List_deleteMultiple(List *, int, int);
+int List_compare(List *, List *);
 
 #endif
