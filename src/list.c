@@ -16,15 +16,7 @@ void List_print(List *p_target) {
 
 // copy a given list
 List *List_copy(List *p_target) {
-  List *res = (List *) malloc(sizeof(List));
-  res->vals = (Generic **) malloc(sizeof(Generic *) * p_target->len);
-  res->len = p_target->len;
-  
-  for (int i = 0; i < res->len; i += 1) {
-    res->vals[i] = Generic_copy(p_target->vals[i]);
-  }
-
-  return res;
+  return List_new(p_target->vals, p_target->len);
 }
 
 // make a new list struct, given a list of generics
@@ -164,7 +156,7 @@ int List_compare(List *p_target1, List *p_target2) {
   if (p_target1->len != p_target2->len) return 0;
 
   for(int i = 0; i < p_target1->len; i += 1) {
-    if (Generic_is(p_target1->vals[i], p_target2->vals[i])) return 0;
+    if (!Generic_is(p_target1->vals[i], p_target2->vals[i])) return 0;
   }
 
   return 1;
