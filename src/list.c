@@ -16,7 +16,15 @@ void List_print(List *p_target) {
 
 // copy a given list
 List *List_copy(List *p_target) {
-  return List_new(p_target->vals, p_target->len);
+  List *res = (List *) malloc(sizeof(List));
+  res->vals = (Generic **) malloc(sizeof(Generic *) * p_target->len);
+  res->len = p_target->len;
+  
+  for (int i = 0; i < res->len; i += 1) {
+    res->vals[i] = Generic_copy(p_target->vals[i]);
+  }
+
+  return res;
 }
 
 // make a new list struct, given a list of generics
@@ -89,7 +97,8 @@ List *List_join(List *lists[], int count) {
   int i = 0;
   for (int listIndex = 0; listIndex < count; listIndex += 1) {
     for (int itemIndex = 0; itemIndex < lists[listIndex]->len; itemIndex += 1) {
-      res->vals[i] = Generic_copy(lists[listIndex]->vals[i]);
+      res->vals[i] = Generic_copy(lists[listIndex]->vals[itemIndex]);
+      i += 1;
     }
   }
 
@@ -103,7 +112,7 @@ List *List_sublist(List *p_target, int index1, int index2) {
   res->len = index2 - index1;
   
   for (int i = index1; i < index2; i += 1) {
-    res->vals[i] = Generic_copy(p_target->vals[i - index1]);
+    res->vals[i - index1] = Generic_copy(p_target->vals[i]);
   }
 
   return res;
