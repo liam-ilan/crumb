@@ -12,6 +12,7 @@
 #include "eval.h"
 #include "stdlib.h"
 #include "events.h"
+#include "file.h"
 
 void exitHandler() {  
   exit(0);
@@ -153,6 +154,9 @@ int main(int argc, char *argv[]) {
   Generic_free(res);
   res = NULL;
   if (debug) printf("Exit Code Generic Freed\n");
+
+  FileCache_free();
+  if (debug) printf("File Cache Freed\n");
 
   return exitCode;
 }
