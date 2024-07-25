@@ -59,12 +59,14 @@ void FileCache_free() {
   fileCache.index = 0;
 }
 
-char *readFile(char *path) {
-  CachedFile *p_cachedFile = FileCache_read(path);
-  if (p_cachedFile != NULL) {
-    char *res = malloc(p_cachedFile->fileLength + 1);
-    memcpy(res, p_cachedFile->contents, p_cachedFile->fileLength + 1);
-    return res;
+char *readFile(char *path, bool cache) {
+  if (cache) {
+    CachedFile *p_cachedFile = FileCache_read(path);
+    if (p_cachedFile != NULL) {
+      char *res = malloc(p_cachedFile->fileLength + 1);
+      memcpy(res, p_cachedFile->contents, p_cachedFile->fileLength + 1);
+      return res;
+    }
   }
 
   FILE *p_file = fopen(path, "r");
@@ -97,7 +99,10 @@ char *readFile(char *path) {
   res[fileLength] = 0;
 
   // write to the cache so we do not need to open a new reader next time
-  FileCache_write(path, res, fileLength);
+  if (cache) {
+    FileCache_write(path, res, fileLength);
+  }
+  
   return res;
 }
 

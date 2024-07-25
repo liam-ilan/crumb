@@ -281,7 +281,7 @@ Generic *StdLib_read_file(Scope *p_scope, Generic *args[], int length, int lineN
   validateType(allowedTypes, 1, args[0]->type, 1, lineNumber, "read_file");
 
   // read file
-  char *res = readFile(*((char **) args[0]->p_val));
+  char *res = readFile(*((char **) args[0]->p_val), false);
   
   // if file couldn't be read, return void
   if (res == NULL) return Generic_new(TYPE_VOID, NULL, 0);
@@ -341,7 +341,7 @@ Generic *StdLib_use(Scope *p_scope, Generic *args[], int length, int lineNumber)
   for (int i = 0; i < length - 1; i++) {
 
     // read file
-    char *code = readFile(*((char **) args[i]->p_val));
+    char *code = readFile(*((char **) args[i]->p_val), true);
 
     // throw error if file could not be read
     if (code == NULL) {

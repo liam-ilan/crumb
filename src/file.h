@@ -16,7 +16,7 @@ typedef struct FileCache {
 } FileCache;
 
 // prototypes
-char *readFile(char *);
+char *readFile(char *, bool);
 void writeFile(char *, char *, int);
 void FileCache_free();
 
