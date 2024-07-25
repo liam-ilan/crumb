@@ -1,6 +1,6 @@
 #ifndef FILE_H
 #define FILE_H
-#define FILE_CACHE_SIZE 256
+#define FILE_CACHE_SIZE 64
 
 // an individual cached file, both path and contents are heap allocated
 typedef struct CachedFile {

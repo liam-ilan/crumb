@@ -102,7 +102,7 @@ char *readFile(char *path, bool cache) {
   if (cache) {
     FileCache_write(path, res, fileLength);
   }
-  
+
   return res;
 }
 
