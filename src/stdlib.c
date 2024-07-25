@@ -308,13 +308,41 @@ Generic *StdLib_write_file(Scope *p_scope, Generic *args[], int length, int line
   return Generic_new(TYPE_VOID, NULL, 0);
 }
 
-// (event)
-// returns a string containing the current event
+// (event time) or (event)
+// returns a string containing the current event, blocking up to time seconds
 Generic *StdLib_event(Scope *p_scope, Generic *args[], int length, int lineNumber) {
-  validateArgCount(0, 0, length, lineNumber);
+  validateArgCount(0, 1, length, lineNumber);
+
+  // find the number of deciseconds to block
+  int decisecondsBlock;
+  if (length == 1) {
+    enum Type allowedTypes[] = {TYPE_FLOAT, TYPE_INT};
+    validateType(allowedTypes, 2, args[0]->type, 1, lineNumber, "event");
+  
+    if (args[0]->type == TYPE_INT) {
+      decisecondsBlock = *((int *) args[0]->p_val) * 10;
+    }
+    if (args[0]->type == TYPE_FLOAT) {
+      decisecondsBlock = (int) ceilf(*((double *) args[0]->p_val) * 10);
+    }
+  }
 
   char **p_res = (char **) malloc(sizeof(char *));
-  *p_res = event();
+
+  int i = 0;
+  while (length == 0 || i < decisecondsBlock) {
+    if (i != 0) {
+      free(*p_res);
+    }
+    *p_res = event();
+
+    // if an event is received
+    if (strcmp(*p_res, "") != 0) {
+      return Generic_new(TYPE_STRING, p_res, 0);
+    }
+
+    i += 1;
+  }
   
   return Generic_new(TYPE_STRING, p_res, 0);
 }

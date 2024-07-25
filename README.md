@@ -144,8 +144,9 @@ You should now be ready to write your own Crumb programs! More info on how to bu
   - `path`: `string`
   - `contents`: `string`
 
-- `(event)`
-  - Returns the ANSI string corresponding with the current event. This may block for up to 0.1 seconds.
+- `(event time)` or `(event)`
+  - Returns the ANSI string corresponding with the current event. This may block for up to `time` seconds, rounded up to the nearest 100 ms. If no `time` is supplied, the function will not return before receiving an event.
+  - `time`: `integer` or `float`
 
 - `(use path1 path2 path3 ... fn)`
   - Crumb's code splitting method. Runs code in file paths, in order, on a new scope. Then uses said scope to apply `fn`.
