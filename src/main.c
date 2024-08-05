@@ -14,6 +14,8 @@
 #include "events.h"
 #include "file.h"
 
+#define CRUMB_VERSION ("v0.0.3")
+
 void exitHandler() {  
   exit(0);
 }
@@ -44,7 +46,7 @@ int main(int argc, char *argv[]) {
 
   // version help
   if (strcmp(argv[1], "-v") == 0) {
-    printf("v0.0.2\n");
+    printf("%s\n", CRUMB_VERSION);
     return 0;
   }
 
