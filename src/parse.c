@@ -160,7 +160,7 @@ AstNode *parseAssignment(Token *p_head, int length) {
 }
 
 // parse return
-// ebnf: return = "return", value;
+// ebnf: return = "<-", value;
 AstNode *parseReturn(Token *p_head, int length) {
   if (length < 2) {
     printf(
