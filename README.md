@@ -421,6 +421,11 @@ This will allow Valgrind to provide extra information,
 valgrind --leak-check=full -s ./crumb -d YOURCODE.crumb
 ```
 
+On mac, you can use `leaks`,
+```bash
+leaks -atExit -- ./crumb YOURCODE.crumb
+```
+
 To obtain debug information about how your code is interpreted (Tokens, AST, etc.), add the `-d` flag.
 ```bash
 ./crumb -d YOURCODE.crumb

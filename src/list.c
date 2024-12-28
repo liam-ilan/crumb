@@ -44,11 +44,19 @@ List *List_insert(List *p_target, Generic *p_val, int index) {
   res->vals = (Generic **) malloc(sizeof(Generic *) * (p_target->len + 1));
   res->len = p_target->len + 1;
   
-  for (int i = 0; i < p_target->len; i += 1) {
-    res->vals[i] = Generic_copy(p_target->vals[i]);
+  // resIndex is the index in the resulting list
+  // targetIndex is the index in the provided list
+  int targetIndex = 0;
+  for (int resIndex = 0; resIndex < res->len; resIndex += 1) {
+    if (resIndex == index) {
+      res->vals[index] = Generic_copy(p_val);
+      continue;
+    }
+
+    res->vals[resIndex] = Generic_copy(p_target->vals[targetIndex]);
+    targetIndex += 1;
   }
 
-  res->vals[res->len - 1] = Generic_copy(p_val);
   return res;
 }
 
@@ -57,9 +65,14 @@ List *List_delete(List *p_target, int index) {
   List *res = (List *) malloc(sizeof(List));
   res->vals = (Generic **) malloc(sizeof(Generic *) * (p_target->len - 1));
   res->len = p_target->len - 1;
-  
-  for (int i = 0; i < res->len; i += 1) {
-    res->vals[i] = Generic_copy(p_target->vals[i]);
+
+  // resIndex is the index in the resulting list
+  // targetIndex is the index in the provided list
+  int resIndex = 0;
+  for (int targetIndex = 0; targetIndex < p_target->len; targetIndex += 1) {
+    if (targetIndex == index) continue;
+    res->vals[resIndex] = Generic_copy(p_target->vals[targetIndex]);
+    resIndex += 1;
   }
 
   return res;
@@ -133,17 +146,16 @@ int List_length(List *p_target) {
 }
 
 // delete multiple items from list from index1 to index2
-// delete item from list
 List *List_deleteMultiple(List *p_target, int index1, int index2) {
   List *res = (List *) malloc(sizeof(List));
-  res->vals = (Generic **) malloc(sizeof(Generic *) * (p_target->len - (index2 - index1)));
-  res->len = p_target->len - (index2 - index1);
-  
+  res->len = p_target->len - index2 + index1;
+  res->vals = (Generic **) malloc(sizeof(Generic *) * (res->len));
+
   for (int i = 0; i < index1; i += 1) {
     res->vals[i] = Generic_copy(p_target->vals[i]);
   }
 
-  for (int i = index2; i < res->len; i += 1) {
+  for (int i = index2; i < p_target->len; i += 1) {
     res->vals[i - index2 + index1] = Generic_copy(p_target->vals[i]);
   }
 

@@ -2,3 +2,5 @@
 _ignore
 _test.crumb
 crumb
+crumb.dSYM
+.DS_Store
