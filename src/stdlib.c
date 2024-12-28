@@ -451,7 +451,6 @@ Generic *StdLib_shell(Scope *p_scope, Generic *args[], int length, int lineNumbe
     c = fgetc(p_out);
     if (feof(p_out)) break; // end of stdout
     strncat(res, &c, 1);
-    
   }
 
   // close process
@@ -461,7 +460,6 @@ Generic *StdLib_shell(Scope *p_scope, Generic *args[], int length, int lineNumbe
   char **p_res = malloc(sizeof(char *));
   *p_res = res;
   
-
   return Generic_new(TYPE_STRING, p_res, 0);
 }
 
