@@ -22,64 +22,76 @@ void exitHandler() {
 
 int main(int argc, char *argv[]) {
 
-  char *codePath;
-
-  if (argc < 2) {
-    printf("Error: Supply file path to read from.\n");
-    return 0;
-  }
-
-  codePath = argv[1];
-
-  // handle debug mode
-  bool debug = false;
-  if (strcmp(argv[1], "-d") == 0) {
-    debug = true;
-
-    if (argc < 3) {
-      printf("Error: Supply file path to read from.\n");
-      return 0;
-    }
-    
-    codePath = argv[2];
-  }
-
-  // version help
-  if (strcmp(argv[1], "-v") == 0) {
+  // parse version flag
+  if (argc >= 2 && strcmp(argv[1], "-v") == 0) {
     printf("%s\n", CRUMB_VERSION);
     return 0;
   }
 
+  // parse debug flag
+  bool debug = argc >= 2 && strcmp(argv[1], "-d") == 0;
+
   /* read file */
   if (debug) printf("\nCODE\n");
+  char *code = NULL;
+  long fileLength = 0;
 
-  // open file
-  FILE *p_file = fopen(codePath, "r");
+  // Check if stdin is empty.
+  fseek(stdin, 0, SEEK_END);
+  bool stdinEmpty = ftell(stdin) == 0;
+  rewind(stdin);
 
-  if (p_file == NULL) {
-    printf("Error: Could not read %s.\n", codePath);
+  if (!stdinEmpty) {
+
+    // if stdin is empty, read it (code was passed in as a pipe)
+    code = malloc(0);
+    int i = 0;
+    do {
+      code = realloc(code, sizeof(code) + 1);
+      code[i] = getchar();
+      i += 1;
+    } while (code[i - 1] != EOF);
+
+    // terminate with null char.
+    code[i] = '\0';
+    fileLength = i - 1;
+
+  } else if ((debug && argc == 3) || (!debug && argc == 2)) {
+
+    // if a path was supplied
+    char *codePath = debug ? argv[2] : argv[1];
+
+    // if code is passed through an file argument
+    FILE *p_file = fopen(codePath, "r");
+    if (p_file == NULL) {
+      printf("Error: Could not read file %s.\n", codePath);
+      return 0;
+    }
+
+    // go to end, and record position (this will be the length of the file)
+    fseek(p_file, 0, SEEK_END);
+    fileLength = ftell(p_file);
+
+    // rewind to start
+    rewind(p_file);
+
+    // allocate memory (+1 for 0 terminated string)
+    code = malloc(fileLength + 1);
+
+    // read file and close
+    fread(code, fileLength, 1, p_file); 
+    fclose(p_file);
+
+    // set terminator to 0
+    code[fileLength] = '\0';
+
+  } else {
+    printf("Error: Program not supplied through pipe or argument.\n");
     return 0;
   }
-
-  // go to end, and record position (this will be the length of the file)
-  fseek(p_file, 0, SEEK_END);
-  long fileLength = ftell(p_file);
-
-  // rewind to start
-  rewind(p_file);
-
-  // allocate memory (+1 for 0 terminated string)
-  char *code = malloc(fileLength + 1);
-
-  // read file and close
-  fread(code, fileLength, 1, p_file);
-  fclose(p_file);
-
-  // set terminator to 0
-  code[fileLength] = 0;
   
   if (debug) {
-    printf("%s\n", code);
+    printf("%s\nlength: %ld\n", code, fileLength);
     printf("\nTOKENS\n");
   }
 
