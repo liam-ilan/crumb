@@ -53,8 +53,8 @@ int main(int argc, char *argv[]) {
     } while (code[i - 1] != EOF);
 
     // terminate with null char.
-    code[i] = '\0';
-    fileLength = i - 1;
+    code[i - 1] = '\0';
+    fileLength = i - 2;
 
   } else if ((debug && argc == 3) || (!debug && argc == 2)) {
 
@@ -91,7 +91,6 @@ int main(int argc, char *argv[]) {
   }
   
   if (debug) {
-    printf("%s\nlength: %ld\n", code, fileLength);
     printf("\nTOKENS\n");
   }
 
