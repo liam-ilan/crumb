@@ -122,6 +122,7 @@ You should now be ready to write your own Crumb programs! More info on how to bu
 ### IO
 - `arguments`
   - A list command line arguments, like argv in C.
+  - Will skip all arguments up to and including the path to the crumb program.
 
 - `(print arg1 arg2 arg3 ...)`
   - Prints all arguments to stdout, returns nothing.
