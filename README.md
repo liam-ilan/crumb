@@ -436,5 +436,7 @@ You can also pipe code straight into crumb (piped code always takes priority ove
 echo '(print (add 1 2) "\\n")' | ./crumb
 ```
 
+Note that piping code that uses the `event` function is undefined/unsupported.
+
 ## Credit
 - Built by [Liam Ilan](https://www.liamilan.com/)
