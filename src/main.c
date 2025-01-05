@@ -14,7 +14,7 @@
 #include "events.h"
 #include "file.h"
 
-#define CRUMB_VERSION ("v0.0.3")
+#define CRUMB_VERSION ("v0.0.4")
 
 void exitHandler() {  
   exit(0);
