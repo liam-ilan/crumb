@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     fileLength = finalIndex + 1;
     code[fileLength] = '\0';
 
-  } else if ((debug && argc == 3) || (!debug && argc == 2)) {
+  } else if ((debug && argc >= 3) || (!debug && argc >= 2)) {
 
     // if a path was supplied
     char *codePath = debug ? argv[2] : argv[1];
