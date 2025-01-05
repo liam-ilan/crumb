@@ -45,16 +45,21 @@ int main(int argc, char *argv[]) {
 
     // if stdin is empty, read it (code was passed in as a pipe)
     code = malloc(0);
-    int i = 0;
-    do {
-      code = realloc(code, sizeof(code) + 1);
-      code[i] = getchar();
-      i += 1;
-    } while (code[i - 1] != EOF);
 
-    // terminate with null char.
-    code[i - 1] = '\0';
-    fileLength = i - 2;
+    // finalIndex tracks the last index populated with a non '\0' char
+    int finalIndex = 0;
+    char c = EOF;
+
+    // loop through stdin.
+    for (finalIndex = 0; (c = getchar()) != EOF; finalIndex += 1) {
+      code = realloc(code, finalIndex + 1);
+      code[finalIndex] = c;
+    }
+
+    // create space for null terminator
+    code = realloc(code, finalIndex + 2);
+    fileLength = finalIndex + 1;
+    code[fileLength] = '\0';
 
   } else if ((debug && argc == 3) || (!debug && argc == 2)) {
 
@@ -91,6 +96,7 @@ int main(int argc, char *argv[]) {
   }
   
   if (debug) {
+    printf("%s\n", code);
     printf("\nTOKENS\n");
   }
 
