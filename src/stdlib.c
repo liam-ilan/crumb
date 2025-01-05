@@ -1569,18 +1569,17 @@ Generic *StdLib_find(Scope *p_scope, Generic *args[], int length, int lineNumber
 }
 
 // creates a new global scope
-// skipArgs, the number of args to skip from the real argv
-Scope *newGlobal(int argc, char *argv[], int skipArgs) {
+Scope *newGlobal(int argc, char *argv[]) {
 
   // initialize random number generator for (random)
   srand(time(NULL) + clock());
 
   // create global scope
   Scope *p_global = Scope_new(NULL);
-  Generic *args[argc - skipArgs];
+  Generic *args[argc];
 
   // for each arg
-  for (int i = skipArgs; i < argc; i++) {
+  for (int i = 0; i < argc; i++) {
     char **p_val = (char **) malloc(sizeof(char *));
 
     // create string
@@ -1589,16 +1588,16 @@ Scope *newGlobal(int argc, char *argv[], int skipArgs) {
     *p_val = val;
 
     // add to args
-    args[i - skipArgs] = Generic_new(TYPE_STRING, p_val, 0);
+    args[i] = Generic_new(TYPE_STRING, p_val, 0);
   }
   
   // add arguments and arguments count
-  Scope_set(p_global, "arguments", Generic_new(TYPE_LIST, List_new(args, argc - skipArgs), 0));
+  Scope_set(p_global, "arguments", Generic_new(TYPE_LIST, List_new(args, argc), 0));
 
   // free arguments memory (as List_new does a copy)
-  for (int i = skipArgs; i < argc; i++) {
-    Generic_free(args[i - skipArgs]);
-    args[i - skipArgs] = NULL;
+  for (int i = 0; i < argc; i++) {
+    Generic_free(args[i]);
+    args[i] = NULL;
   }
 
   // add void

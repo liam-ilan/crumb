@@ -13,12 +13,9 @@
 #include "stdlib.h"
 #include "events.h"
 #include "file.h"
+#include "run.h"
 
 #define CRUMB_VERSION ("v0.0.4")
-
-void exitHandler() {  
-  exit(0);
-}
 
 int main(int argc, char *argv[]) {
 
@@ -35,6 +32,7 @@ int main(int argc, char *argv[]) {
   if (debug) printf("\nCODE\n");
   char *code = NULL;
   long fileLength = 0;
+  bool pipedInput = false;
 
   // Check if stdin is empty.
   fseek(stdin, 0, SEEK_END);
@@ -61,6 +59,7 @@ int main(int argc, char *argv[]) {
     fileLength = finalIndex + 1;
     code[fileLength] = '\0';
 
+    pipedInput = true;
   } else if ((debug && argc >= 3) || (!debug && argc >= 2)) {
 
     // if a path was supplied
@@ -97,85 +96,16 @@ int main(int argc, char *argv[]) {
   
   if (debug) {
     printf("%s\n", code);
-    printf("\nTOKENS\n");
   }
 
-  /* lex */
-  // create initial token
-  Token *p_headToken = (Token *) malloc(sizeof(Token));
-  p_headToken->lineNumber = 1;
-  p_headToken->type = TOK_START;
-  p_headToken->val = NULL;
-  p_headToken->p_next = NULL;
-
-  // lex
-  int tokenCount = lex(p_headToken, code, fileLength);
-
-  if (debug) {
-    // print tokens
-    Token_print(p_headToken, tokenCount);
-    printf("Token Count: %i\n", tokenCount);
-    /* parse */
-    printf("\nAST\n");
-  }
-
-  // parse
-  AstNode *p_headAstNode = parseProgram(p_headToken, tokenCount);
-  
-  if (debug) {
-    // print AST
-    AstNode_print(p_headAstNode, 0);
-    printf("\nEVAL\n");
-  };
-
-  /* evaluate */
-  initEvents();
-
-  // cleanly handle exit events
-  signal(SIGTERM, exitHandler);
-  signal(SIGINT, exitHandler);
-
-  Scope *p_global = newGlobal(argc, argv, 1 + debug);
-  Generic *res = eval(p_headAstNode, p_global, 0);
-
-  // get exit code
-  int exitCode = 0;
-  if (res->type == TYPE_INT) {
-    exitCode = *((int *) res->p_val);
-  }
-
-  res->refCount = 0;
-
-  /* free */
-  if (debug) printf("\nFREE\n");
+  // Calculate the number of arguments to skip (ie. name of executable, file passed).
+  int argsToSkip = 1 + (pipedInput ? 0 : 1) + (debug ? 1 : 0);
+  int exitCode = run(code, fileLength, argc - argsToSkip, &argv[argsToSkip], debug);
 
   // free code
   free(code);
   code = NULL;
   if (debug) printf("Code Freed\n");
-
-  // free tokens
-  Token_free(p_headToken);
-  p_headToken = NULL;
-  if (debug) printf("Tokens Freed\n");
-
-  // free ast
-  AstNode_free(p_headAstNode);
-  p_headAstNode = NULL;
-  if (debug) printf("AST Freed\n");
-  
-  // free global scope
-  Scope_free(p_global);
-  p_global = NULL;
-  if (debug) printf("Global Scope Freed\n");
-
-  // free generic for exit code
-  Generic_free(res);
-  res = NULL;
-  if (debug) printf("Exit Code Generic Freed\n");
-
-  FileCache_free();
-  if (debug) printf("File Cache Freed\n");
 
   return exitCode;
 }

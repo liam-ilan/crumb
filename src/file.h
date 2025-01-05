@@ -4,15 +4,15 @@
 
 // an individual cached file, both path and contents are heap allocated
 typedef struct CachedFile {
-    char *path;
-    char *contents;
-    long fileLength;
+  char *path;
+  char *contents;
+  long fileLength;
 } CachedFile;
 
 // cache of files that were read
 typedef struct FileCache {
-    int index;
-    CachedFile cache[FILE_CACHE_SIZE];
+  int index;
+  CachedFile cache[FILE_CACHE_SIZE];
 } FileCache;
 
 // prototypes
