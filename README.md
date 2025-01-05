@@ -431,5 +431,10 @@ To obtain debug information about how your code is interpreted (Tokens, AST, etc
 ./crumb -d YOURCODE.crumb
 ```
 
+You can also pipe code straight into crumb (piped code always takes priority over the passed file).
+```bash
+echo '(print (add 1 2) "\\n")' | ./crumb
+```
+
 ## Credit
 - Built by [Liam Ilan](https://www.liamilan.com/)
