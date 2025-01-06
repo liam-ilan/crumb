@@ -4,7 +4,10 @@
 #include <string.h>
 #include "file.h"
 
-static FileCache fileCache;
+static FileCache fileCache = {
+  .index = 0,
+  .frozen = false
+};
 
 CachedFile *FileCache_read(char *path) {
   for (int i = 0; i < FILE_CACHE_SIZE; i++) {
@@ -99,7 +102,7 @@ char *readFile(char *path, bool cache) {
   res[fileLength] = 0;
 
   // write to the cache so we do not need to open a new reader next time
-  if (cache) {
+  if (cache && !fileCache.frozen) {
     FileCache_write(path, res, fileLength);
   }
 
