@@ -9,6 +9,10 @@ static FileCache fileCache = {
   .frozen = false
 };
 
+void FileCache_freeze() {
+  fileCache.frozen = true;
+}
+
 CachedFile *FileCache_read(char *path) {
   for (int i = 0; i < FILE_CACHE_SIZE; i++) {
     bool pathExists = fileCache.cache[i].path != NULL;

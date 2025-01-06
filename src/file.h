@@ -22,5 +22,6 @@ char *readFile(char *, bool);
 void writeFile(char *, char *, int);
 void FileCache_free();
 void FileCache_write(char *path, char *contents, long fileLength);
+void FileCache_freeze();
 
 #endif
