@@ -32,6 +32,8 @@ table = (map (range 10) {_ y ->
 
 Find more examples under the [`examples`](./examples/) directory.
 
+Crumb can also build standalone binaries through [Loaf](https://github.com/liam-ilan/loaf).
+
 ## Getting Started
 ### Install
 **You do not need to clone this repo.** Instead, follow the instructions in [this template repo](https://github.com/liam-ilan/crumb-template).
