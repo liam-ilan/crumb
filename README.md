@@ -291,7 +291,7 @@ You should now be ready to write your own Crumb programs! More info on how to bu
   - `index`: `int`.
   
 - `(set x item index)`
-  - Returns a `list` or `string`, in which the item located at `index` in `x`, was replaced by `item`.Overwrites data.
+  - Returns a `list` or `string`, in which the item located at `index` in `x`, was replaced by `item`.
   - `x`: `string` or `list`.
   - `item`: `string` if `x` is `string`, else any
   - `index`: `int`.
@@ -434,12 +434,18 @@ To obtain debug information about how your code is interpreted (Tokens, AST, etc
 ./crumb -d YOURCODE.crumb
 ```
 
-You can also pipe code straight into crumb (piped code always takes priority over the passed file).
+You can also pipe code straight into crumb (passed files always take priority over piped code).
 ```bash
 echo '(print (add 1 2) "\\n")' | ./crumb
 ```
 
-Note that piping code that uses the `event` function is undefined/unsupported.
+Note that piping and using the `event` function is undefined/unsupported.
+
+Loaf derives it's templating from [`loaf-template/template.crumb`](./loaf-template/template.crumb). For Loaf to function correctly, this template must have no dependencies, and expose the following function:
+- `(template_main entry used_files)`
+  - Returns a formatted `main.c` to substitute with [`src/main.c`](./src/main.c) in standalone builds.
+  - `entry`: `string`, the entry point path of the Crumb program.
+  - `used_files`: `list` of `string`, a list of paths to Crumb files in the project.
 
 ## Credit
 - Built by [Liam Ilan](https://www.liamilan.com/)
