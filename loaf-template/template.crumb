@@ -1,0 +1,25 @@
+// Generates main.c for packaged program.
+template_main = {entry used_files ->
+  <- (use "./src/encoder.crumb" "./src/utils.crumb" {
+    code = (read_file entry)
+
+    // Generate a single FileCache_write line for a given file.
+    template_file_cache_write = {path ->
+      contents = (read_file path)
+      <- (join "  FileCache_write(\"" path "\", \"" (encode_str contents) "\", " (string (length contents)) ");\n")
+    }
+
+    file_cache_writes = (list_to_string (map used_files {path _ -> <- (template_file_cache_write path)}))
+
+    // Main function.
+    <- (join
+      "#include \"run.h\"\n"
+      "#include \"file.h\"\n"
+      "int main(int argc, char *argv[]) {\n"
+      file_cache_writes
+      "  FileCache_freeze();\n"
+      "  return run(\"" (encode_str code) "\", " (string (length code)) ", argc - 1, &argv[1], false);\n"
+      "}"
+    )
+  })
+}

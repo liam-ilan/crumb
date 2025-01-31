@@ -39,28 +39,8 @@ int main(int argc, char *argv[]) {
   bool stdinEmpty = ftell(stdin) == 0;
   rewind(stdin);
 
-  if (!stdinEmpty) {
 
-    // if stdin is empty, read it (code was passed in as a pipe)
-    code = malloc(0);
-
-    // finalIndex tracks the last index populated with a non '\0' char
-    int finalIndex = 0;
-    char c = EOF;
-
-    // loop through stdin.
-    for (finalIndex = 0; (c = getchar()) != EOF; finalIndex += 1) {
-      code = realloc(code, finalIndex + 1);
-      code[finalIndex] = c;
-    }
-
-    // create space for null terminator
-    code = realloc(code, finalIndex + 2);
-    fileLength = finalIndex + 1;
-    code[fileLength] = '\0';
-
-    pipedInput = true;
-  } else if ((debug && argc >= 3) || (!debug && argc >= 2)) {
+  if ((debug && argc >= 3) || (!debug && argc >= 2)) {
 
     // if a path was supplied
     char *codePath = debug ? argv[2] : argv[1];
@@ -89,6 +69,27 @@ int main(int argc, char *argv[]) {
     // set terminator to 0
     code[fileLength] = '\0';
 
+  } else if (!stdinEmpty) {
+    
+    // if stdin is empty, read it (code was passed in as a pipe)
+    code = malloc(0);
+
+    // finalIndex tracks the last index populated with a non '\0' char
+    int finalIndex = 0;
+    char c = EOF;
+
+    // loop through stdin.
+    for (finalIndex = 0; (c = getchar()) != EOF; finalIndex += 1) {
+      code = realloc(code, finalIndex + 1);
+      code[finalIndex] = c;
+    }
+
+    // create space for null terminator
+    code = realloc(code, finalIndex + 2);
+    fileLength = finalIndex + 1;
+    code[fileLength] = '\0';
+
+    pipedInput = true;
   } else {
     printf("Error: Program not supplied through pipe or argument.\n");
     return 0;
