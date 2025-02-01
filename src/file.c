@@ -11,7 +11,12 @@
 char *normalizePath(char *path) {
   // Only normalize relative paths
   if (path[0] == '~' || path[0] == '/') {
-    return NULL;
+      printf(
+        "Error: Attempted to write %s to the use cache, "
+        "paths in invocations to the use function must be relative, "
+        "and the path cannot step out of the working directory.\n", path
+      );
+      exit(0);
   }
 
   // Copy that path for strtok_r.
@@ -107,6 +112,7 @@ void FileCache_write(char *path, char *contents, long fileLength) {
   memcpy(newContents, contents, fileLength + 1);
 
   char *newPath = normalizePath(path);
+  printf("%s\n", newPath);
 
   fileCache.cache[fileCache.index].path = newPath;
   fileCache.cache[fileCache.index].contents = newContents;
