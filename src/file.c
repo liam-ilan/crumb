@@ -4,6 +4,71 @@
 #include <string.h>
 #include "file.h"
 
+// Normalize a path to be as simple as possible, relative to the current working dir.
+// Makes similar files have the same path.
+// ie. ./abc/def/../useable.crumb and abc/useable.crumb both become ./abc/useable.crumb.
+// Allocates new memory.
+char *normalizePath(char *path) {
+  // Only normalize relative paths
+  if (path[0] == '~' || path[0] == '/') {
+    return NULL;
+  }
+
+  // Copy that path for strtok_r.
+  char *pathCopy = malloc(strlen(path) + 1);
+  strcpy(pathCopy, path);
+
+  // Keep track of the start for freeing at the end.
+  char *pathCopyStart = pathCopy;
+
+  // Allocate memory for the result.
+  // The size of the result will at most be the size of the original path, 
+  // + 2 for the "./" prefix.
+  char *res = malloc(strlen(path) + 1 + 2);
+
+  // res without the prefix ".".
+  char *unprefixedRes = &res[1];
+  res[0] = '.';
+  res[1] = '/';
+
+  // Index to write to next in unprefixedRes.
+  int writeIndex = 0;
+  char* token;
+
+  // Split on "/".
+  while ((token = strtok_r(pathCopy, "/", &pathCopy))) {
+    if (strcmp(token, "..") == 0) {
+      // If "..", backtrack to last "/".
+      while (unprefixedRes[writeIndex] != '/') {
+        writeIndex -= 1;
+
+        // If we go too far back, fail.
+        if (writeIndex < 0) {
+          printf(
+            "Error: Attempted to write %s to the use cache, "
+            "paths in invocations to the use function must be relative, "
+            "and the path cannot step out of the working directory.\n", path
+          );
+          exit(0);
+        }
+      }
+
+      unprefixedRes[writeIndex] = '\0';
+    } else if (!(strcmp(token, "") == 0 || strcmp(token, ".") == 0)){
+      // Don't act on empty tokens or ".".
+      // Add "/token".
+      strcpy(&unprefixedRes[writeIndex], "/");
+      writeIndex += 1;
+      strcpy(&unprefixedRes[writeIndex], token);
+      writeIndex += strlen(token);
+    }
+  }
+
+  free(pathCopyStart);
+  return res;
+}
+
+
 static FileCache fileCache = {
   .index = 0,
   .frozen = false
@@ -14,13 +79,17 @@ void FileCache_freeze() {
 }
 
 CachedFile *FileCache_read(char *path) {
+  char *normalizedPath = normalizePath(path);
+
   for (int i = 0; i < FILE_CACHE_SIZE; i++) {
     bool pathExists = fileCache.cache[i].path != NULL;
-    if (pathExists && strcmp(fileCache.cache[i].path, path) == 0) {
+    if (pathExists && strcmp(fileCache.cache[i].path, normalizedPath) == 0) {
+      free(normalizedPath);
       return &(fileCache.cache[i]);
     }
   }
 
+  free(normalizedPath);
   return NULL;
 }
 
@@ -37,8 +106,7 @@ void FileCache_write(char *path, char *contents, long fileLength) {
   char *newContents = malloc(fileLength + 1);
   memcpy(newContents, contents, fileLength + 1);
 
-  char *newPath = malloc(strlen(path) + 1);
-  memcpy(newPath, path, strlen(path) + 1);
+  char *newPath = normalizePath(path);
 
   fileCache.cache[fileCache.index].path = newPath;
   fileCache.cache[fileCache.index].contents = newContents;
