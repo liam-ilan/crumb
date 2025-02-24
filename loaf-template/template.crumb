@@ -1,6 +1,8 @@
 // This crumb file must:
 // - Have 0 dependencies.
 // - Expose template_main, a function that gets an entry point and list of usables, and returns a templated main.c.
+string_to_list = { str -> <- (map (range (length str)) {index _ -> <- (get str index)}) }
+list_to_string = { arr -> <- (reduce arr {accum item _ -> <- (join accum (string item))} "")}
 
 ascii_table = (list 
   "\x00" "\x01" "\x02" "\x03" "\x04" "\x05" "\x06" "\x07" "\x08" "\x09" "\x0a" "\x0b" "\x0c" "\x0d" "\x0e" "\x0f"
@@ -59,9 +61,6 @@ encode_str = {str ->
   <- (list_to_string (map (string_to_list str) {char _ -> <- (encode_char char)}))
 }
 
-string_to_list = { str -> <- (map (range (length str)) {index _ -> <- (get str index)}) }
-list_to_string = { arr -> <- (reduce arr {accum item _ -> <- (join accum (string item))} "")}
-
 // Split a string on a single char separator.
 split = {in sep ->
   arr = (string_to_list in)
@@ -80,13 +79,6 @@ split = {in sep ->
       })
     } (list ""))
   })
-}
-
-// Recursively finds all .crumb files in the current directory
-find_crumb_files = {
-  res = (split (shell "find . -name \\*.crumb -print") "\n")
-  res = (get res 0 (subtract (length res) 1))
-  <- res
 }
 
 // Generates main.c for packaged program.

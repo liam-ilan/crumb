@@ -112,7 +112,6 @@ void FileCache_write(char *path, char *contents, long fileLength) {
   memcpy(newContents, contents, fileLength + 1);
 
   char *newPath = normalizePath(path);
-  printf("%s\n", newPath);
 
   fileCache.cache[fileCache.index].path = newPath;
   fileCache.cache[fileCache.index].contents = newContents;
